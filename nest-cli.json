@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/cms-admin-api/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "builder": "swc",
+    "tsConfigPath": "apps/cms-admin-api/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/cms-admin-api",
+  "projects": {
+    "cms-admin-api": {
+      "type": "application",
+      "root": "apps/cms-admin-api",
+      "entryFile": "main",
+      "sourceRoot": "apps/cms-admin-api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/cms-admin-api/tsconfig.app.json"
+      }
+    },
+    "cms-content-api": {
+      "type": "application",
+      "root": "apps/cms-content-api",
+      "entryFile": "main",
+      "sourceRoot": "apps/cms-content-api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/cms-content-api/tsconfig.app.json"
+      }
+    },
+    "db": {
+      "type": "library",
+      "root": "libs/db",
+      "entryFile": "index",
+      "sourceRoot": "libs/db/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/db/tsconfig.lib.json"
+      }
+    },
+    "sem-activity-api": {
+      "type": "application",
+      "root": "apps/sem-activity-api",
+      "entryFile": "main",
+      "sourceRoot": "apps/sem-activity-api/src",
+      "compilerOptions": {
+        "builder": "swc",
+        "tsConfigPath": "apps/sem-activity-api/tsconfig.app.json"
+      }
+    },
+    "sem-api": {
+      "type": "application",
+      "root": "apps/sem-api",
+      "entryFile": "main",
+      "sourceRoot": "apps/sem-api/src",
+      "compilerOptions": {
+        "builder": "swc",
+        "tsConfigPath": "apps/sem-api/tsconfig.app.json"
+      }
+    },
+    "storage": {
+      "type": "library",
+      "root": "libs/storage",
+      "entryFile": "index",
+      "sourceRoot": "libs/storage/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/storage/tsconfig.lib.json"
+      }
+    }
+  }
+}
