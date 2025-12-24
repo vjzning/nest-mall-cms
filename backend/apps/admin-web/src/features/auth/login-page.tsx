@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useAuthStore } from '@/stores/auth.store';
 import { api } from '@/lib/axios';
 import { Button } from '@/components/ui/button';
@@ -47,7 +47,7 @@ export default function LoginPage() {
       
       setAuth(access_token, user || { username: data.username }); 
       toast.success('Login successful');
-      navigate('/');
+      navigate({ to: '/' });
     } catch (err: any) {
       const message = err.response?.data?.message || 'Login failed';
       toast.error(message);

@@ -18,8 +18,16 @@ export class ArticleController {
 
   @Get()
   @RequirePermissions('cms:article:list')
-  findAll(@Query() query: any) {
-    return this.articleService.findAll(query);
+  async findAll(@Query() query: any) {
+    const { page = 1, limit = 10 } = query;
+    const [items, total] = await this.articleService.findAll(query);
+    return {
+      items,
+      total,
+      page: +page,
+      limit: +limit,
+      totalPages: Math.ceil(total / +limit),
+    };
   }
 
   @Get(':id')

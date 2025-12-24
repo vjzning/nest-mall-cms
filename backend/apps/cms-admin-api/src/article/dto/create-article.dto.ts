@@ -14,7 +14,7 @@ export class CreateArticleDto {
 
   @IsString()
   @IsOptional()
-  summary?: string;
+  description?: string;
 
   @IsString()
   @IsOptional()
@@ -30,7 +30,15 @@ export class CreateArticleDto {
 
   @IsInt()
   @IsOptional()
+  isRecommend?: number;
+
+  @IsInt()
+  @IsOptional()
   views?: number;
+
+  @IsInt()
+  @IsOptional()
+  likes?: number;
 
   @IsDateString()
   @IsOptional()

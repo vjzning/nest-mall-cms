@@ -149,21 +149,14 @@ export function MenuDialog({ open, onOpenChange, menu, onSubmit }: MenuDialogPro
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Parent Menu</FormLabel>
-                    <Select onValueChange={(val) => field.onChange(Number(val))} value={String(field.value)}>
-                        <FormControl>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select parent" />
-                            </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                            <SelectItem value="0">Root</SelectItem>
-                            {parentOptions.map((m) => (
-                                <SelectItem key={m.id} value={String(m.id)}>
-                                    {m.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <FormControl>
+                        <TreeSelect
+                            options={[{ id: 0, name: 'Root' }, ...(parentOptions || [])]}
+                            value={field.value}
+                            onValueChange={(val) => field.onChange(Number(val))}
+                            placeholder="Select parent"
+                        />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./apps/nest-11/test/jest-e2e.json"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.958.0",
     "@keyv/redis": "^5.1.5",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/bullmq": "^11.0.4",
@@ -28,10 +29,12 @@
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.2",
+    "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/schedule": "^6.1.0",
     "@nestjs/typeorm": "^11.0.0",
+    "ali-oss": "^6.23.0",
     "aws-sdk": "^2.1693.0",
     "axios-retry": "^4.5.0",
     "bcryptjs": "^3.0.3",
@@ -54,6 +57,7 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "path-to-regexp": "^8.3.0",
+    "proxy-agent": "^6.5.0",
     "redis": "^5.10.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
@@ -63,10 +67,12 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.18.0",
+    "@faker-js/faker": "^10.1.0",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/swagger": "^11.2.3",
     "@nestjs/testing": "^11.0.1",
+    "@types/ali-oss": "^6.16.13",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/multer": "^1.4.13",
@@ -112,7 +118,8 @@
     ],
     "moduleNameMapper": {
       "^@app/db(|/.*)$": "<rootDir>/libs/db/src/$1",
-      "^@app/storage(|/.*)$": "<rootDir>/libs/storage/src/$1"
+      "^@app/storage(|/.*)$": "<rootDir>/libs/storage/src/$1",
+      "^y/redis(|/.*)$": "<rootDir>/libs/redis/src/$1"
     }
   }
 }

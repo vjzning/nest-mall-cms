@@ -2,6 +2,7 @@ import { Entity, Column, ManyToOne, ManyToMany, JoinTable, JoinColumn } from 'ty
 import { BaseEntity } from './base.entity';
 import { UserEntity } from './user.entity';
 import { CategoryEntity } from './category.entity';
+import type { CategoryEntity as CategoryEntityType } from './category.entity';
 import { TagEntity } from './tag.entity';
 
 @Entity('cms_article')
@@ -16,7 +17,7 @@ export class ArticleEntity extends BaseEntity {
   cover: string;
 
   @Column({ length: 500, nullable: true })
-  summary: string;
+  description: string;
 
   @Column({ type: 'text', nullable: true })
   content: string;
@@ -27,8 +28,14 @@ export class ArticleEntity extends BaseEntity {
   @Column({ type: 'int', default: 0 })
   views: number;
 
+  @Column({ type: 'int', default: 0 })
+  likes: number;
+
   @Column({ type: 'tinyint', default: 0 })
   isTop: number;
+
+  @Column({ type: 'tinyint', default: 0 })
+  isRecommend: number;
 
   @Column({ type: 'datetime', nullable: true })
   publishedAt: Date;
@@ -37,9 +44,9 @@ export class ArticleEntity extends BaseEntity {
   @JoinColumn({ name: 'author_id' })
   author: UserEntity;
 
-  @ManyToOne('CategoryEntity', (category: CategoryEntity) => category.articles)
+  @ManyToOne(() => CategoryEntity, (category) => category.articles)
   @JoinColumn({ name: 'category_id' })
-  category: CategoryEntity;
+  category: CategoryEntityType;
 
   @ManyToMany(() => TagEntity, (tag) => tag.articles)
   @JoinTable({

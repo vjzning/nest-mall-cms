@@ -1,6 +1,7 @@
 import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { ArticleEntity } from './article.entity';
+import type { ArticleEntity as ArticleEntityType } from './article.entity';
 
 @Entity('cms_category')
 export class CategoryEntity extends BaseEntity {
@@ -19,6 +20,6 @@ export class CategoryEntity extends BaseEntity {
   @Column({ type: 'int', default: 0 })
   sort: number;
 
-  @OneToMany('ArticleEntity', (article: ArticleEntity) => article.category)
-  articles: ArticleEntity[];
+  @OneToMany(() => ArticleEntity, (article) => article.category)
+  articles: ArticleEntityType[];
 }

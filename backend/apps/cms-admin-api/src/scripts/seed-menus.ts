@@ -108,76 +108,77 @@ async function bootstrap() {
   // 6. Article Management
   const articleMenu = await findOrCreateMenu({
     name: 'Article Management',
-    code: 'content:article',
+    code: 'cms:article',
     type: 2, // Menu
     parentId: contentDir.id,
     path: '/content/article',
-    component: 'article/article-list',
+    component: 'content/article/article-list',
     sort: 1,
     icon: 'File',
   });
 
   // Article Buttons
-  await findOrCreateMenu({ name: 'Query Article', code: 'content:article:list', type: 3, parentId: articleMenu.id, sort: 1 });
-  await findOrCreateMenu({ name: 'Create Article', code: 'content:article:create', type: 3, parentId: articleMenu.id, sort: 2 });
-  await findOrCreateMenu({ name: 'Update Article', code: 'content:article:update', type: 3, parentId: articleMenu.id, sort: 3 });
-  await findOrCreateMenu({ name: 'Delete Article', code: 'content:article:delete', type: 3, parentId: articleMenu.id, sort: 4 });
-  await findOrCreateMenu({ name: 'Article Detail', code: 'content:article:query', type: 3, parentId: articleMenu.id, sort: 5 });
+  await findOrCreateMenu({ name: 'Query Article', code: 'cms:article:list', type: 3, parentId: articleMenu.id, sort: 1 });
+  await findOrCreateMenu({ name: 'Create Article', code: 'cms:article:create', type: 3, parentId: articleMenu.id, sort: 2 });
+  await findOrCreateMenu({ name: 'Update Article', code: 'cms:article:update', type: 3, parentId: articleMenu.id, sort: 3 });
+  await findOrCreateMenu({ name: 'Delete Article', code: 'cms:article:delete', type: 3, parentId: articleMenu.id, sort: 4 });
+  await findOrCreateMenu({ name: 'Article Detail', code: 'cms:article:query', type: 3, parentId: articleMenu.id, sort: 5 });
+  await findOrCreateMenu({ name: 'Audit Article', code: 'cms:article:audit', type: 3, parentId: articleMenu.id, sort: 6 });
 
   // 7. Category Management
   const categoryMenu = await findOrCreateMenu({
     name: 'Category Management',
-    code: 'content:category',
+    code: 'cms:category',
     type: 2, // Menu
     parentId: contentDir.id,
     path: '/content/category',
-    component: 'category/category-list',
+    component: 'content/category/category-list',
     sort: 2,
     icon: 'Folder',
   });
 
   // Category Buttons
-  await findOrCreateMenu({ name: 'Query Category', code: 'content:category:list', type: 3, parentId: categoryMenu.id, sort: 1 });
-  await findOrCreateMenu({ name: 'Create Category', code: 'content:category:create', type: 3, parentId: categoryMenu.id, sort: 2 });
-  await findOrCreateMenu({ name: 'Update Category', code: 'content:category:update', type: 3, parentId: categoryMenu.id, sort: 3 });
-  await findOrCreateMenu({ name: 'Delete Category', code: 'content:category:delete', type: 3, parentId: categoryMenu.id, sort: 4 });
-  await findOrCreateMenu({ name: 'Category Detail', code: 'content:category:query', type: 3, parentId: categoryMenu.id, sort: 5 });
+  await findOrCreateMenu({ name: 'Query Category', code: 'cms:category:list', type: 3, parentId: categoryMenu.id, sort: 1 });
+  await findOrCreateMenu({ name: 'Create Category', code: 'cms:category:create', type: 3, parentId: categoryMenu.id, sort: 2 });
+  await findOrCreateMenu({ name: 'Update Category', code: 'cms:category:update', type: 3, parentId: categoryMenu.id, sort: 3 });
+  await findOrCreateMenu({ name: 'Delete Category', code: 'cms:category:delete', type: 3, parentId: categoryMenu.id, sort: 4 });
+  await findOrCreateMenu({ name: 'Category Detail', code: 'cms:category:query', type: 3, parentId: categoryMenu.id, sort: 5 });
 
   // 8. Tag Management
   const tagMenu = await findOrCreateMenu({
     name: 'Tag Management',
-    code: 'content:tag',
+    code: 'cms:tag',
     type: 2, // Menu
     parentId: contentDir.id,
     path: '/content/tag',
-    component: 'tag/tag-list',
+    component: 'content/tag/tag-list',
     sort: 3,
     icon: 'Tags',
   });
 
   // Tag Buttons
-  await findOrCreateMenu({ name: 'Query Tag', code: 'content:tag:list', type: 3, parentId: tagMenu.id, sort: 1 });
-  await findOrCreateMenu({ name: 'Create Tag', code: 'content:tag:create', type: 3, parentId: tagMenu.id, sort: 2 });
-  await findOrCreateMenu({ name: 'Update Tag', code: 'content:tag:update', type: 3, parentId: tagMenu.id, sort: 3 });
-  await findOrCreateMenu({ name: 'Delete Tag', code: 'content:tag:delete', type: 3, parentId: tagMenu.id, sort: 4 });
-  await findOrCreateMenu({ name: 'Tag Detail', code: 'content:tag:query', type: 3, parentId: tagMenu.id, sort: 5 });
+  await findOrCreateMenu({ name: 'Query Tag', code: 'cms:tag:list', type: 3, parentId: tagMenu.id, sort: 1 });
+  await findOrCreateMenu({ name: 'Create Tag', code: 'cms:tag:create', type: 3, parentId: tagMenu.id, sort: 2 });
+  await findOrCreateMenu({ name: 'Update Tag', code: 'cms:tag:update', type: 3, parentId: tagMenu.id, sort: 3 });
+  await findOrCreateMenu({ name: 'Delete Tag', code: 'cms:tag:delete', type: 3, parentId: tagMenu.id, sort: 4 });
+  await findOrCreateMenu({ name: 'Tag Detail', code: 'cms:tag:query', type: 3, parentId: tagMenu.id, sort: 5 });
 
   // 9. Comment Management
   const commentMenu = await findOrCreateMenu({
     name: 'Comment Management',
-    code: 'content:comment',
+    code: 'cms:comment',
     type: 2, // Menu
     parentId: contentDir.id,
     path: '/content/comment',
-    component: 'comment/comment-list',
+    component: 'content/comment',
     sort: 4,
     icon: 'MessageSquare',
   });
 
   // Comment Buttons
-  await findOrCreateMenu({ name: 'Query Comment', code: 'content:comment:list', type: 3, parentId: commentMenu.id, sort: 1 });
-  await findOrCreateMenu({ name: 'Delete Comment', code: 'content:comment:delete', type: 3, parentId: commentMenu.id, sort: 2 }); // Comments usually just delete or approve/reject
-  await findOrCreateMenu({ name: 'Update Comment', code: 'content:comment:update', type: 3, parentId: commentMenu.id, sort: 3 }); // For status updates
+  await findOrCreateMenu({ name: 'Query Comment', code: 'cms:comment:list', type: 3, parentId: commentMenu.id, sort: 1 });
+  await findOrCreateMenu({ name: 'Delete Comment', code: 'cms:comment:delete', type: 3, parentId: commentMenu.id, sort: 2 }); 
+  await findOrCreateMenu({ name: 'Update Comment', code: 'cms:comment:update', type: 3, parentId: commentMenu.id, sort: 3 }); 
 
 
 

@@ -52,7 +52,7 @@ export class ArticleService {
       .leftJoinAndSelect('article.tags', 'tags')
       .skip((page - 1) * limit)
       .take(limit)
-      .orderBy('article.created_at', 'DESC');
+      .orderBy('article.createdAt', 'DESC');
 
     if (title) {
       qb.andWhere('article.title LIKE :title', { title: `%${title}%` });

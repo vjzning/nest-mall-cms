@@ -15,6 +15,9 @@ import { ArticleModule } from './article/article.module';
 import { TagModule } from './tag/tag.module';
 import { CommentModule } from './comment/comment.module';
 import { UploadModule } from './upload/upload.module';
+import { DictionaryModule } from './dictionary/dictionary.module';
+import { ResourceModule } from './resource/resource.module';
+import { SystemConfigModule } from './system-config/system-config.module';
 import databaseConfig from './config/database.config';
 
 @Module({
@@ -39,6 +42,9 @@ import databaseConfig from './config/database.config';
     TagModule,
     CommentModule,
     UploadModule,
+    DictionaryModule,
+    ResourceModule,
+    SystemConfigModule,
   ],
   controllers: [CmsAdminApiController],
   providers: [

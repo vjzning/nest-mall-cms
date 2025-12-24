@@ -9,3 +9,5 @@ export * from './entities/category.entity';
 export * from './entities/tag.entity';
 export * from './entities/comment.entity';
 export * from './entities/resource.entity';
+export * from './entities/dict-type.entity';
+export * from './entities/dict-data.entity';

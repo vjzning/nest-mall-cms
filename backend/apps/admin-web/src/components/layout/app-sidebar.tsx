@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth.store';
 import { menuApi } from '@/features/menu/api';
@@ -37,9 +37,9 @@ interface MenuGroup {
 }
 
 const getIcon = (name: string) => {
-    if (!name) return LucideIcons.FileText;
-    const Icon = LucideIcons[name];
-    return Icon || LucideIcons.FileText;
+  if (!name) return LucideIcons.FileText;
+  const Icon = LucideIcons[name];
+  return Icon || LucideIcons.FileText;
 };
 
 export function AppSidebar({ children }: AppSidebarProps) {
@@ -54,14 +54,14 @@ export function AppSidebar({ children }: AppSidebarProps) {
 
   const menuGroups = useMemo<MenuGroup[]>(() => {
     if (!menus) {
-        return [];
+      return [];
     }
 
     // Find roots (directories) - assuming type 1 is Directory
     // Also handle case where items are at root level (parentId is 0 or null)
     // IMPORTANT: parentId might be string "0" or number 0, or null
     const roots = menus.filter(m => !m.parentId || String(m.parentId) === '0');
-    
+
     // Sort roots
     roots.sort((a, b) => (a.sort || 0) - (b.sort || 0));
 
@@ -69,38 +69,38 @@ export function AppSidebar({ children }: AppSidebarProps) {
 
     // Handle root directories
     roots.forEach(root => {
-        if (root.type === 1) {
-            // It's a directory, find its children
-            const items = menus
-                .filter(m => String(m.parentId) === String(root.id) && m.type === 2)
-                .sort((a, b) => (a.sort || 0) - (b.sort || 0))
-                .map(item => ({
-                    label: item.name,
-                    path: item.path || '#',
-                    icon: getIcon(item.icon),
-                }));
-            
-            // Even if items is empty, we might want to show the group label?
-            // But usually empty groups are hidden.
-            if (items.length > 0) {
-                groups.push({
-                    label: root.name,
-                    items,
-                });
-            }
-        } else if (root.type === 2) {
-            // It's a menu at root level
-            let generalGroup = groups.find(g => g.label === 'General');
-            if (!generalGroup) {
-                generalGroup = { label: 'General', items: [] };
-                groups.push(generalGroup);
-            }
-            generalGroup.items.push({
-                label: root.name,
-                path: root.path || '#',
-                icon: getIcon(root.icon),
-            });
+      if (root.type === 1) {
+        // It's a directory, find its children
+        const items = menus
+          .filter(m => String(m.parentId) === String(root.id) && m.type === 2)
+          .sort((a, b) => (a.sort || 0) - (b.sort || 0))
+          .map(item => ({
+            label: item.name,
+            path: item.path || '#',
+            icon: getIcon(item.icon),
+          }));
+
+        // Even if items is empty, we might want to show the group label?
+        // But usually empty groups are hidden.
+        if (items.length > 0) {
+          groups.push({
+            label: root.name,
+            items,
+          });
         }
+      } else if (root.type === 2) {
+        // It's a menu at root level
+        let generalGroup = groups.find(g => g.label === 'General');
+        if (!generalGroup) {
+          generalGroup = { label: 'General', items: [] };
+          groups.push(generalGroup);
+        }
+        generalGroup.items.push({
+          label: root.name,
+          path: root.path || '#',
+          icon: getIcon(root.icon),
+        });
+      }
     });
 
     return groups;
@@ -108,12 +108,12 @@ export function AppSidebar({ children }: AppSidebarProps) {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate({ to: '/login' });
   };
 
   const currentLabel = menuGroups
-    .flatMap((group) => group.items)
-    .find((item) => item.path === location.pathname)?.label;
+    .flatMap(group => group.items)
+    .find(item => item.path === location.pathname)?.label;
 
   return (
     <SidebarProvider>
@@ -128,16 +128,12 @@ export function AppSidebar({ children }: AppSidebarProps) {
                 <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {group.items.map((item) => {
+                    {group.items.map(item => {
                       const Icon = item.icon;
                       const isActive = location.pathname === item.path;
                       return (
                         <SidebarMenuItem key={item.path}>
-                          <SidebarMenuButton
-                            asChild
-                            isActive={isActive}
-                            tooltip={item.label}
-                          >
+                          <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
                             <Link to={item.path}>
                               <Icon />
                               <span>{item.label}</span>
@@ -156,12 +152,12 @@ export function AppSidebar({ children }: AppSidebarProps) {
               <div className="flex gap-3 items-center">
                 <Avatar>
                   <AvatarImage src={user?.avatar} />
-                  <AvatarFallback><LucideIcons.User /></AvatarFallback>
+                  <AvatarFallback>
+                    <LucideIcons.User />
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex overflow-hidden flex-col">
-                  <span className="text-sm font-medium truncate">
-                    {user?.username || 'User'}
-                  </span>
+                  <span className="text-sm font-medium truncate">{user?.username || 'User'}</span>
                   <span className="text-xs truncate text-muted-foreground">
                     {user?.email || 'admin@example.com'}
                   </span>
@@ -179,15 +175,11 @@ export function AppSidebar({ children }: AppSidebarProps) {
           </SidebarFooter>
         </Sidebar>
         <main className="overflow-auto flex-1">
-            <div className="flex gap-4 items-center p-4 border-b">
-                <SidebarTrigger />
-                <h2 className="text-lg font-semibold">
-                    {currentLabel || 'Dashboard'}
-                </h2>
-            </div>
-            <div className="p-8">
-                {children}
-            </div>
+          <div className="flex gap-4 items-center p-4 border-b">
+            <SidebarTrigger />
+            <h2 className="text-lg font-semibold">{currentLabel || 'Dashboard'}</h2>
+          </div>
+          <div className="p-8">{children}</div>
         </main>
       </div>
     </SidebarProvider>
