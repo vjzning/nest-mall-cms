@@ -1,0 +1,99 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ProductActions from '../../components/nike/ProductActions';
+import type { ProductInfo } from '@app/shared';
+
+// In a real app, you'd fetch this from the API
+export async function getStaticPaths() {
+  return [
+    { params: { id: '1' } },
+    { params: { id: '2' } },
+    { params: { id: '3' } },
+    { params: { id: '4' } },
+  ];
+}
+
+const { id } = Astro.params;
+
+// Mock data for the product
+const product: ProductInfo = {
+  id: Number(id),
+  name: id === '1' ? 'Nike Air Force 1 \'07' : id === '2' ? 'Nike Air Max Pulse Roam' : id === '3' ? 'Nike Dunk Low Retro' : 'Air Jordan 1 Low G',
+  description: '这款经典鞋款采用利落皮革材质，搭配恰到好处的亮泽效果，让你在赛场上尽显风采。',
+  categoryId: 1,
+  cover: id === '1' ? 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b0540fb3c00f/AIR+FORCE+1+%2707.png' : 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/070f3f26-e13f-4e44-b816-cb82b993309a/AIR+MAX+PULSE+ROAM.png',
+  images: [
+    'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b0540fb3c00f/AIR+FORCE+1+%2707.png',
+    'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/82dc096b-733d-4c80-9755-90050800d3d5/AIR+FORCE+1+%2707.png',
+    'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/5267a353-8380-4be4-b6c8-18e3a2f7c006/AIR+FORCE+1+%2707.png',
+    'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/3588fce7-1111-4770-b474-0f2c419356ce/AIR+FORCE+1+%2707.png',
+  ],
+  detail: 'Nike Air Force 1 \'07 男子运动鞋将元年款篮球鞋的经典魅力与现代风格融为一体。它拥有深受人们喜爱的特色：利落皮革材质、大胆配色，以及恰到好处的亮泽效果，让你闪耀光芒。',
+  status: 1,
+  price: 799,
+  sales: 1000,
+  skus: [
+    { id: 101, code: 'AF1-001', specs: { size: '40' }, price: 799, marketPrice: 799, stock: 10 },
+    { id: 102, code: 'AF1-002', specs: { size: '41' }, price: 799, marketPrice: 799, stock: 5 },
+    { id: 103, code: 'AF1-003', specs: { size: '42' }, price: 799, marketPrice: 799, stock: 15 },
+    { id: 104, code: 'AF1-004', specs: { size: '43' }, price: 799, marketPrice: 799, stock: 20 },
+  ]
+};
+---
+
+<Layout title={product.name}>
+  <div class="max-w-[1920px] mx-auto px-4 sm:px-12 py-10">
+    <div class="flex flex-col lg:flex-row gap-12">
+      
+      <!-- Left: Image Gallery -->
+      <div class="lg:w-3/5 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {product.images.map(img => (
+          <div class="aspect-square bg-nike-grey overflow-hidden">
+            <img src={img} alt={product.name} class="w-full h-full object-cover mix-blend-multiply" />
+          </div>
+        ))}
+      </div>
+
+      <!-- Right: Product Info -->
+      <div class="lg:w-2/5 max-w-md lg:sticky lg:top-24 h-fit">
+        <div class="mb-8">
+          <h1 class="text-3xl font-bold uppercase italic tracking-tighter mb-2">{product.name}</h1>
+          <p class="font-medium mb-1">男子运动鞋</p>
+          <p class="font-bold text-xl mt-4">￥{product.price}</p>
+        </div>
+
+        <ProductActions client:load product={product} />
+
+        <div class="mt-12 space-y-6 pt-10 border-t border-nike-grey">
+          <p class="text-nike-dark-grey leading-relaxed">
+            {product.description}
+          </p>
+          <div class="space-y-4">
+            <details class="group border-b border-nike-grey pb-4 cursor-pointer">
+              <summary class="flex justify-between items-center font-bold uppercase list-none">
+                产品详情
+                <span class="group-open:rotate-180 transition-transform">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </span>
+              </summary>
+              <div class="mt-4 text-sm text-nike-dark-grey leading-relaxed">
+                {product.detail}
+              </div>
+            </details>
+            <details class="group border-b border-nike-grey pb-4 cursor-pointer">
+              <summary class="flex justify-between items-center font-bold uppercase list-none">
+                配送与退货
+                <span class="group-open:rotate-180 transition-transform">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </span>
+              </summary>
+              <div class="mt-4 text-sm text-nike-dark-grey leading-relaxed">
+                普通会员满399元免运费。支持7天无理由退货（详见退货说明）。
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

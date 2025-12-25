@@ -1,0 +1,71 @@
+---
+import { CollectionType, CollectionLayout } from '@app/shared';
+import type { CollectionInfo } from '@app/shared';
+import ProductCard from './ProductCard';
+
+interface Props {
+  collection: CollectionInfo;
+}
+
+const { collection } = Astro.props;
+
+// Mock fetching actual products if needed, or if collection already has them
+const products = (collection as any).products || [];
+---
+
+{collection.layoutType === CollectionLayout.SINGLE_HERO && (
+  <section class="relative w-full h-[85vh] bg-white flex flex-col md:flex-row items-center overflow-hidden" style={collection.bgColor ? `background-color: ${collection.bgColor}` : ''}>
+    <div class="w-full h-full md:w-3/5 absolute md:relative inset-0 overflow-hidden">
+      <img 
+        src={collection.coverImage} 
+        alt={collection.title} 
+        class="w-full h-full object-cover"
+      />
+    </div>
+    <div class="relative z-10 w-full md:w-2/5 px-8 md:px-16 flex flex-col justify-center items-start pt-32 md:pt-0 bg-white/70 md:bg-transparent backdrop-blur-sm md:backdrop-blur-0">
+      {collection.subtitle && <span class="text-xs font-bold uppercase tracking-widest mb-4">{collection.subtitle}</span>}
+      <h1 class="text-6xl md:text-8xl font-nike font-black uppercase tracking-tighter leading-none italic mb-6">
+        {collection.title}
+      </h1>
+      <p class="text-lg md:text-xl text-nike-dark-grey max-w-md mb-8">
+        {collection.description}
+      </p>
+      <div class="flex gap-3">
+        <a href={`/topic/${collection.code}`} class="btn-nike-black px-8 py-4">立即选购</a>
+      </div>
+    </div>
+  </section>
+)}
+
+{collection.layoutType === CollectionLayout.GRID && (
+  <section class="max-w-[1920px] mx-auto px-4 sm:px-12 py-20">
+    <div class="flex items-end justify-between mb-10">
+      <div>
+        <h2 class="text-3xl font-bold italic uppercase tracking-tighter leading-none mb-2">{collection.title}</h2>
+        <p class="text-nike-dark-grey text-sm">{collection.description}</p>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      {products.map((product: any) => (
+        <ProductCard client:load product={product} />
+      ))}
+    </div>
+  </section>
+)}
+
+{collection.layoutType === CollectionLayout.SPLIT_SCREEN && (
+   <section class="w-full h-[60vh] relative flex items-center justify-center text-white overflow-hidden mb-10">
+      <img 
+        src={collection.coverImage} 
+        class="absolute inset-0 w-full h-full object-cover"
+        alt={collection.title}
+      />
+      <div class="absolute inset-0 bg-black/30"></div>
+      <div class="relative z-10 text-center px-4">
+          <h2 class="text-4xl md:text-6xl font-black uppercase italic mb-6">{collection.title}</h2>
+          <p class="text-lg mb-8 max-w-xl mx-auto">{collection.description}</p>
+          <a href={`/topic/${collection.code}`} class="bg-white text-nike-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition-colors inline-block">立即探索</a>
+      </div>
+  </section>
+)}

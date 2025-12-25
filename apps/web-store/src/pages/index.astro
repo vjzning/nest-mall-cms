@@ -1,0 +1,58 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { CollectionType, CollectionLayout } from '@app/shared';
+import type { CollectionInfo } from '@app/shared';
+import CollectionSection from '../components/nike/CollectionSection.astro';
+
+// In a real app, you'd fetch this from: GET /collections/active
+const activeCollections: CollectionInfo[] = [
+  {
+    id: 1,
+    code: 'spring-hero',
+    type: CollectionType.TOPIC,
+    title: '无畏前行',
+    subtitle: '全新力作',
+    description: '探索全新 Nike 运动系列，无论是赛场还是街头，助你时刻保持领先。',
+    coverImage: 'https://images.nike.com.cn/is/image/DotCom/FA24_AF1_ECOM_HP_P1_DSK?wid=1500&hei=1500&fmt=jpg&qlt=85',
+    layoutType: CollectionLayout.SINGLE_HERO,
+    status: 1,
+    sort: 1
+  },
+  {
+    id: 2,
+    code: 'weekly-trending',
+    type: CollectionType.PRODUCT,
+    title: '本周热门推荐',
+    description: '挑选最适合你的风格',
+    layoutType: CollectionLayout.GRID,
+    status: 1,
+    sort: 2,
+    // @ts-ignore - Mocking product relation
+    products: [
+      { id: 1, name: 'Nike Air Force 1 \'07', price: 799, cover: 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b0540fb3c00f/AIR+FORCE+1+%2707.png' },
+      { id: 2, name: 'Nike Air Max Pulse Roam', price: 1099, cover: 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/070f3f26-e13f-4e44-b816-cb82b993309a/AIR+MAX+PULSE+ROAM.png' },
+      { id: 3, name: 'Nike Dunk Low Retro', price: 749, cover: 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/7968504f-124b-486d-9669-775798939b4b/NIKE+DUNK+LOW+RETRO.png' },
+      { id: 4, name: 'Air Jordan 1 Low G', price: 999, cover: 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/50953fd3-d9d1-4475-802c-470295da9be6/AIR+JORDAN+1+LOW+G.png' },
+    ]
+  },
+  {
+    id: 3,
+    code: 'lifestyle-footer',
+    type: CollectionType.TOPIC,
+    title: '尽显本色',
+    description: 'Nike Sportswear 经典系列，助你轻松拿捏日常穿搭。',
+    coverImage: 'https://images.nike.com.cn/is/image/DotCom/FA24_AF1_ECOM_HP_P4_DSK?wid=1500&hei=800&fmt=jpg&qlt=85',
+    layoutType: CollectionLayout.SPLIT_SCREEN,
+    status: 1,
+    sort: 3
+  }
+];
+---
+
+<Layout title="首页">
+  {activeCollections.map(collection => (
+    <CollectionSection collection={collection} />
+  ))}
+</Layout>
+
+

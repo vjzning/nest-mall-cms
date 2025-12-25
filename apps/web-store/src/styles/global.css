@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme {
+  --color-nike-black: #111111;
+  --color-nike-white: #ffffff;
+  --color-nike-grey: #f5f5f5;
+  --color-nike-dark-grey: #707072;
+
+  --font-nike: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply font-nike text-nike-black bg-white;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  .btn-nike-black {
+    @apply bg-nike-black text-white px-6 py-3 rounded-full font-medium transition-opacity hover:opacity-80;
+  }
+
+  .btn-nike-outline {
+    @apply border border-nike-black text-nike-black px-6 py-3 rounded-full font-medium transition-colors hover:bg-nike-black hover:text-white;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
