@@ -7,6 +7,7 @@ import { ArticleModule } from './article/article.module';
 import { CategoryModule } from './category/category.module';
 import { TagModule } from './tag/tag.module';
 import { CommentModule } from './comment/comment.module';
+import { MallModule } from './mall/mall.module';
 import databaseConfig from './config/database.config';
 
 @Module({
@@ -26,6 +27,7 @@ import databaseConfig from './config/database.config';
     CategoryModule,
     TagModule,
     CommentModule,
+    MallModule,
   ],
   controllers: [CmsContentApiController],
   providers: [CmsContentApiService],

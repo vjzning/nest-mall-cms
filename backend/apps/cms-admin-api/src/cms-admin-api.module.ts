@@ -18,6 +18,7 @@ import { UploadModule } from './upload/upload.module';
 import { DictionaryModule } from './dictionary/dictionary.module';
 import { ResourceModule } from './resource/resource.module';
 import { SystemConfigModule } from './system-config/system-config.module';
+import { MallModule } from './mall/mall.module';
 import databaseConfig from './config/database.config';
 
 @Module({
@@ -45,6 +46,7 @@ import databaseConfig from './config/database.config';
     DictionaryModule,
     ResourceModule,
     SystemConfigModule,
+    MallModule,
   ],
   controllers: [CmsAdminApiController],
   providers: [

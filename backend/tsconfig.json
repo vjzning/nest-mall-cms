@@ -28,6 +28,12 @@
       "@app/db/*": [
         "libs/db/src/*"
       ],
+      "@app/redis": [
+        "libs/redis/src"
+      ],
+      "@app/redis/*": [
+        "libs/redis/src/*"
+      ],
       "@app/sem-activity": [
         "apps/sem-activity/src"
       ],
@@ -46,11 +52,11 @@
       "@app/storage/*": [
         "libs/storage/src/*"
       ],
-      "@app/redis": [
-        "libs/redis/src"
+      "y/payment": [
+        "libs/payment/src"
       ],
-      "@app/redis/*": [
-        "libs/redis/src/*"
+      "y/payment/*": [
+        "libs/payment/src/*"
       ]
     }
   },

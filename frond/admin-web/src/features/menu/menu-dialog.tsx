@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { TreeSelect } from '@/components/ui/tree-data-table';
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { menuApi, type CreateMenuDto, type Menu } from './api';

@@ -10,6 +10,12 @@ import { ResourceEntity } from '@app/db/entities/resource.entity';
 import { DictTypeEntity } from '@app/db/entities/dict-type.entity';
 import { DictDataEntity } from '@app/db/entities/dict-data.entity';
 import { SystemConfigEntity } from '@app/db/entities/system-config.entity';
+import { MemberEntity } from '@app/db/entities/member.entity';
+import { MallProductEntity } from '@app/db/entities/mall-product.entity';
+import { MallProductSkuEntity } from '@app/db/entities/mall-product-sku.entity';
+import { MallOrderEntity } from '@app/db/entities/mall-order.entity';
+import { MallOrderItemEntity } from '@app/db/entities/mall-order-item.entity';
+import { MallPaymentEntity } from '@app/db/entities/mall-payment.entity';
 
 export default registerAs('database', () => ({
   type: 'mysql',
@@ -30,6 +36,12 @@ export default registerAs('database', () => ({
     DictTypeEntity,
     DictDataEntity,
     SystemConfigEntity,
+    MemberEntity,
+    MallProductEntity,
+    MallProductSkuEntity,
+    MallOrderEntity,
+    MallOrderItemEntity,
+    MallPaymentEntity,
   ],
 
   synchronize: process.env.NODE_ENV !== 'production',

@@ -38,6 +38,15 @@
         "tsConfigPath": "libs/db/tsconfig.lib.json"
       }
     },
+    "payment": {
+      "type": "library",
+      "root": "libs/payment",
+      "entryFile": "index",
+      "sourceRoot": "libs/payment/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/payment/tsconfig.lib.json"
+      }
+    },
     "redis": {
       "type": "library",
       "root": "libs/redis",

@@ -23,6 +23,9 @@ import { Route as AuthContentResourceRouteImport } from './routes/_auth.content.
 import { Route as AuthContentCommentRouteImport } from './routes/_auth.content.comment'
 import { Route as AuthContentCategoryRouteImport } from './routes/_auth.content.category'
 import { Route as AuthContentArticleRouteImport } from './routes/_auth.content.article'
+import { Route as AuthMallProductIndexRouteImport } from './routes/_auth.mall.product.index'
+import { Route as AuthMallProductCreateRouteImport } from './routes/_auth.mall.product.create'
+import { Route as AuthMallProductEditIdRouteImport } from './routes/_auth.mall.product.edit.$id'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -113,6 +116,27 @@ const AuthContentArticleRoute = AuthContentArticleRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_auth.content.article.lazy').then((d) => d.Route),
 )
+const AuthMallProductIndexRoute = AuthMallProductIndexRouteImport.update({
+  id: '/mall/product/',
+  path: '/mall/product/',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() =>
+  import('./routes/_auth.mall.product.index.lazy').then((d) => d.Route),
+)
+const AuthMallProductCreateRoute = AuthMallProductCreateRouteImport.update({
+  id: '/mall/product/create',
+  path: '/mall/product/create',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() =>
+  import('./routes/_auth.mall.product.create.lazy').then((d) => d.Route),
+)
+const AuthMallProductEditIdRoute = AuthMallProductEditIdRouteImport.update({
+  id: '/mall/product/edit/$id',
+  path: '/mall/product/edit/$id',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() =>
+  import('./routes/_auth.mall.product.edit.$id.lazy').then((d) => d.Route),
+)
 
 export interface FileRoutesByFullPath {
   '/403': typeof R403Route
@@ -128,6 +152,9 @@ export interface FileRoutesByFullPath {
   '/system/menu': typeof AuthSystemMenuRoute
   '/system/role': typeof AuthSystemRoleRoute
   '/system/user': typeof AuthSystemUserRoute
+  '/mall/product/create': typeof AuthMallProductCreateRoute
+  '/mall/product': typeof AuthMallProductIndexRoute
+  '/mall/product/edit/$id': typeof AuthMallProductEditIdRoute
 }
 export interface FileRoutesByTo {
   '/403': typeof R403Route
@@ -143,6 +170,9 @@ export interface FileRoutesByTo {
   '/system/menu': typeof AuthSystemMenuRoute
   '/system/role': typeof AuthSystemRoleRoute
   '/system/user': typeof AuthSystemUserRoute
+  '/mall/product/create': typeof AuthMallProductCreateRoute
+  '/mall/product': typeof AuthMallProductIndexRoute
+  '/mall/product/edit/$id': typeof AuthMallProductEditIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -160,6 +190,9 @@ export interface FileRoutesById {
   '/_auth/system/menu': typeof AuthSystemMenuRoute
   '/_auth/system/role': typeof AuthSystemRoleRoute
   '/_auth/system/user': typeof AuthSystemUserRoute
+  '/_auth/mall/product/create': typeof AuthMallProductCreateRoute
+  '/_auth/mall/product/': typeof AuthMallProductIndexRoute
+  '/_auth/mall/product/edit/$id': typeof AuthMallProductEditIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -177,6 +210,9 @@ export interface FileRouteTypes {
     | '/system/menu'
     | '/system/role'
     | '/system/user'
+    | '/mall/product/create'
+    | '/mall/product'
+    | '/mall/product/edit/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/403'
@@ -192,6 +228,9 @@ export interface FileRouteTypes {
     | '/system/menu'
     | '/system/role'
     | '/system/user'
+    | '/mall/product/create'
+    | '/mall/product'
+    | '/mall/product/edit/$id'
   id:
     | '__root__'
     | '/403'
@@ -208,6 +247,9 @@ export interface FileRouteTypes {
     | '/_auth/system/menu'
     | '/_auth/system/role'
     | '/_auth/system/user'
+    | '/_auth/mall/product/create'
+    | '/_auth/mall/product/'
+    | '/_auth/mall/product/edit/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -316,6 +358,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthContentArticleRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/mall/product/': {
+      id: '/_auth/mall/product/'
+      path: '/mall/product'
+      fullPath: '/mall/product'
+      preLoaderRoute: typeof AuthMallProductIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/mall/product/create': {
+      id: '/_auth/mall/product/create'
+      path: '/mall/product/create'
+      fullPath: '/mall/product/create'
+      preLoaderRoute: typeof AuthMallProductCreateRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/mall/product/edit/$id': {
+      id: '/_auth/mall/product/edit/$id'
+      path: '/mall/product/edit/$id'
+      fullPath: '/mall/product/edit/$id'
+      preLoaderRoute: typeof AuthMallProductEditIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
   }
 }
 
@@ -331,6 +394,9 @@ interface AuthRouteChildren {
   AuthSystemMenuRoute: typeof AuthSystemMenuRoute
   AuthSystemRoleRoute: typeof AuthSystemRoleRoute
   AuthSystemUserRoute: typeof AuthSystemUserRoute
+  AuthMallProductCreateRoute: typeof AuthMallProductCreateRoute
+  AuthMallProductIndexRoute: typeof AuthMallProductIndexRoute
+  AuthMallProductEditIdRoute: typeof AuthMallProductEditIdRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
@@ -345,6 +411,9 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthSystemMenuRoute: AuthSystemMenuRoute,
   AuthSystemRoleRoute: AuthSystemRoleRoute,
   AuthSystemUserRoute: AuthSystemUserRoute,
+  AuthMallProductCreateRoute: AuthMallProductCreateRoute,
+  AuthMallProductIndexRoute: AuthMallProductIndexRoute,
+  AuthMallProductEditIdRoute: AuthMallProductEditIdRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
