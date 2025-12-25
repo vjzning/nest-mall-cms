@@ -7,7 +7,6 @@ import {
   ValidateNested,
   IsInt,
   Min,
-  IsDecimal,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
@@ -43,8 +42,9 @@ export class CreateProductDto {
   @IsOptional()
   description: string;
 
-  @IsDecimal()
+  @IsNumber()
   @IsOptional()
+  @Transform(({ value }) => parseInt(value))
   categoryId: number;
 
   @IsString()

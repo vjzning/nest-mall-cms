@@ -56,26 +56,6 @@
         "tsConfigPath": "libs/redis/tsconfig.lib.json"
       }
     },
-    "sem-activity-api": {
-      "type": "application",
-      "root": "apps/sem-activity-api",
-      "entryFile": "main",
-      "sourceRoot": "apps/sem-activity-api/src",
-      "compilerOptions": {
-        "builder": "swc",
-        "tsConfigPath": "apps/sem-activity-api/tsconfig.app.json"
-      }
-    },
-    "sem-api": {
-      "type": "application",
-      "root": "apps/sem-api",
-      "entryFile": "main",
-      "sourceRoot": "apps/sem-api/src",
-      "compilerOptions": {
-        "builder": "swc",
-        "tsConfigPath": "apps/sem-api/tsconfig.app.json"
-      }
-    },
     "storage": {
       "type": "library",
       "root": "libs/storage",
