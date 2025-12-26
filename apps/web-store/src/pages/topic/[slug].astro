@@ -1,84 +1,75 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import { CollectionType, CollectionLayout } from '@app/shared';
-import type { CollectionInfo } from '@app/shared';
-import CollectionSection from '../../components/nike/CollectionSection.astro';
+import Layout from "../../layouts/Layout.astro";
+import { CollectionType, CollectionLayout } from "@app/shared";
+import type { CollectionInfo } from "@app/shared";
+import CollectionSection from "../../components/nike/CollectionSection.astro";
+import { API_ENDPOINTS } from "../../lib/api";
 
-// getStaticPaths is required for static site generation. 
-// For a real dynamic store, you might switch to SSR.
-export async function getStaticPaths() {
-  try {
-    const response = await fetch('http://localhost:3001/collections/active');
-    if (response.ok) {
-      const collections = await response.json();
-      return collections.map((c: any) => ({ params: { slug: c.code } }));
-    }
-  } catch (e) {
-    console.error('Failed to pre-fetch slugs:', e);
-  }
-  return [];
-}
-
+// SSR 模式 - 每次请求动态渲染
 const { slug } = Astro.params;
 
 let collection: CollectionInfo | null = null;
 try {
-  const response = await fetch(`http://localhost:3001/collections/${slug}`);
+  const response = await fetch(`${API_ENDPOINTS.COLLECTIONS}/${slug}`);
   if (response.ok) {
     collection = await response.json();
   }
 } catch (e) {
-  console.error('Failed to fetch collection detail:', e);
+  console.error("Failed to fetch collection detail:", e);
 }
 
 if (!collection) {
-  return Astro.redirect('/404');
+  return Astro.redirect("/404");
 }
 ---
 
 <Layout title={collection.title}>
   <div class="pb-10">
     {/* Hero Banner with Cover Image */}
-    {collection.coverImage && (
-      <div class="relative w-full h-[60vh] mb-10 overflow-hidden">
-        <img 
-          src={collection.coverImage} 
-          alt={collection.title}
-          class="absolute inset-0 w-full h-full object-cover"
-        />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-        <div class="relative z-10 h-full flex flex-col justify-end max-w-[1920px] mx-auto px-4 sm:px-12 pb-16">
+    {
+      collection.coverImage && (
+        <div class="relative w-full h-[60vh] mb-10 overflow-hidden">
+          <img
+            src={collection.coverImage}
+            alt={collection.title}
+            class="absolute inset-0 object-cover w-full h-full"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          <div class="relative z-10 h-full flex flex-col justify-end max-w-[1920px] mx-auto px-4 sm:px-12 pb-16">
+            {collection.subtitle && (
+              <span class="mb-2 text-sm font-bold tracking-widest uppercase text-white/90">
+                {collection.subtitle}
+              </span>
+            )}
+            <h1 class="mb-4 text-5xl italic font-black tracking-tighter text-white uppercase md:text-7xl font-nike">
+              {collection.title}
+            </h1>
+            <p class="max-w-2xl text-lg text-white/90">
+              {collection.description}
+            </p>
+          </div>
+        </div>
+      )
+    }
+
+    {/* Title Section (if no cover image) */}
+    {
+      !collection.coverImage && (
+        <div class="max-w-[1920px] mx-auto px-4 sm:px-12 py-10">
           {collection.subtitle && (
-            <span class="text-white/90 text-sm font-bold uppercase tracking-widest mb-2">
+            <span class="block mb-2 text-xs font-bold tracking-widest uppercase text-nike-dark-grey">
               {collection.subtitle}
             </span>
           )}
-          <h1 class="text-5xl md:text-7xl font-nike font-black uppercase italic tracking-tighter text-white mb-4">
+          <h1 class="mb-4 text-4xl italic font-black tracking-tighter uppercase md:text-6xl font-nike">
             {collection.title}
           </h1>
-          <p class="text-white/90 text-lg max-w-2xl">
+          <p class="max-w-2xl text-lg text-nike-dark-grey">
             {collection.description}
           </p>
         </div>
-      </div>
-    )}
-
-    {/* Title Section (if no cover image) */}
-    {!collection.coverImage && (
-      <div class="max-w-[1920px] mx-auto px-4 sm:px-12 py-10">
-        {collection.subtitle && (
-          <span class="text-xs font-bold uppercase tracking-widest text-nike-dark-grey mb-2 block">
-            {collection.subtitle}
-          </span>
-        )}
-        <h1 class="text-4xl md:text-6xl font-nike font-black uppercase italic tracking-tighter mb-4">
-          {collection.title}
-        </h1>
-        <p class="text-nike-dark-grey text-lg max-w-2xl">
-          {collection.description}
-        </p>
-      </div>
-    )}
+      )
+    }
 
     {/* Collection Content */}
     <CollectionSection collection={collection} />

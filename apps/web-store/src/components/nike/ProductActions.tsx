@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCartStore } from '../../store/cart';
+import { actions } from 'astro:actions';
 import type { ProductInfo } from '@app/shared';
 
 interface Props {
@@ -8,18 +8,68 @@ interface Props {
 
 const ProductActions: React.FC<Props> = ({ product }) => {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const { addItem } = useCartStore();
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!selectedSize) {
       alert('请选择尺码');
       return;
     }
-    const sku = product.skus?.find(s => s.specs.size === selectedSize);
+
+    // 从规格中找到对应的SKU
+    const sku = product.skus?.find(sku => {
+      // 检查规格中是否包含尺码信息
+      if (sku.specs && Array.isArray(sku.specs)) {
+        // 如果 specs 是数组，查找尺码
+        const sizeSpec = sku.specs.find((spec: any) => spec.key === '尺码');
+        return sizeSpec && sizeSpec.value === selectedSize;
+      } else if (sku.specs && typeof sku.specs === 'object') {
+        // 如果 specs 是对象，直接查找尺码
+        return sku.specs['尺码'] === selectedSize || sku.specs.size === selectedSize;
+      }
+      return false;
+    });
+
     if (sku) {
-      addItem(product, sku.id);
+      setIsAddingToCart(true);
+      try {
+        const result = await actions.cart.addToCart({
+          productId: +product.id,
+          skuId: +sku.id,
+          quantity: 1,
+        });
+
+        if (result.data?.success) {
+          alert('已添加到购物车');
+        } else {
+          alert(result.error?.message || '添加失败');
+        }
+      } catch (error) {
+        alert('添加到购物车失败');
+      } finally {
+        setIsAddingToCart(false);
+      }
+    } else {
+      alert('未找到对应的SKU');
     }
   };
+
+  // 从规格中提取尺码
+  const getAvailableSizes = () => {
+    if (!product.skus) return [];
+    
+    return product.skus.map(sku => {
+      if (Array.isArray(sku.specs)) {
+        const sizeSpec = sku.specs.find((spec: any) => spec.key === '尺码');
+        return sizeSpec ? sizeSpec.value : null;
+      } else if (sku.specs && typeof sku.specs === 'object') {
+        return sku.specs['尺码'] || sku.specs.size || null;
+      }
+      return null;
+    }).filter(Boolean);
+  };
+
+  const sizes = getAvailableSizes();
 
   return (
     <div className="space-y-10">
@@ -27,19 +77,19 @@ const ProductActions: React.FC<Props> = ({ product }) => {
       <div>
         <div className="flex justify-between items-center mb-4">
           <span className="font-bold">选择尺码</span>
-          <button className="text-nike-dark-grey underline text-sm">尺码表</button>
+          <button className="text-sm underline text-nike-dark-grey">尺码表</button>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          {product.skus?.map(sku => (
+          {sizes.map((size, index) => (
             <button
-              key={sku.id}
-              onClick={() => setSelectedSize(sku.specs.size)}
-              className={`border py-3 rounded transition-colors font-medium ${selectedSize === sku.specs.size
+              key={index}
+              onClick={() => setSelectedSize(size as string)}
+              className={`border py-3 rounded transition-colors font-medium ${selectedSize === size
                 ? 'border-nike-black bg-nike-black text-white'
                 : 'border-nike-grey hover:border-nike-black'
                 }`}
             >
-              {sku.specs.size}
+              {size}
             </button>
           ))}
         </div>
@@ -49,11 +99,12 @@ const ProductActions: React.FC<Props> = ({ product }) => {
       <div className="space-y-3">
         <button
           onClick={handleAddToCart}
-          className="w-full btn-nike-black py-5 text-lg"
+          disabled={isAddingToCart}
+          className="py-5 w-full text-lg btn-nike-black disabled:opacity-50"
         >
-          加入购物车
+          {isAddingToCart ? '添加中...' : '加入购物车'}
         </button>
-        <button className="w-full btn-nike-outline py-5 text-lg flex items-center justify-center gap-2">
+        <button className="flex gap-2 justify-center items-center py-5 w-full text-lg btn-nike-outline">
           收藏
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
         </button>

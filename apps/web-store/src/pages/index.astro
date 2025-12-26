@@ -1,25 +1,26 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { CollectionType, CollectionLayout } from '@app/shared';
-import type { CollectionInfo } from '@app/shared';
-import CollectionSection from '../components/nike/CollectionSection.astro';
+import Layout from "../layouts/Layout.astro";
+import { CollectionType, CollectionLayout } from "@app/shared";
+import type { CollectionInfo } from "@app/shared";
+import CollectionSection from "../components/nike/CollectionSection.astro";
+import { API_ENDPOINTS } from "../lib/api";
 
 // Fetch collections from the store API
 let activeCollections: CollectionInfo[] = [];
 try {
-  const response = await fetch('http://localhost:3001/collections/active');
+  const response = await fetch(API_ENDPOINTS.COLLECTIONS_ACTIVE);
   if (response.ok) {
     activeCollections = await response.json();
   }
 } catch (e) {
-  console.error('Failed to fetch collections:', e);
+  console.error("Failed to fetch collections:", e);
 }
 ---
 
 <Layout title="首页">
-  {activeCollections.map(collection => (
-    <CollectionSection collection={collection} />
-  ))}
+  {
+    activeCollections.map((collection) => (
+      <CollectionSection collection={collection} />
+    ))
+  }
 </Layout>
-
-

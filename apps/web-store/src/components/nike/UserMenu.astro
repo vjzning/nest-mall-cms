@@ -1,0 +1,130 @@
+---
+import { getSession } from "../../lib/session";
+import { actions } from "astro:actions";
+
+const session = await getSession(Astro);
+const user = session?.user;
+---
+
+{
+  !user ? (
+    <div class="flex items-center gap-4">
+      <a
+        href="/login"
+        class="text-sm font-medium transition-colors text-nike-black hover:text-nike-dark-grey"
+      >
+        登录
+      </a>
+      <a
+        href="/register"
+        class="px-4 py-2 text-sm font-bold text-white transition-colors rounded-full bg-nike-black hover:bg-gray-800"
+      >
+        注册
+      </a>
+    </div>
+  ) : (
+    <div class="relative user-menu">
+      <button
+        type="button"
+        class="flex items-center gap-2 text-sm font-medium transition-colors text-nike-black hover:text-nike-dark-grey menu-trigger"
+      >
+        <div class="flex items-center justify-center w-8 h-8 overflow-hidden rounded-full bg-nike-grey">
+          {user.avatar ? (
+            <img
+              src={user.avatar}
+              alt={user.nickname}
+              class="object-cover w-full h-full"
+            />
+          ) : (
+            <span class="text-xs font-bold uppercase">
+              {user.nickname?.charAt(0) || "U"}
+            </span>
+          )}
+        </div>
+        <span class="hidden md:inline">{user.nickname}</span>
+        <svg
+          class="w-4 h-4 transition-transform menu-icon"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+
+      <div class="absolute right-0 z-20 hidden w-48 py-2 mt-2 bg-white border rounded-lg shadow-lg menu-dropdown border-nike-grey">
+        <a
+          href="/profile"
+          class="block px-4 py-2 text-sm transition-colors text-nike-black hover:bg-nike-grey"
+        >
+          个人中心
+        </a>
+        <a
+          href="/orders"
+          class="block px-4 py-2 text-sm transition-colors text-nike-black hover:bg-nike-grey"
+        >
+          我的订单
+        </a>
+        <a
+          href="/favorites"
+          class="block px-4 py-2 text-sm transition-colors text-nike-black hover:bg-nike-grey"
+        >
+          我的收藏
+        </a>
+        <hr class="my-2 border-nike-grey" />
+        <form method="POST" action={actions.auth.logout} class="block">
+          <button
+            type="submit"
+            class="block w-full px-4 py-2 text-sm text-left text-red-600 transition-colors hover:bg-nike-grey"
+          >
+            退出登录
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const userMenu = document.querySelector(".user-menu");
+    if (!userMenu) return;
+
+    const trigger = userMenu.querySelector(".menu-trigger");
+    const dropdown = userMenu.querySelector(".menu-dropdown");
+    const icon = userMenu.querySelector(".menu-icon");
+
+    if (!trigger || !dropdown || !icon) return;
+
+    trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isHidden = dropdown.classList.contains("hidden");
+
+      if (isHidden) {
+        dropdown.classList.remove("hidden");
+        icon.classList.add("rotate-180");
+      } else {
+        dropdown.classList.add("hidden");
+        icon.classList.remove("rotate-180");
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", () => {
+      if (!dropdown.classList.contains("hidden")) {
+        dropdown.classList.add("hidden");
+        icon.classList.remove("rotate-180");
+      }
+    });
+
+    // Prevent dropdown from closing when clicking inside
+    dropdown.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+  });
+</script>

@@ -1,56 +1,51 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import ProductActions from '../../components/nike/ProductActions';
-import type { ProductInfo } from '@app/shared';
+import Layout from "../../layouts/Layout.astro";
+import ProductActions from "../../components/nike/ProductActions";
+import type { ProductInfo } from "@app/shared";
+import { API_ENDPOINTS } from "../../lib/api";
 
-// For a dynamic store, we fetch all active products for SSG
-export async function getStaticPaths() {
-  try {
-    const response = await fetch('http://localhost:3001/mall/products');
-    if (response.ok) {
-      const products = await response.json();
-      return products.map((p: any) => ({ params: { id: p.id.toString() } }));
-    }
-  } catch (e) {
-    console.error('Failed to pre-fetch product paths:', e);
-  }
-  return [];
-}
-
+// SSR 模式 - 每次请求动态渲染
 const { id } = Astro.params;
 
 let product: ProductInfo | null = null;
 try {
-  const response = await fetch(`http://localhost:3001/mall/products/${id}`);
+  const response = await fetch(`${API_ENDPOINTS.PRODUCTS}/${id}`);
   if (response.ok) {
     product = await response.json();
   }
 } catch (e) {
-  console.error('Failed to fetch product detail:', e);
+  console.error("Failed to fetch product detail:", e);
 }
 
 if (!product) {
-  return Astro.redirect('/404');
+  return Astro.redirect("/404");
 }
 ---
 
 <Layout title={product.name}>
   <div class="max-w-[1920px] mx-auto px-4 sm:px-12 py-10">
     <div class="flex flex-col lg:flex-row gap-12">
-      
       <!-- Left: Image Gallery -->
       <div class="lg:w-3/5 grid grid-cols-1 md:grid-cols-2 gap-4">
-        {product.images.map(img => (
-          <div class="aspect-square bg-nike-grey overflow-hidden">
-            <img src={img} alt={product.name} class="w-full h-full object-cover mix-blend-multiply" />
-          </div>
-        ))}
+        {
+          product.images.map((img) => (
+            <div class="aspect-square bg-nike-grey overflow-hidden">
+              <img
+                src={img}
+                alt={product.name}
+                class="w-full h-full object-cover mix-blend-multiply"
+              />
+            </div>
+          ))
+        }
       </div>
 
       <!-- Right: Product Info -->
       <div class="lg:w-2/5 max-w-md lg:sticky lg:top-24 h-fit">
         <div class="mb-8">
-          <h1 class="text-3xl font-bold uppercase italic tracking-tighter mb-2">{product.name}</h1>
+          <h1 class="text-3xl font-bold uppercase italic tracking-tighter mb-2">
+            {product.name}
+          </h1>
           <p class="font-medium mb-1">男子运动鞋</p>
           <p class="font-bold text-xl mt-4">￥{product.price}</p>
         </div>
@@ -62,22 +57,50 @@ if (!product) {
             {product.description}
           </p>
           <div class="space-y-4">
-            <details class="group border-b border-nike-grey pb-4 cursor-pointer">
-              <summary class="flex justify-between items-center font-bold uppercase list-none">
+            <details
+              class="group border-b border-nike-grey pb-4 cursor-pointer"
+            >
+              <summary
+                class="flex justify-between items-center font-bold uppercase list-none"
+              >
                 产品详情
                 <span class="group-open:rotate-180 transition-transform">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"></path></svg
+                  >
                 </span>
               </summary>
               <div class="mt-4 text-sm text-nike-dark-grey leading-relaxed">
                 {product.detail}
               </div>
             </details>
-            <details class="group border-b border-nike-grey pb-4 cursor-pointer">
-              <summary class="flex justify-between items-center font-bold uppercase list-none">
+            <details
+              class="group border-b border-nike-grey pb-4 cursor-pointer"
+            >
+              <summary
+                class="flex justify-between items-center font-bold uppercase list-none"
+              >
                 配送与退货
                 <span class="group-open:rotate-180 transition-transform">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"></path></svg
+                  >
                 </span>
               </summary>
               <div class="mt-4 text-sm text-nike-dark-grey leading-relaxed">

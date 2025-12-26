@@ -1,28 +1,35 @@
 ---
 import '../styles/global.css';
-import CartButton from '../components/nike/CartButton';
-import CartDrawer from '../components/nike/CartDrawer';
+import { actions } from 'astro:actions';
+import { Cart } from '../components/nike/CartButton';
+import UserMenu from '../components/nike/UserMenu.astro';
 
 interface Props {
-  title: string;
+    title: string;
 }
 
 const { title } = Astro.props;
+
+// 在服务器端预获取购物车数据
+const result = await Astro.callAction(actions.cart.getCart, new FormData());
+const initialCartData = result.data?.success ? result.data : null;
 ---
 
 <!doctype html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="description" content="Nike Storefront Prototype" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="generator" content={Astro.generator} />
-    <title>{title} | Nike Prototype</title>
-  </head>
-  <body>
-    <!-- Top Bar -->
-    <div class="bg-nike-grey text-[10px] font-bold py-1 px-4 sm:px-12 flex justify-end gap-4 border-b border-gray-200">
+<html lang='zh-CN'>
+    <head>
+        <meta charset='UTF-8' />
+        <meta name='description' content='Nike Storefront Prototype' />
+        <meta name='viewport' content='width=device-width' />
+        <link rel='icon' type='image/svg+xml' href='/favicon.svg' />
+        <meta name='generator' content={Astro.generator} />
+        <title>{title} | Nike Prototype</title>
+    </head>
+    <body>
+        <!-- Top Bar -->
+        <!-- <div
+      class="bg-nike-grey text-[10px] font-bold py-1 px-4 sm:px-12 flex justify-end gap-4 border-b border-gray-200"
+    >
       <a href="#" class="hover:opacity-70">查找门店</a>
       <span>|</span>
       <a href="#" class="hover:opacity-70">帮助</a>
@@ -30,105 +37,262 @@ const { title } = Astro.props;
       <a href="#" class="hover:opacity-70">加入思绪</a>
       <span>|</span>
       <a href="#" class="hover:opacity-70">登录</a>
-    </div>
+    </div> -->
 
-    <!-- Main Header -->
-    <header class="sticky top-0 z-50 bg-white border-b border-nike-grey transition-all">
-      <nav class="max-w-[1920px] mx-auto px-4 sm:px-12 h-16 flex items-center justify-between">
-        <div class="flex items-center gap-12">
-          <a href="/" class="flex-shrink-0">
-             <svg width="60" height="22" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M21 12l-18 6v-12l18 6z" />
-             </svg>
-          </a>
-          <div class="hidden lg:flex items-center gap-6 font-bold text-[15px] tracking-tight">
-            <a href="#" class="hover:border-b-2 border-nike-black h-16 flex items-center transition-all">男子</a>
-            <a href="#" class="hover:border-b-2 border-nike-black h-16 flex items-center transition-all">女子</a>
-            <a href="#" class="hover:border-b-2 border-nike-black h-16 flex items-center transition-all">儿童</a>
-            <a href="#" class="hover:border-b-2 border-nike-black h-16 flex items-center transition-all">特惠</a>
-            <a href="#" class="hover:border-b-2 border-nike-black h-16 flex items-center transition-all">SNKRS</a>
-          </div>
-        </div>
-        
-        <div class="flex items-center gap-4">
-          <div class="relative hidden md:block group">
-            <div class="bg-nike-grey rounded-full px-10 py-2 text-sm flex items-center hover:bg-gray-200 transition-colors">
-              <svg class="w-5 h-5 mr-2 text-nike-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input 
-                type="text" 
-                placeholder="搜索" 
-                class="bg-transparent border-none focus:outline-none w-32 group-hover:w-48 transition-all duration-300"
-              />
-            </div>
-          </div>
-          <button class="p-2 hover:bg-nike-grey rounded-full relative">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          </button>
-          <CartButton client:load />
-        </div>
-      </nav>
-    </header>
-    
-    <main>
-      <slot />
-    </main>
+        <!-- Main Header -->
+        <header
+            class='sticky top-0 z-50 transition-all bg-white border-b border-nike-grey'
+        >
+            <nav
+                class='max-w-[1920px] mx-auto px-4 sm:px-12 h-16 flex items-center justify-between'
+            >
+                <div class='flex items-center gap-12'>
+                    <a href='/' class='flex-shrink-0'>
+                        <svg
+                            width='60'
+                            height='22'
+                            viewBox='0 0 24 24'
+                            fill='currentColor'
+                        >
+                            <path d='M21 12l-18 6v-12l18 6z'></path>
+                        </svg>
+                    </a>
+                    <div
+                        class='hidden lg:flex items-center gap-6 font-bold text-[15px] tracking-tight'
+                    >
+                        <a
+                            href='#'
+                            class='flex items-center h-16 transition-all hover:border-b-2 border-nike-black'
+                            >男子</a
+                        >
+                        <a
+                            href='#'
+                            class='flex items-center h-16 transition-all hover:border-b-2 border-nike-black'
+                            >女子</a
+                        >
+                        <a
+                            href='#'
+                            class='flex items-center h-16 transition-all hover:border-b-2 border-nike-black'
+                            >儿童</a
+                        >
+                        <a
+                            href='#'
+                            class='flex items-center h-16 transition-all hover:border-b-2 border-nike-black'
+                            >特惠</a
+                        >
+                        <a
+                            href='#'
+                            class='flex items-center h-16 transition-all hover:border-b-2 border-nike-black'
+                            >SNKRS</a
+                        >
+                    </div>
+                </div>
 
-    <CartDrawer client:load />
-    
-    <footer class="bg-nike-black text-white py-12 px-4 sm:px-12 mt-20">
-      <div class="max-w-[1920px] mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-12 mb-16">
-          <div class="md:col-span-1 lg:col-span-2 space-y-4">
-            <h4 class="text-[14px] font-black uppercase italic tracking-tighter mb-6">获取帮助</h4>
-            <ul class="space-y-3 text-[12px] text-nike-dark-grey font-medium uppercase tracking-tight">
-              <li><a href="#" class="hover:text-white transition-colors">订单状态</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">配送方式</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">退换货政策</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">付款方式</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">联系我们</a></li>
-            </ul>
-          </div>
-          <div class="md:col-span-1 lg:col-span-2 space-y-4">
-            <h4 class="text-[14px] font-black uppercase italic tracking-tighter mb-6">关于 NIKE</h4>
-            <ul class="space-y-3 text-[12px] text-nike-dark-grey font-medium uppercase tracking-tight">
-              <li><a href="#" class="hover:text-white transition-colors">新闻中心</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">投资者关系</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">可持续发展</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">加入我们</a></li>
-            </ul>
-          </div>
-          <div class="md:col-span-2 space-y-6">
-            <h4 class="text-[14px] font-black uppercase italic tracking-tighter mb-6">关注我们</h4>
-            <div class="flex gap-4">
-              <div class="w-10 h-10 bg-nike-dark-grey rounded-full flex items-center justify-center cursor-pointer hover:bg-white hover:text-nike-black transition-all">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.919-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.084.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-              </div>
-              <div class="w-10 h-10 bg-nike-dark-grey rounded-full flex items-center justify-center cursor-pointer hover:bg-white hover:text-nike-black transition-all">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
-              </div>
+                <div class='flex items-center gap-4'>
+                    <div class='relative hidden md:block group'>
+                        <div
+                            class='flex items-center px-10 py-2 text-sm transition-colors rounded-full bg-nike-grey hover:bg-gray-200'
+                        >
+                            <svg
+                                class='w-5 h-5 mr-2 text-nike-black'
+                                fill='none'
+                                stroke='currentColor'
+                                viewBox='0 0 24 24'
+                            >
+                                <path
+                                    stroke-linecap='round'
+                                    stroke-linejoin='round'
+                                    stroke-width='2'
+                                    d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
+                                ></path>
+                            </svg>
+                            <input
+                                type='text'
+                                placeholder='搜索'
+                                class='w-32 transition-all duration-300 bg-transparent border-none focus:outline-none group-hover:w-48'
+                            />
+                        </div>
+                    </div>
+                    <button
+                        class='relative p-2 rounded-full hover:bg-nike-grey'
+                    >
+                        <svg
+                            class='w-6 h-6'
+                            fill='none'
+                            stroke='currentColor'
+                            viewBox='0 0 24 24'
+                        >
+                            <path
+                                stroke-linecap='round'
+                                stroke-linejoin='round'
+                                stroke-width='2'
+                                d='M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z'
+                            ></path>
+                        </svg>
+                    </button>
+                    <Cart client:load initialData={initialCartData} />
+                    <UserMenu />
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <slot />
+        </main>
+
+        <footer class='px-4 py-12 mt-20 text-white bg-nike-black sm:px-12'>
+            <div class='max-w-[1920px] mx-auto'>
+                <div
+                    class='grid grid-cols-1 gap-12 mb-16 md:grid-cols-4 lg:grid-cols-6'
+                >
+                    <div class='space-y-4 md:col-span-1 lg:col-span-2'>
+                        <h4
+                            class='text-[14px] font-black uppercase italic tracking-tighter mb-6'
+                        >
+                            获取帮助
+                        </h4>
+                        <ul
+                            class='space-y-3 text-[12px] text-nike-dark-grey font-medium uppercase tracking-tight'
+                        >
+                            <li>
+                                <a
+                                    href='#'
+                                    class='transition-colors hover:text-white'
+                                    >订单状态</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href='#'
+                                    class='transition-colors hover:text-white'
+                                    >配送方式</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href='#'
+                                    class='transition-colors hover:text-white'
+                                    >退换货政策</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href='#'
+                                    class='transition-colors hover:text-white'
+                                    >付款方式</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href='#'
+                                    class='transition-colors hover:text-white'
+                                    >联系我们</a
+                                >
+                            </li>
+                        </ul>
+                    </div>
+                    <div class='space-y-4 md:col-span-1 lg:col-span-2'>
+                        <h4
+                            class='text-[14px] font-black uppercase italic tracking-tighter mb-6'
+                        >
+                            关于 NIKE
+                        </h4>
+                        <ul
+                            class='space-y-3 text-[12px] text-nike-dark-grey font-medium uppercase tracking-tight'
+                        >
+                            <li>
+                                <a
+                                    href='#'
+                                    class='transition-colors hover:text-white'
+                                    >新闻中心</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href='#'
+                                    class='transition-colors hover:text-white'
+                                    >投资者关系</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href='#'
+                                    class='transition-colors hover:text-white'
+                                    >可持续发展</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href='#'
+                                    class='transition-colors hover:text-white'
+                                    >加入我们</a
+                                >
+                            </li>
+                        </ul>
+                    </div>
+                    <div class='space-y-6 md:col-span-2'>
+                        <h4
+                            class='text-[14px] font-black uppercase italic tracking-tighter mb-6'
+                        >
+                            关注我们
+                        </h4>
+                        <div class='flex gap-4'>
+                            <div
+                                class='flex items-center justify-center w-10 h-10 transition-all rounded-full cursor-pointer bg-nike-dark-grey hover:bg-white hover:text-nike-black'
+                            >
+                                <svg
+                                    class='w-5 h-5'
+                                    fill='currentColor'
+                                    viewBox='0 0 24 24'
+                                    ><path
+                                        d='M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.919-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.084.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z'
+                                    ></path></svg
+                                >
+                            </div>
+                            <div
+                                class='flex items-center justify-center w-10 h-10 transition-all rounded-full cursor-pointer bg-nike-dark-grey hover:bg-white hover:text-nike-black'
+                            >
+                                <svg
+                                    class='w-5 h-5'
+                                    fill='currentColor'
+                                    viewBox='0 0 24 24'
+                                    ><path
+                                        d='M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z'
+                                    ></path></svg
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class='flex flex-col items-start justify-between gap-6 pt-8 border-t md:flex-row md:items-end border-nike-dark-grey'
+                >
+                    <div
+                        class='flex flex-col md:flex-row gap-6 items-start md:items-center text-[11px] text-nike-dark-grey font-medium'
+                    >
+                        <div class='flex items-center gap-2 text-white'>
+                            <svg
+                                class='w-4 h-4'
+                                fill='currentColor'
+                                viewBox='0 0 24 24'
+                                ><path
+                                    d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'
+                                ></path></svg
+                            >
+                            <span>中国大陆 (简体中文)</span>
+                        </div>
+                        <span>© 2025 Nike, Inc. 保留所有权利</span>
+                    </div>
+                    <div
+                        class='flex flex-wrap gap-4 text-[11px] text-nike-dark-grey font-medium uppercase tracking-tight'
+                    >
+                        <a href='#' class='hover:text-white'>指引</a>
+                        <a href='#' class='hover:text-white'>使用条款</a>
+                        <a href='#' class='hover:text-white'>销售条款</a>
+                        <a href='#' class='hover:text-white'>隐私政策说明</a>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pt-8 border-t border-nike-dark-grey">
-          <div class="flex flex-col md:flex-row gap-6 items-start md:items-center text-[11px] text-nike-dark-grey font-medium">
-             <div class="flex items-center gap-2 text-white">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                <span>中国大陆 (简体中文)</span>
-             </div>
-             <span>© 2025 Nike, Inc. 保留所有权利</span>
-          </div>
-          <div class="flex flex-wrap gap-4 text-[11px] text-nike-dark-grey font-medium uppercase tracking-tight">
-             <a href="#" class="hover:text-white">指引</a>
-             <a href="#" class="hover:text-white">使用条款</a>
-             <a href="#" class="hover:text-white">销售条款</a>
-             <a href="#" class="hover:text-white">隐私政策说明</a>
-          </div>
-        </div>
-      </div>
-    </footer>
-  </body>
+        </footer>
+    </body>
 </html>
