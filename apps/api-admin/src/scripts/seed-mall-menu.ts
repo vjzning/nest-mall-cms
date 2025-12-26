@@ -52,22 +52,38 @@ async function bootstrap() {
   await findOrCreateMenu({ name: 'Update Product', code: 'mall:product:update', type: 3, parentId: productMenu.id, sort: 3 });
   await findOrCreateMenu({ name: 'Delete Product', code: 'mall:product:delete', type: 3, parentId: productMenu.id, sort: 4 });
 
+  // 3. Content Collection
+  const collectionMenu = await findOrCreateMenu({
+    name: 'Content Collection',
+    code: 'mall:collection',
+    type: 2, // Menu
+    parentId: mallDir.id,
+    path: '/mall/collection',
+    sort: 5,
+    icon: 'Layout',
+  });
+
+  await findOrCreateMenu({ name: 'Query Collection', code: 'mall:collection:list', type: 3, parentId: collectionMenu.id, sort: 1 });
+  await findOrCreateMenu({ name: 'Create Collection', code: 'mall:collection:create', type: 3, parentId: collectionMenu.id, sort: 2 });
+  await findOrCreateMenu({ name: 'Update Collection', code: 'mall:collection:update', type: 3, parentId: collectionMenu.id, sort: 3 });
+  await findOrCreateMenu({ name: 'Delete Collection', code: 'mall:collection:delete', type: 3, parentId: collectionMenu.id, sort: 4 });
+
   console.log('Mall Menus seeded.');
 
   // Assign all menus to Admin Role
   console.log('Assigning all menus to Admin role...');
   const allMenus = await menuService.findAll();
   const allMenuIds = allMenus.map(m => m.id);
-  
+
   // Find admin role
   const roles = await roleService.findAll();
   const adminRole = roles.find(r => r.code === 'admin');
-  
+
   if (adminRole) {
-      await roleService.assignPermissions(adminRole.id, allMenuIds);
-      console.log('Assigned all permissions to Admin role.');
+    await roleService.assignPermissions(adminRole.id, allMenuIds);
+    console.log('Assigned all permissions to Admin role.');
   } else {
-      console.warn('Admin role not found. Skipping permission assignment.');
+    console.warn('Admin role not found. Skipping permission assignment.');
   }
 
   await app.close();
