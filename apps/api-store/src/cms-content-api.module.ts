@@ -9,6 +9,7 @@ import { TagModule } from './tag/tag.module';
 import { CommentModule } from './comment/comment.module';
 import { MallModule } from './mall/mall.module';
 import { AuthModule } from './auth/auth.module';
+import { MemberModule } from './member/member.module';
 import { SystemConfigModule } from '@app/shared/system-config/system-config.module';
 import databaseConfig from './config/database.config';
 import { RedisClientModule, RedisLockModule } from '@app/redis';
@@ -57,6 +58,7 @@ import { createKeyv as createKeyvRedis } from '@keyv/redis';
         CommentModule,
         MallModule,
         AuthModule,
+        MemberModule,
         SystemConfigModule,
     ],
     controllers: [CmsContentApiController],

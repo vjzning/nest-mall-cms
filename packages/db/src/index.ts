@@ -21,3 +21,4 @@ export * from './entities/mall-payment.entity';
 export * from './entities/collection.entity';
 export * from './entities/collection-item.entity';
 export * from './entities/member-auth.entity';
+export * from './entities/member-address.entity';

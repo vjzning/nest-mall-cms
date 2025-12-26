@@ -1,0 +1,358 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { actions } from 'astro:actions';
+import MemberSidebar from '../../../components/member/MemberSidebar.astro';
+import { getApiUrl } from '../../../lib/api';
+
+const user = await Astro.session?.get('user');
+const token = await Astro.session?.get('token');
+if (!user || !token) return Astro.redirect('/login');
+
+const { id } = Astro.params;
+const apiUrl = getApiUrl();
+
+// 获取当前地址详情
+const response = await fetch(
+    `${apiUrl}/member/address/${id}`,
+    {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    }
+);
+
+let address = null;
+let fetchError = null;
+
+if (!response.ok) {
+    fetchError = '无法获取地址详情，该地址可能不存在或您没有权限访问。';
+} else {
+    address = await response.json();
+}
+
+const result = Astro.getActionResult(actions.address.updateAddress);
+if (result && !result.error) {
+    return Astro.redirect('/member/address?msg=updated');
+}
+
+const countries = [
+    { code: 'CN', name: '中国' },
+    { code: 'US', name: '美国' },
+    { code: 'GB', name: '英国' },
+    { code: 'JP', name: '日本' },
+    { code: 'DE', name: '德国' },
+    { code: 'FR', name: '法国' },
+    { code: 'KR', name: '韩国' },
+];
+---
+
+<Layout title='编辑收货地址'>
+    <div class='min-h-screen py-10 bg-nike-grey'>
+        <div class='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
+            <div class='grid grid-cols-1 gap-6 md:grid-cols-3'>
+                <!-- Sidebar -->
+                <div class='md:col-span-1'>
+                    <MemberSidebar user={user} activeTab='addresses' />
+                </div>
+
+                <!-- Main Content -->
+                <div class='md:col-span-2'>
+                    <div class='p-6 bg-white rounded-lg shadow-lg'>
+                        <div class='mb-8'>
+                            <h1
+                                class='text-2xl font-bold italic uppercase tracking-tighter'
+                            >
+                                编辑收货地址
+                            </h1>
+                            <p class='text-gray-500 text-sm mt-1'>
+                                修改您的收货信息。
+                            </p>
+                        </div>
+
+                        {
+                            (fetchError || result?.error) && (
+                                <div class='mb-6 p-4 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg font-medium'>
+                                    {fetchError || result?.error?.message}
+                                </div>
+                            )
+                        }
+
+                        {address && (
+                        <form
+                            action={actions.address.updateAddress}
+                            method='POST'
+                            class='space-y-6'
+                        >
+                            <input type='hidden' name='id' value={id} />
+
+                            <!-- 收货人基本信息 -->
+                            <div class='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='receiverName'
+                                        class='block text-xs font-bold uppercase tracking-widest text-gray-500'
+                                        >收货人姓名 *</label
+                                    >
+                                    <input
+                                        type='text'
+                                        id='receiverName'
+                                        name='receiverName'
+                                        value={address.receiverName}
+                                        required
+                                        class='w-full px-4 py-3 border border-gray-300 rounded-md focus:border-nike-black outline-none transition-all'
+                                        placeholder='姓名'
+                                    />
+                                </div>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='receiverPhone'
+                                        class='block text-xs font-bold uppercase tracking-widest text-gray-500'
+                                        >联系电话 *</label
+                                    >
+                                    <input
+                                        type='tel'
+                                        id='receiverPhone'
+                                        name='receiverPhone'
+                                        value={address.receiverPhone}
+                                        required
+                                        class='w-full px-4 py-3 border border-gray-300 rounded-md focus:border-nike-black outline-none transition-all'
+                                        placeholder='手机号 / 电话'
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- 国家选择 -->
+                            <div class='space-y-2'>
+                                <label
+                                    for='countryCode'
+                                    class='block text-xs font-bold uppercase tracking-widest text-gray-500'
+                                    >国家/地区 *</label
+                                >
+                                <select
+                                    id='countryCode'
+                                    name='countryCode'
+                                    required
+                                    class='w-full px-4 py-3 border border-gray-300 rounded-md focus:border-nike-black outline-none bg-white transition-all appearance-none'
+                                    onchange="document.getElementById('countryName').value = this.options[this.selectedIndex].text"
+                                >
+                                    <option value=''>请选择国家</option>
+                                    {
+                                        countries.map((c) => (
+                                            <option
+                                                value={c.code}
+                                                selected={
+                                                    address.countryCode ===
+                                                    c.code
+                                                }
+                                            >
+                                                {c.name}
+                                            </option>
+                                        ))
+                                    }
+                                </select>
+                                <input
+                                    type='hidden'
+                                    id='countryName'
+                                    name='countryName'
+                                    value={address.countryName}
+                                />
+                            </div>
+
+                            <!-- 州/省、城市、区县 -->
+                            <div class='grid grid-cols-1 md:grid-cols-3 gap-6'>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='stateProvince'
+                                        class='block text-xs font-bold uppercase tracking-widest text-gray-500'
+                                        >州 / 省</label
+                                    >
+                                    <input
+                                        type='text'
+                                        id='stateProvince'
+                                        name='stateProvince'
+                                        value={address.stateProvince}
+                                        class='w-full px-4 py-3 border border-gray-300 rounded-md focus:border-nike-black outline-none transition-all'
+                                        placeholder='省份/州'
+                                    />
+                                </div>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='city'
+                                        class='block text-xs font-bold uppercase tracking-widest text-gray-500'
+                                        >城市</label
+                                    >
+                                    <input
+                                        type='text'
+                                        id='city'
+                                        name='city'
+                                        value={address.city}
+                                        class='w-full px-4 py-3 border border-gray-300 rounded-md focus:border-nike-black outline-none transition-all'
+                                        placeholder='城市'
+                                    />
+                                </div>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='districtCounty'
+                                        class='block text-xs font-bold uppercase tracking-widest text-gray-500'
+                                        >区 / 县</label
+                                    >
+                                    <input
+                                        type='text'
+                                        id='districtCounty'
+                                        name='districtCounty'
+                                        value={address.districtCounty}
+                                        class='w-full px-4 py-3 border border-gray-300 rounded-md focus:border-nike-black outline-none transition-all'
+                                        placeholder='区/县'
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- 详细地址行 -->
+                            <div class='space-y-4'>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='addressLine1'
+                                        class='block text-xs font-bold uppercase tracking-widest text-gray-500'
+                                        >详细地址行 1 *</label
+                                    >
+                                    <input
+                                        type='text'
+                                        id='addressLine1'
+                                        name='addressLine1'
+                                        value={address.addressLine1}
+                                        required
+                                        class='w-full px-4 py-3 border border-gray-300 rounded-md focus:border-nike-black outline-none transition-all'
+                                        placeholder='街道、楼号、公司名等'
+                                    />
+                                </div>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='addressLine2'
+                                        class='block text-xs font-bold uppercase tracking-widest text-gray-500'
+                                        >详细地址行 2 (可选)</label
+                                    >
+                                    <input
+                                        type='text'
+                                        id='addressLine2'
+                                        name='addressLine2'
+                                        value={address.addressLine2}
+                                        class='w-full px-4 py-3 border border-gray-300 rounded-md focus:border-nike-black outline-none transition-all'
+                                        placeholder='公寓、单元、门牌号等'
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- 邮编与标签 -->
+                            <div class='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='postalCode'
+                                        class='block text-xs font-bold uppercase tracking-widest text-gray-500'
+                                        >邮政编码</label
+                                    >
+                                    <input
+                                        type='text'
+                                        id='postalCode'
+                                        name='postalCode'
+                                        value={address.postalCode}
+                                        class='w-full px-4 py-3 border border-gray-300 rounded-md focus:border-nike-black outline-none transition-all'
+                                        placeholder='Postal / Zip Code'
+                                    />
+                                </div>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='tag'
+                                        class='block text-xs font-bold uppercase tracking-widest text-gray-500'
+                                        >地址标签</label
+                                    >
+                                    <select
+                                        id='tag'
+                                        name='tag'
+                                        class='w-full px-4 py-3 border border-gray-300 rounded-md focus:border-nike-black outline-none bg-white transition-all appearance-none'
+                                    >
+                                        <option value=''>请选择标签</option>
+                                        <option
+                                            value='Home'
+                                            selected={address.tag === 'Home'}
+                                            >家 (Home)</option
+                                        >
+                                        <option
+                                            value='Office'
+                                            selected={address.tag === 'Office'}
+                                            >公司 (Office)</option
+                                        >
+                                        <option
+                                            value='School'
+                                            selected={address.tag === 'School'}
+                                            >学校 (School)</option
+                                        >
+                                        <option
+                                            value='Other'
+                                            selected={address.tag === 'Other'}
+                                            >其他 (Other)</option
+                                        >
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- 设为默认 -->
+                            <div class='flex items-center gap-3 pt-4'>
+                                <input
+                                    type='checkbox'
+                                    id='isDefault'
+                                    name='isDefault'
+                                    checked={address.isDefault === 1}
+                                    class='w-5 h-5 accent-nike-black cursor-pointer'
+                                />
+                                <label
+                                    for='isDefault'
+                                    class='text-sm font-bold text-nike-black cursor-pointer'
+                                    >设为默认收货地址</label
+                                >
+                            </div>
+
+                            <!-- 操作按钮 -->
+                            <div
+                                class='flex gap-4 pt-8 border-t border-gray-100'
+                            >
+                                <button
+                                    type='submit'
+                                    class='flex-1 bg-nike-black text-white py-4 rounded-full font-bold hover:opacity-80 transition-all'
+                                >
+                                    保存修改
+                                </button>
+                                <a
+                                    href='/member/address'
+                                    class='flex-1 bg-white text-nike-black py-4 rounded-full font-bold border border-gray-300 text-center hover:bg-gray-50 transition-all'
+                                >
+                                    取消
+                                </a>
+                            </div>
+                        </form>
+                        )}
+
+                        <div class='mt-12 flex items-center gap-2'>
+                            <svg
+                                class='w-4 h-4'
+                                fill='none'
+                                stroke='currentColor'
+                                viewBox='0 0 24 24'
+                            >
+                                <path
+                                    stroke-linecap='round'
+                                    stroke-linejoin='round'
+                                    stroke-width='2'
+                                    d='M15 19l-7-7 7-7'></path>
+                            </svg>
+                            <a
+                                href='/member/address'
+                                class='text-nike-black font-bold hover:underline text-sm'
+                                >返回地址列表</a
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</Layout>

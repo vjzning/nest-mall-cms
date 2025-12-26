@@ -1,0 +1,286 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { actions } from 'astro:actions';
+import MemberSidebar from '../../../components/member/MemberSidebar.astro';
+
+const user = await Astro.session?.get('user');
+if (!user) return Astro.redirect('/login');
+
+const result = Astro.getActionResult(actions.address.createAddress);
+if (result?.data?.success) {
+    return Astro.redirect('/member/address');
+}
+
+// 支持的常用国家列表（外贸场景）
+const countries = [
+    { code: 'CN', name: '中国', phonePrefix: '+86' },
+    { code: 'US', name: '美国', phonePrefix: '+1' },
+    { code: 'GB', name: '英国', phonePrefix: '+44' },
+    { code: 'JP', name: '日本', phonePrefix: '+81' },
+    { code: 'DE', name: '德国', phonePrefix: '+49' },
+    { code: 'FR', name: '法国', phonePrefix: '+33' },
+    { code: 'KR', name: '韩国', phonePrefix: '+82' },
+];
+---
+
+<Layout title='新增收货地址'>
+    <div class='py-10 min-h-screen bg-nike-grey'>
+        <div class='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
+            <div class='grid grid-cols-1 gap-6 md:grid-cols-3'>
+                <!-- Sidebar -->
+                <div class='md:col-span-1'>
+                    <MemberSidebar user={user} activeTab='addresses' />
+                </div>
+
+                <!-- Main Content -->
+                <div class='md:col-span-2'>
+                    <div class='p-6 bg-white rounded-lg shadow-lg'>
+                        <div class='mb-8'>
+                            <h1
+                                class='text-2xl italic font-bold tracking-tighter uppercase'
+                            >
+                                新增收货地址
+                            </h1>
+                            <p class='mt-1 text-sm text-gray-500'>
+                                请填写详细的收货信息，以便我们准确送达。
+                            </p>
+                        </div>
+
+                        {
+                            result?.error && (
+                                <div class='p-4 mb-6 text-sm font-medium text-red-600 bg-red-50 rounded-lg border border-red-200'>
+                                    {result.error.message}
+                                </div>
+                            )
+                        }
+
+                        <form
+                            action={actions.address.createAddress}
+                            method='POST'
+                            class='space-y-6'
+                        >
+                            <!-- 收货人基本信息 -->
+                            <div class='grid grid-cols-1 gap-6 md:grid-cols-2'>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='receiverName'
+                                        class='block text-xs font-bold tracking-widest text-gray-500 uppercase'
+                                        >收货人姓名 *</label
+                                    >
+                                    <input
+                                        type='text'
+                                        id='receiverName'
+                                        name='receiverName'
+                                        required
+                                        class='px-4 py-3 w-full rounded-md border border-gray-300 transition-all outline-none focus:border-nike-black'
+                                        placeholder='姓名'
+                                    />
+                                </div>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='receiverPhone'
+                                        class='block text-xs font-bold tracking-widest text-gray-500 uppercase'
+                                        >联系电话 *</label
+                                    >
+                                    <input
+                                        type='tel'
+                                        id='receiverPhone'
+                                        name='receiverPhone'
+                                        required
+                                        class='px-4 py-3 w-full rounded-md border border-gray-300 transition-all outline-none focus:border-nike-black'
+                                        placeholder='手机号 / 电话'
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- 国家选择 -->
+                            <div class='space-y-2'>
+                                <label
+                                    for='countryCode'
+                                    class='block text-xs font-bold tracking-widest text-gray-500 uppercase'
+                                    >国家/地区 *</label
+                                >
+                                <select
+                                    id='countryCode'
+                                    name='countryCode'
+                                    required
+                                    class='px-4 py-3 w-full bg-white rounded-md border border-gray-300 transition-all appearance-none outline-none focus:border-nike-black'
+                                    onchange="document.getElementById('countryName').value = this.options[this.selectedIndex].text"
+                                >
+                                    <option value=''>请选择国家</option>
+                                    {
+                                        countries.map((c) => (
+                                            <option value={c.code}>
+                                                {c.name}
+                                            </option>
+                                        ))
+                                    }
+                                </select>
+                                <input
+                                    type='hidden'
+                                    id='countryName'
+                                    name='countryName'
+                                    value=''
+                                />
+                            </div>
+
+                            <!-- 州/省、城市、区县 -->
+                            <div class='grid grid-cols-1 gap-6 md:grid-cols-3'>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='stateProvince'
+                                        class='block text-xs font-bold tracking-widest text-gray-500 uppercase'
+                                        >州 / 省</label
+                                    >
+                                    <input
+                                        type='text'
+                                        id='stateProvince'
+                                        name='stateProvince'
+                                        class='px-4 py-3 w-full rounded-md border border-gray-300 transition-all outline-none focus:border-nike-black'
+                                        placeholder='省份/州'
+                                    />
+                                </div>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='city'
+                                        class='block text-xs font-bold tracking-widest text-gray-500 uppercase'
+                                        >城市</label
+                                    >
+                                    <input
+                                        type='text'
+                                        id='city'
+                                        name='city'
+                                        class='px-4 py-3 w-full rounded-md border border-gray-300 transition-all outline-none focus:border-nike-black'
+                                        placeholder='城市'
+                                    />
+                                </div>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='districtCounty'
+                                        class='block text-xs font-bold tracking-widest text-gray-500 uppercase'
+                                        >区 / 县</label
+                                    >
+                                    <input
+                                        type='text'
+                                        id='districtCounty'
+                                        name='districtCounty'
+                                        class='px-4 py-3 w-full rounded-md border border-gray-300 transition-all outline-none focus:border-nike-black'
+                                        placeholder='区/县'
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- 详细地址行 -->
+                            <div class='space-y-4'>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='addressLine1'
+                                        class='block text-xs font-bold tracking-widest text-gray-500 uppercase'
+                                        >详细地址行 1 *</label
+                                    >
+                                    <input
+                                        type='text'
+                                        id='addressLine1'
+                                        name='addressLine1'
+                                        required
+                                        class='px-4 py-3 w-full rounded-md border border-gray-300 transition-all outline-none focus:border-nike-black'
+                                        placeholder='街道、楼号、公司名等'
+                                    />
+                                </div>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='addressLine2'
+                                        class='block text-xs font-bold tracking-widest text-gray-500 uppercase'
+                                        >详细地址行 2 (可选)</label
+                                    >
+                                    <input
+                                        type='text'
+                                        id='addressLine2'
+                                        name='addressLine2'
+                                        class='px-4 py-3 w-full rounded-md border border-gray-300 transition-all outline-none focus:border-nike-black'
+                                        placeholder='公寓、单元、门牌号等'
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- 邮编与标签 -->
+                            <div class='grid grid-cols-1 gap-6 md:grid-cols-2'>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='postalCode'
+                                        class='block text-xs font-bold tracking-widest text-gray-500 uppercase'
+                                        >邮政编码</label
+                                    >
+                                    <input
+                                        type='text'
+                                        id='postalCode'
+                                        name='postalCode'
+                                        class='px-4 py-3 w-full rounded-md border border-gray-300 transition-all outline-none focus:border-nike-black'
+                                        placeholder='Postal / Zip Code'
+                                    />
+                                </div>
+                                <div class='space-y-2'>
+                                    <label
+                                        for='tag'
+                                        class='block text-xs font-bold tracking-widest text-gray-500 uppercase'
+                                        >地址标签</label
+                                    >
+                                    <select
+                                        id='tag'
+                                        name='tag'
+                                        class='px-4 py-3 w-full bg-white rounded-md border border-gray-300 transition-all appearance-none outline-none focus:border-nike-black'
+                                    >
+                                        <option value=''>请选择标签</option>
+                                        <option value='Home'>家 (Home)</option>
+                                        <option value='Office'
+                                            >公司 (Office)</option
+                                        >
+                                        <option value='School'
+                                            >学校 (School)</option
+                                        >
+                                        <option value='Other'
+                                            >其他 (Other)</option
+                                        >
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- 设为默认 -->
+                            <div class='flex gap-3 items-center pt-4'>
+                                <input
+                                    type='checkbox'
+                                    id='isDefault'
+                                    name='isDefault'
+                                    class='w-5 h-5 cursor-pointer accent-nike-black'
+                                />
+                                <label
+                                    for='isDefault'
+                                    class='text-sm font-bold cursor-pointer text-nike-black'
+                                    >设为默认收货地址</label
+                                >
+                            </div>
+
+                            <!-- 操作按钮 -->
+                            <div
+                                class='flex gap-4 pt-8 border-t border-gray-100'
+                            >
+                                <button
+                                    type='submit'
+                                    class='flex-1 py-4 font-bold text-white rounded-full transition-all bg-nike-black hover:opacity-80'
+                                >
+                                    保存并使用
+                                </button>
+                                <a
+                                    href='/member/address'
+                                    class='flex-1 py-4 font-bold text-center bg-white rounded-full border border-gray-300 transition-all text-nike-black hover:bg-gray-50'
+                                >
+                                    取消
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</Layout>

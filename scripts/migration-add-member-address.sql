@@ -1,0 +1,20 @@
+CREATE TABLE `mall_member_address` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `member_id` bigint NOT NULL COMMENT '关联会员ID',
+  `receiver_name` varchar(100) NOT NULL COMMENT '收货人姓名',
+  `receiver_phone` varchar(50) NOT NULL COMMENT '收货人电话',
+  `country_code` varchar(10) NOT NULL COMMENT 'ISO 3166-1 alpha-2 国家代码',
+  `country_name` varchar(100) DEFAULT NULL COMMENT '国家名称',
+  `state_province` varchar(100) DEFAULT NULL COMMENT '州/省',
+  `city` varchar(100) DEFAULT NULL COMMENT '城市',
+  `district_county` varchar(100) DEFAULT NULL COMMENT '区/县',
+  `address_line1` varchar(255) NOT NULL COMMENT '地址行1',
+  `address_line2` varchar(255) DEFAULT NULL COMMENT '地址行2',
+  `postal_code` varchar(20) DEFAULT NULL COMMENT '邮政编码',
+  `is_default` tinyint NOT NULL DEFAULT '0' COMMENT '是否默认: 0-否, 1-是',
+  `tag` varchar(20) DEFAULT NULL COMMENT '标签: Home, Office等',
+  `created_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updated_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id`),
+  KEY `IDX_MEMBER_ADDRESS_MEMBER_ID` (`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

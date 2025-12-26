@@ -47,6 +47,11 @@ export class WechatStrategy extends PassportStrategy(Strategy, 'wechat') {
                 (this as any)._oauth.appid = appID;
                 (this as any)._oauth.appsecret = appSecret;
             }
+            // 同时也更新 options 对象
+            if ((this as any)._options) {
+                (this as any)._options.appID = appID;
+                (this as any)._options.appSecret = appSecret;
+            }
             (this as any)._callbackURL = callbackURL;
         } catch (err) {
             console.error(

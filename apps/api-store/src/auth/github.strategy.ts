@@ -46,6 +46,11 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
                 (this as any)._oauth2._clientId = clientID;
                 (this as any)._oauth2._clientSecret = clientSecret;
             }
+            // 同时也更新 options 对象，以防某些内部逻辑依赖它
+            if ((this as any)._options) {
+                (this as any)._options.clientID = clientID;
+                (this as any)._options.clientSecret = clientSecret;
+            }
             (this as any)._callbackURL = callbackURL;
         } catch (err) {
             console.error(

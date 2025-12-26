@@ -1,0 +1,203 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { actions } from 'astro:actions';
+import MemberSidebar from '../../../components/member/MemberSidebar.astro';
+import { getApiUrl } from '../../../lib/api';
+
+const user = await Astro.session?.get('user');
+const token = await Astro.session?.get('token');
+
+if (!user || !token) {
+    return Astro.redirect('/login');
+}
+
+const apiUrl = getApiUrl();
+
+// 获取地址列表
+const response = await fetch(`${apiUrl}/member/address`, {
+    headers: {
+        Authorization: `Bearer ${token}`,
+    },
+});
+
+if (!response.ok) {
+    console.error(
+        'Failed to fetch addresses:',
+        response.status,
+        await response.text()
+    );
+}
+
+const addresses = response.ok ? await response.json() : [];
+const fetchError = !response.ok ? '无法加载地址列表，请稍后重试。' : null;
+
+// 处理删除或设为默认后的重定向
+const deleteResult = Astro.getActionResult(actions.address.deleteAddress);
+if (deleteResult && !deleteResult.error) {
+    return Astro.redirect('/member/address?msg=deleted');
+}
+const defaultResult = Astro.getActionResult(actions.address.setDefaultAddress);
+if (defaultResult && !defaultResult.error) {
+    return Astro.redirect('/member/address?msg=default_set');
+}
+
+const actionError =
+    deleteResult?.error?.message || defaultResult?.error?.message;
+---
+
+<Layout title='收货地址管理'>
+    <div class='py-10 min-h-screen bg-nike-grey'>
+        <div class='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
+            <div class='grid grid-cols-1 gap-6 md:grid-cols-3'>
+                <!-- Sidebar -->
+                <div class='md:col-span-1'>
+                    <MemberSidebar user={user} activeTab='addresses' />
+                </div>
+
+                <!-- Main Content -->
+                <div class='md:col-span-2'>
+                    <div class='p-6 bg-white rounded-lg shadow-lg'>
+                        <div class='flex justify-between items-center mb-8'>
+                            <h1
+                                class='text-2xl italic font-bold tracking-tighter uppercase'
+                            >
+                                收货地址管理
+                            </h1>
+                            <a
+                                href='/member/address/new'
+                                class='px-6 py-2 text-sm font-medium text-white rounded-full transition-all bg-nike-black hover:opacity-80'
+                            >
+                                新增地址
+                            </a>
+                        </div>
+
+                        {
+                            (fetchError || actionError) && (
+                                <div class='p-4 mb-6 text-sm font-medium text-red-600 bg-red-50 rounded-lg border border-red-200'>
+                                    {fetchError || actionError}
+                                </div>
+                            )
+                        }
+
+                        {
+                            addresses.length === 0 ? (
+                                <div class='py-20 text-center rounded-lg border border-gray-300 border-dashed bg-nike-grey'>
+                                    <p class='mb-4 text-gray-500'>
+                                        暂无收货地址
+                                    </p>
+                                    <a
+                                        href='/member/address/new'
+                                        class='font-medium underline text-nike-black hover:opacity-70'
+                                    >
+                                        去添加第一个地址
+                                    </a>
+                                </div>
+                            ) : (
+                                <div class='grid gap-6'>
+                                    {addresses.map((addr: any) => (
+                                        <div
+                                            class={`p-6 border rounded-lg relative transition-all ${addr.isDefault ? 'border-nike-black ring-1 ring-nike-black' : 'border-gray-200 hover:border-gray-400'}`}
+                                        >
+                                            {addr.isDefault === 1 && (
+                                                <span class='absolute top-4 right-4 bg-nike-black text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase'>
+                                                    默认地址
+                                                </span>
+                                            )}
+
+                                            <div class='flex gap-4 items-center mb-3'>
+                                                <span class='text-lg font-bold'>
+                                                    {addr.receiverName}
+                                                </span>
+                                                <span class='font-medium text-gray-500'>
+                                                    {addr.receiverPhone}
+                                                </span>
+                                                {addr.tag && (
+                                                    <span class='bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider'>
+                                                        {addr.tag}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <div class='text-[15px] text-gray-600 leading-relaxed mb-6'>
+                                                <p class='font-medium text-nike-black'>
+                                                    {addr.countryName ||
+                                                        addr.countryCode}{' '}
+                                                    {addr.stateProvince}{' '}
+                                                    {addr.city}{' '}
+                                                    {addr.districtCounty}
+                                                </p>
+                                                <p>{addr.addressLine1}</p>
+                                                {addr.addressLine2 && (
+                                                    <p>{addr.addressLine2}</p>
+                                                )}
+                                                {addr.postalCode && (
+                                                    <p class='mt-1 text-sm text-gray-400'>
+                                                        邮编: {addr.postalCode}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            <div class='flex gap-6 pt-4 text-sm font-bold border-t border-gray-100'>
+                                                <a
+                                                    href={`/member/address/${addr.id}`}
+                                                    class='underline transition-opacity text-nike-black hover:opacity-60'
+                                                >
+                                                    编辑
+                                                </a>
+
+                                                <form
+                                                    action={
+                                                        actions.address
+                                                            .deleteAddress
+                                                    }
+                                                    method='POST'
+                                                    class='inline'
+                                                >
+                                                    <input
+                                                        type='hidden'
+                                                        name='id'
+                                                        value={addr.id}
+                                                    />
+                                                    <button
+                                                        type='submit'
+                                                        class='text-red-600 underline transition-opacity cursor-pointer hover:opacity-60'
+                                                        onclick="return confirm('确定要删除这个收货地址吗？')"
+                                                    >
+                                                        删除
+                                                    </button>
+                                                </form>
+
+                                                {addr.isDefault === 0 && (
+                                                    <form
+                                                        action={
+                                                            actions.address
+                                                                .setDefaultAddress
+                                                        }
+                                                        method='POST'
+                                                        class='inline'
+                                                    >
+                                                        <input
+                                                            type='hidden'
+                                                            name='id'
+                                                            value={addr.id}
+                                                        />
+                                                        <button
+                                                            type='submit'
+                                                            class='underline transition-opacity cursor-pointer text-nike-black hover:opacity-60'
+                                                        >
+                                                            设为默认
+                                                        </button>
+                                                    </form>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</Layout>
