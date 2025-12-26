@@ -8,13 +8,23 @@ export class ProductService {
   constructor(
     @InjectRepository(MallProductEntity)
     private readonly productRepo: Repository<MallProductEntity>,
-  ) {}
+  ) { }
 
-  findAll() {
-    return this.productRepo.find({
+  async findAll() {
+    const products = await this.productRepo.find({
       where: { status: 1 }, // Only on-shelf products
       order: { sort: 'DESC', createdAt: 'DESC' },
-      select: ['id', 'name', 'cover', 'sales', 'categoryId'],
+      relations: ['skus'],
+    });
+
+    return products.map(p => {
+      const price = p.skus?.length > 0
+        ? Math.min(...p.skus.map(s => s.price))
+        : 0;
+      return {
+        ...p,
+        price,
+      };
     });
   }
 
@@ -26,6 +36,14 @@ export class ProductService {
     if (!product) {
       throw new NotFoundException(`Product #${id} not found`);
     }
-    return product;
+
+    const price = product.skus?.length > 0
+      ? Math.min(...product.skus.map(s => s.price))
+      : 0;
+
+    return {
+      ...product,
+      price,
+    };
   }
 }

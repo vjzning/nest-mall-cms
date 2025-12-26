@@ -29,7 +29,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Trash2, Plus, ArrowLeft, Save, Image as ImageIcon, GripVertical, Search } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Trash2, Plus, ArrowLeft, Save, Image as ImageIcon, GripVertical, Search, Settings, Calendar as CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { ImagePickerDialog } from '@/components/ui/image-picker-dialog';
 import { ContentPicker, type ContentType } from '@/components/content-picker';
@@ -58,6 +66,8 @@ export default function CollectionFormPage() {
       bgColor: '',
       status: 1,
       sort: 0,
+      startAt: null as Date | null,
+      endAt: null as Date | null,
       metadata: {},
       items: [],
     },
@@ -91,6 +101,9 @@ export default function CollectionFormPage() {
       reset({
         ...collection,
         items: collection.items || [],
+        metadata: collection.metadata || {},
+        startAt: collection.startAt ? new Date(collection.startAt) : null,
+        endAt: collection.endAt ? new Date(collection.endAt) : null,
       });
     }
   }, [collection, reset]);
@@ -206,107 +219,86 @@ export default function CollectionFormPage() {
                 <Input {...register('subtitle')} placeholder="Catchy subtitle" />
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label>Start Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "justify-start text-left font-normal",
+                          !watch('startAt') && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {watch('startAt') ? format(watch('startAt') as Date, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={watch('startAt') as Date || undefined}
+                        onSelect={(date) => setValue('startAt', date as any)}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="grid gap-2">
+                  <Label>End Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "justify-start text-left font-normal",
+                          !watch('endAt') && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {watch('endAt') ? format(watch('endAt') as Date, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={watch('endAt') as Date || undefined}
+                        onSelect={(date) => setValue('endAt', date as any)}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
               <div className="grid gap-2">
                 <Label>Description</Label>
                 <Textarea {...register('description')} placeholder="Marketing text..." />
               </div>
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <div>
-                <CardTitle>Items</CardTitle>
-                <CardDescription>Products or entities in this collection</CardDescription>
+              <div className="grid gap-2">
+                <Label>Metadata (JSON)</Label>
+                <Textarea
+                  className="font-mono text-sm min-h-[150px]"
+                  placeholder='{"key": "value"}'
+                  value={(() => {
+                    const metadata = watch('metadata');
+                    return typeof metadata === 'object' ? JSON.stringify(metadata, null, 2) : (metadata as string || '');
+                  })()}
+                  onChange={(e) => {
+                    try {
+                      const parsed = JSON.parse(e.target.value);
+                      setValue('metadata', parsed);
+                    } catch (err) {
+                      setValue('metadata', e.target.value as any);
+                    }
+                  }}
+                />
+                <p className="text-[0.8rem] text-muted-foreground">
+                  Extra configuration for this collection.
+                </p>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => openPicker(getPickerType(collectionType), null, true)}
-                >
-                  <Search className="mr-2 h-4 w-4" /> Bulk Add
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => append({ targetId: 0, sort: 0 })}>
-                  <Plus className="mr-2 h-4 w-4" /> Add Item
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[50px]"></TableHead>
-                    <TableHead>Target ID</TableHead>
-                    <TableHead>Title Override</TableHead>
-                    <TableHead>Image</TableHead>
-                    <TableHead>Sort</TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {fields.map((field, index) => (
-                    <TableRow key={field.id}>
-                      <TableCell>
-                        <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2 items-center">
-                          <Input
-                            type="number"
-                            {...register(`items.${index}.targetId` as any, { valueAsNumber: true })}
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 shrink-0"
-                            onClick={() => openPicker(getPickerType(collectionType), index, false)}
-                          >
-                            <Search className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Input {...register(`items.${index}.titleOverride` as any)} placeholder="Keep empty to use default" />
-                      </TableCell>
-                      <TableCell>
-                        <div
-                          className="w-10 h-10 border rounded cursor-pointer flex items-center justify-center bg-muted/20"
-                          onClick={() => {
-                            setActiveItemIndex(index);
-                            setCoverPickerOpen(true);
-                          }}
-                        >
-                          {watch(`items.${index}.imageOverride` as any) ? (
-                            <img src={watch(`items.${index}.imageOverride` as any)} className="w-full h-full object-cover rounded" />
-                          ) : (
-                            <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          className="w-20"
-                          {...register(`items.${index}.sort` as any, { valueAsNumber: true })}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="icon" onClick={() => remove(index)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {fields.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-4 text-muted-foreground text-sm">
-                        No items added yet. Click Add Item to start.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
             </CardContent>
           </Card>
         </div>
@@ -338,7 +330,19 @@ export default function CollectionFormPage() {
                 <Label>Background Color</Label>
                 <div className="flex gap-2">
                   <Input {...register('bgColor')} placeholder="#ffffff or transparent" />
-                  <div className="w-10 h-10 rounded border" style={{ backgroundColor: watch('bgColor') || 'white' }} />
+                  <div
+                    className="w-10 h-10 rounded border cursor-pointer shrink-0 transition-all hover:scale-105 active:scale-95 shadow-sm"
+                    style={{ backgroundColor: watch('bgColor') || 'transparent' }}
+                    onClick={() => document.getElementById('bg-color-picker')?.click()}
+                    title="Choose color"
+                  />
+                  <input
+                    id="bg-color-picker"
+                    type="color"
+                    className="sr-only"
+                    value={watch('bgColor')?.startsWith('#') ? watch('bgColor') : '#ffffff'}
+                    onChange={(e) => setValue('bgColor', e.target.value)}
+                  />
                 </div>
               </div>
 
@@ -378,6 +382,103 @@ export default function CollectionFormPage() {
           </Card>
         </div>
       </div>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle>Items</CardTitle>
+            <CardDescription>Products or entities in this collection</CardDescription>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => openPicker(getPickerType(collectionType), null, true)}
+            >
+              <Search className="mr-2 h-4 w-4" /> Bulk Add
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => append({ targetId: 0, sort: 0 })}>
+              <Plus className="mr-2 h-4 w-4" /> Add Item
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[50px]"></TableHead>
+                <TableHead>Target ID</TableHead>
+                <TableHead>Title Override</TableHead>
+                <TableHead>Image</TableHead>
+                <TableHead>Sort</TableHead>
+                <TableHead className="w-[50px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {fields.map((field, index) => (
+                <TableRow key={field.id}>
+                  <TableCell>
+                    <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2 items-center">
+                      <Input
+                        type="number"
+                        {...register(`items.${index}.targetId` as any, { valueAsNumber: true })}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0"
+                        onClick={() => openPicker(getPickerType(collectionType), index, false)}
+                      >
+                        <Search className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Input {...register(`items.${index}.titleOverride` as any)} placeholder="Keep empty to use default" />
+                  </TableCell>
+                  <TableCell>
+                    <div
+                      className="w-10 h-10 border rounded cursor-pointer flex items-center justify-center bg-muted/20"
+                      onClick={() => {
+                        setActiveItemIndex(index);
+                        setCoverPickerOpen(true);
+                      }}
+                    >
+                      {watch(`items.${index}.imageOverride` as any) ? (
+                        <img src={watch(`items.${index}.imageOverride` as any)} className="w-full h-full object-cover rounded" />
+                      ) : (
+                        <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      type="number"
+                      className="w-20"
+                      {...register(`items.${index}.sort` as any, { valueAsNumber: true })}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="icon" onClick={() => remove(index)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {fields.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-4 text-muted-foreground text-sm">
+                    No items added yet. Click Add Item to start.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       <ImagePickerDialog
         open={coverPickerOpen}

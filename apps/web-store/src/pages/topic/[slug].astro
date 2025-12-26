@@ -4,41 +4,83 @@ import { CollectionType, CollectionLayout } from '@app/shared';
 import type { CollectionInfo } from '@app/shared';
 import CollectionSection from '../../components/nike/CollectionSection.astro';
 
-// Mock getStaticPaths for existing topics
+// getStaticPaths is required for static site generation. 
+// For a real dynamic store, you might switch to SSR.
 export async function getStaticPaths() {
-  return [
-    { params: { slug: 'spring-hero' } },
-    { params: { slug: 'lifestyle-footer' } },
-  ];
+  try {
+    const response = await fetch('http://localhost:3001/collections/active');
+    if (response.ok) {
+      const collections = await response.json();
+      return collections.map((c: any) => ({ params: { slug: c.code } }));
+    }
+  } catch (e) {
+    console.error('Failed to pre-fetch slugs:', e);
+  }
+  return [];
 }
 
 const { slug } = Astro.params;
 
-// Mock fetching this specific collection
-const collection: CollectionInfo = {
-  id: 99,
-  code: slug as string,
-  type: CollectionType.TOPIC,
-  title: slug === 'spring-hero' ? '春季新品系列' : '生活方式精选',
-  description: '这是专题详情页的描述文案。',
-  coverImage: 'https://images.nike.com.cn/is/image/DotCom/FA24_AF1_ECOM_HP_P1_DSK?wid=1500&hei=1500&fmt=jpg&qlt=85',
-  layoutType: CollectionLayout.GRID,
-  status: 1,
-  sort: 1,
-  // @ts-ignore
-  products: [
-    { id: 1, name: 'Nike Air Force 1 \'07', price: 799, cover: 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b0540fb3c00f/AIR+FORCE+1+%2707.png' },
-    { id: 2, name: 'Nike Air Max Pulse Roam', price: 1099, cover: 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/070f3f26-e13f-4e44-b816-cb82b993309a/AIR+MAX+PULSE+ROAM.png' },
-  ]
-};
+let collection: CollectionInfo | null = null;
+try {
+  const response = await fetch(`http://localhost:3001/collections/${slug}`);
+  if (response.ok) {
+    collection = await response.json();
+  }
+} catch (e) {
+  console.error('Failed to fetch collection detail:', e);
+}
+
+if (!collection) {
+  return Astro.redirect('/404');
+}
 ---
 
 <Layout title={collection.title}>
-  <div class="py-10">
-    <div class="max-w-[1920px] mx-auto px-4 sm:px-12 mb-10">
-        <h1 class="text-4xl font-nike font-black uppercase italic tracking-tighter mb-4">{collection.title}</h1>
-        <p class="text-nike-dark-grey max-w-2xl">{collection.description}</p>
-    </div>
+  <div class="pb-10">
+    {/* Hero Banner with Cover Image */}
+    {collection.coverImage && (
+      <div class="relative w-full h-[60vh] mb-10 overflow-hidden">
+        <img 
+          src={collection.coverImage} 
+          alt={collection.title}
+          class="absolute inset-0 w-full h-full object-cover"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+        <div class="relative z-10 h-full flex flex-col justify-end max-w-[1920px] mx-auto px-4 sm:px-12 pb-16">
+          {collection.subtitle && (
+            <span class="text-white/90 text-sm font-bold uppercase tracking-widest mb-2">
+              {collection.subtitle}
+            </span>
+          )}
+          <h1 class="text-5xl md:text-7xl font-nike font-black uppercase italic tracking-tighter text-white mb-4">
+            {collection.title}
+          </h1>
+          <p class="text-white/90 text-lg max-w-2xl">
+            {collection.description}
+          </p>
+        </div>
+      </div>
+    )}
+
+    {/* Title Section (if no cover image) */}
+    {!collection.coverImage && (
+      <div class="max-w-[1920px] mx-auto px-4 sm:px-12 py-10">
+        {collection.subtitle && (
+          <span class="text-xs font-bold uppercase tracking-widest text-nike-dark-grey mb-2 block">
+            {collection.subtitle}
+          </span>
+        )}
+        <h1 class="text-4xl md:text-6xl font-nike font-black uppercase italic tracking-tighter mb-4">
+          {collection.title}
+        </h1>
+        <p class="text-nike-dark-grey text-lg max-w-2xl">
+          {collection.description}
+        </p>
+      </div>
+    )}
+
+    {/* Collection Content */}
     <CollectionSection collection={collection} />
   </div>
 </Layout>

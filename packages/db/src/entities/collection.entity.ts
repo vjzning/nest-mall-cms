@@ -1,5 +1,6 @@
 import { Entity, Column, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
+import { CollectionItemEntity } from './collection-item.entity';
 import { CollectionType, CollectionLayout } from '@app/shared';
 
 @Entity('mall_collection')
@@ -44,5 +45,5 @@ export class CollectionEntity extends BaseEntity {
   endAt: Date;
 
   @OneToMany('CollectionItemEntity', 'collection')
-  items: any[];
+  items: CollectionItemEntity[];
 }

@@ -26,23 +26,57 @@ export class CollectionService {
 
     // If it's a product collection, let's attach product info
     if (collection.type === CollectionType.PRODUCT && collection.items.length > 0) {
-      const productIds = collection.items.map(item => item.targetId);
+      const productIds = collection.items.map(item => String(item.targetId));
       const products = await this.productRepo.find({
-        where: { id: In(productIds) }
+        where: { id: In(productIds) as any },
+        relations: ['skus'],
       });
 
-      // Map products back to items or a custom structure
-      (collection as any).products = products;
+      // Ensure sorted as per items sequence
+      const sortedProducts = productIds.map(id => {
+        const p = products.find(prod => String(prod.id) === id);
+        if (p) {
+          const price = p.skus?.length > 0 ? Math.min(...p.skus.map(s => s.price)) : 0;
+          return { ...p, price };
+        }
+        return null;
+      }).filter(Boolean);
+
+      (collection as any).products = sortedProducts;
     }
 
     return collection;
   }
 
   async getActiveCollections() {
-    return this.collectionRepo.find({
+    const collections = await this.collectionRepo.find({
       where: { status: 1 },
       order: { sort: 'ASC' },
-      relations: ['items']
+      relations: ['items'],
     });
+
+    for (const collection of collections) {
+      if (collection.type === CollectionType.PRODUCT && collection.items.length > 0) {
+        const productIds = collection.items.map(item => String(item.targetId));
+        const products = await this.productRepo.find({
+          where: { id: In(productIds) as any },
+          relations: ['skus'],
+        });
+
+        // Ensure sorted as per items sequence
+        const sortedProducts = productIds.map(id => {
+          const p = products.find(prod => String(prod.id) === id);
+          if (p) {
+            const price = p.skus?.length > 0 ? Math.min(...p.skus.map(s => s.price)) : 0;
+            return { ...p, price };
+          }
+          return null;
+        }).filter(Boolean);
+
+        (collection as any).products = sortedProducts;
+      }
+    }
+
+    return collections;
   }
 }
