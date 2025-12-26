@@ -1,129 +1,196 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import { actions } from "astro:actions";
-import { getSession } from "../lib/session";
+import Layout from '../layouts/Layout.astro';
+import { actions } from 'astro:actions';
+import { getSession, setSession } from '../lib/session';
+
+// 处理 OAuth 回调参数
+const token = Astro.url.searchParams.get('token');
+const userStr = Astro.url.searchParams.get('user');
+
+if (token && userStr) {
+    try {
+        const user = JSON.parse(decodeURIComponent(userStr));
+        await setSession(Astro, { token, user });
+        return Astro.redirect('/');
+    } catch (e) {
+        console.error('Failed to parse user from OAuth callback', e);
+    }
+}
 
 // 如果已登录,重定向到首页
 const session = await getSession(Astro);
 if (session) {
-  return Astro.redirect("/");
+    return Astro.redirect('/');
 }
 
 const result = Astro.getActionResult(actions.auth.login);
 let errorMessage: string | null = null;
 
 if (result && !result.data?.success) {
-  errorMessage = result.error?.message || "登录失败，请重试";
+    errorMessage = result.error?.message || '登录失败，请重试';
 }
 
 // 登录成功，重定向
 if (result?.data?.success) {
-  return Astro.redirect("/");
+    return Astro.redirect('/');
 }
+
+const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001';
 ---
 
-<Layout title="登录">
-  <div
-    class="flex items-center justify-center min-h-screen px-4 py-12 bg-nike-grey sm:px-6 lg:px-8"
-  >
-    <div class="w-full max-w-md p-10 space-y-8 bg-white rounded-lg shadow-lg">
-      <div>
-        <h2
-          class="text-4xl italic font-black tracking-tighter text-center uppercase"
+<Layout title='登录'>
+    <div
+        class='flex items-center justify-center min-h-screen px-4 py-12 bg-nike-grey sm:px-6 lg:px-8'
+    >
+        <div
+            class='w-full max-w-md p-10 space-y-8 bg-white rounded-lg shadow-lg'
         >
-          登录
-        </h2>
-        <p class="mt-2 text-sm text-center text-nike-dark-grey">
-          还没有账号？
-          <a
-            href="/register"
-            class="font-medium text-nike-black hover:underline"
-          >
-            立即注册
-          </a>
-        </p>
-      </div>
+            <div>
+                <h2
+                    class='text-4xl italic font-black tracking-tighter text-center uppercase'
+                >
+                    登录
+                </h2>
+                <p class='mt-2 text-sm text-center text-nike-dark-grey'>
+                    还没有账号？
+                    <a
+                        href='/register'
+                        class='font-medium text-nike-black hover:underline'
+                    >
+                        立即注册
+                    </a>
+                </p>
+            </div>
 
-      {
-        errorMessage && (
-          <div class="px-4 py-3 text-red-600 border border-red-200 rounded bg-red-50">
-            {errorMessage}
-          </div>
-        )
-      }
+            {
+                errorMessage && (
+                    <div class='px-4 py-3 text-red-600 border border-red-200 rounded bg-red-50'>
+                        {errorMessage}
+                    </div>
+                )
+            }
 
-      <form method="POST" action={actions.auth.login} class="mt-8 space-y-6">
-        <div class="space-y-4">
-          <div>
-            <label
-              for="username"
-              class="block mb-1 text-sm font-medium text-nike-black"
+            <form
+                method='POST'
+                action={actions.auth.login}
+                class='mt-8 space-y-6'
             >
-              用户名
-            </label>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              required
-              class="relative block w-full px-3 py-3 placeholder-gray-400 border appearance-none border-nike-grey text-nike-black focus:outline-none focus:ring-2 focus:ring-nike-black focus:border-nike-black sm:text-sm"
-              placeholder="请输入用户名"
-            />
-          </div>
+                <div class='space-y-4'>
+                    <div>
+                        <label
+                            for='username'
+                            class='block mb-1 text-sm font-medium text-nike-black'
+                        >
+                            用户名
+                        </label>
+                        <input
+                            id='username'
+                            name='username'
+                            type='text'
+                            required
+                            class='relative block w-full px-3 py-3 placeholder-gray-400 border appearance-none border-nike-grey text-nike-black focus:outline-none focus:ring-2 focus:ring-nike-black focus:border-nike-black sm:text-sm'
+                            placeholder='请输入用户名'
+                        />
+                    </div>
 
-          <div>
-            <label
-              for="password"
-              class="block mb-1 text-sm font-medium text-nike-black"
-            >
-              密码
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              class="relative block w-full px-3 py-3 placeholder-gray-400 border appearance-none border-nike-grey text-nike-black focus:outline-none focus:ring-2 focus:ring-nike-black focus:border-nike-black sm:text-sm"
-              placeholder="请输入密码"
-            />
-          </div>
+                    <div>
+                        <label
+                            for='password'
+                            class='block mb-1 text-sm font-medium text-nike-black'
+                        >
+                            密码
+                        </label>
+                        <input
+                            id='password'
+                            name='password'
+                            type='password'
+                            required
+                            class='relative block w-full px-3 py-3 placeholder-gray-400 border appearance-none border-nike-grey text-nike-black focus:outline-none focus:ring-2 focus:ring-nike-black focus:border-nike-black sm:text-sm'
+                            placeholder='请输入密码'
+                        />
+                    </div>
+                </div>
+
+                <div class='flex items-center justify-between'>
+                    <div class='flex items-center'>
+                        <input
+                            id='remember-me'
+                            name='remember-me'
+                            type='checkbox'
+                            class='w-4 h-4 rounded text-nike-black focus:ring-nike-black border-nike-grey'
+                        />
+                        <label
+                            for='remember-me'
+                            class='block ml-2 text-sm text-nike-dark-grey'
+                        >
+                            记住我
+                        </label>
+                    </div>
+
+                    <div class='text-sm'>
+                        <a
+                            href='/forgot-password'
+                            class='font-medium text-nike-dark-grey hover:text-nike-black'
+                        >
+                            忘记密码？
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <button
+                        type='submit'
+                        class='relative flex justify-center w-full px-4 py-3 text-sm font-bold text-white uppercase transition-colors border border-transparent group bg-nike-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nike-black'
+                    >
+                        登录
+                    </button>
+                </div>
+
+                <div class='relative flex items-center justify-center py-4'>
+                    <div class='flex-grow border-t border-nike-grey'></div>
+                    <span
+                        class='flex-shrink mx-4 text-xs font-medium text-nike-dark-grey uppercase'
+                        >或者</span
+                    >
+                    <div class='flex-grow border-t border-nike-grey'></div>
+                </div>
+
+                <div class='grid grid-cols-2 gap-4'>
+                    <a
+                        href={`${API_BASE_URL}/auth/github`}
+                        class='relative flex justify-center w-full px-4 py-3 text-sm font-bold text-nike-black uppercase transition-colors border border-nike-black group bg-white hover:bg-nike-grey focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nike-black'
+                    >
+                        <svg
+                            class='w-5 h-5 mr-2'
+                            fill='currentColor'
+                            viewBox='0 0 24 24'
+                            aria-hidden='true'
+                        >
+                            <path
+                                fill-rule='evenodd'
+                                d='M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z'
+                                clip-rule='evenodd'></path>
+                        </svg>
+                        GitHub
+                    </a>
+                    <a
+                        href={`${API_BASE_URL}/auth/wechat`}
+                        class='relative flex justify-center w-full px-4 py-3 text-sm font-bold text-nike-black uppercase transition-colors border border-nike-black group bg-white hover:bg-nike-grey focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nike-black'
+                    >
+                        <svg
+                            class='w-5 h-5 mr-2'
+                            fill='currentColor'
+                            viewBox='0 0 24 24'
+                            aria-hidden='true'
+                        >
+                            <path
+                                d='M8.348 14.65c-.062 0-.125.004-.187.008a4.586 4.586 0 0 0-2.471.874.52.52 0 0 0-.173.401c0 .256.146.48.377.579a12.7 12.7 0 0 1 1.597.746c.145.08.31.09.462.028.153-.062.271-.184.325-.338a2.1 2.1 0 0 1 1.585-1.372 2.15 2.15 0 0 1 1.25.136c.154.067.32.063.471-.012.15-.075.258-.21.297-.373a4.58 4.58 0 0 0-3.538-1.687zM12.108 5c-4.412 0-8 3.16-8 7.062 0 2.036 1.025 3.86 2.684 5.12l-.527 1.582a.25.25 0 0 0 .385.283l1.892-1.135c.5.14 1.025.212 1.566.212 4.412 0 8-3.16 8-7.062S16.52 5 12.108 5zm-3.041 5.625c-.552 0-1-.448-1-1s.448-1 1-1 1 .448 1 1-.448 1-1 1zm6 0c-.552 0-1-.448-1-1s.448-1 1-1 1 .448 1 1-.448 1-1 1zM24 13.15c0-3.344-3.087-6.052-6.892-6.052-3.805 0-6.892 2.708-6.892 6.052 0 3.343 3.087 6.052 6.892 6.052.464 0 .914-.041 1.347-.12l1.63.978a.214.214 0 0 0 .33-.243l-.454-1.362c1.428-1.085 2.311-2.655 2.311-4.405zm-9.398-1.729c-.473 0-.857-.384-.857-.857s.384-.857.857-.857.857.384.857.857-.384.857-.857.857zm5.143 0c-.473 0-.857-.384-.857-.857s.384-.857.857-.857.857.384.857.857-.384.857-.857.857z'
+                            />
+                        </svg>
+                        微信
+                    </a>
+                </div>
+            </form>
         </div>
-
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <input
-              id="remember-me"
-              name="remember-me"
-              type="checkbox"
-              class="w-4 h-4 rounded text-nike-black focus:ring-nike-black border-nike-grey"
-            />
-            <label
-              for="remember-me"
-              class="block ml-2 text-sm text-nike-dark-grey"
-            >
-              记住我
-            </label>
-          </div>
-
-          <div class="text-sm">
-            <a
-              href="/forgot-password"
-              class="font-medium text-nike-dark-grey hover:text-nike-black"
-            >
-              忘记密码？
-            </a>
-          </div>
-        </div>
-
-        <div>
-          <button
-            type="submit"
-            class="relative flex justify-center w-full px-4 py-3 text-sm font-bold text-white uppercase transition-colors border border-transparent group bg-nike-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nike-black"
-          >
-            登录
-          </button>
-        </div>
-      </form>
     </div>
-  </div>
 </Layout>

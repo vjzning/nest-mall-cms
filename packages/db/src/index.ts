@@ -20,3 +20,4 @@ export * from './entities/mall-order-item.entity';
 export * from './entities/mall-payment.entity';
 export * from './entities/collection.entity';
 export * from './entities/collection-item.entity';
+export * from './entities/member-auth.entity';

@@ -1,19 +1,9 @@
 import { Module, Global } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { SystemConfigEntity } from '@app/db/entities/system-config.entity';
-import { SystemConfigService } from './system-config.service';
-import { SystemConfigController } from './system-config.controller';
+import { SystemConfigModule as SharedSystemConfigModule } from '@app/shared/system-config/system-config.module';
 
-import { RedisClientModule } from '@app/redis';
-
-@Global() // Make it global so other modules can inject SystemConfigService easily
+@Global()
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([SystemConfigEntity]),
-    RedisClientModule,
-  ],
-  controllers: [SystemConfigController],
-  providers: [SystemConfigService],
-  exports: [SystemConfigService],
+  imports: [SharedSystemConfigModule],
+  exports: [SharedSystemConfigModule],
 })
 export class SystemConfigModule { }
