@@ -1,0 +1,187 @@
+---
+import { actions } from 'astro:actions';
+import type { ProductInfo } from '@app/shared';
+
+interface Props {
+    product: ProductInfo;
+}
+
+const { product } = Astro.props;
+
+// 在服务端检查收藏状态
+let isFavorited = false;
+try {
+    const result = await Astro.callAction(actions.favorite.check, {
+        productId: +product.id,
+    });
+    if (result.data) {
+        isFavorited = result.data.favorited;
+    }
+} catch (error) {
+    console.error('Failed to check favorite status:', error);
+}
+
+// 提取尺码
+const getAvailableSizes = () => {
+    if (!product.skus) return [];
+
+    return product.skus
+        .map((sku) => {
+            if (Array.isArray(sku.specs)) {
+                const sizeSpec = sku.specs.find(
+                    (spec: any) => spec.key === '尺码'
+                );
+                return sizeSpec ? sizeSpec.value : null;
+            } else if (sku.specs && typeof sku.specs === 'object') {
+                return sku.specs['尺码'] || sku.specs.size || null;
+            }
+            return null;
+        })
+        .filter(Boolean);
+};
+
+const sizes = getAvailableSizes();
+
+// 构造 SKU 映射，方便前端 JS 使用
+const skuMap =
+    product.skus?.map((sku) => {
+        let size = '';
+        if (Array.isArray(sku.specs)) {
+            size = sku.specs.find((s: any) => s.key === '尺码')?.value;
+        } else if (sku.specs && typeof sku.specs === 'object') {
+            size = sku.specs['尺码'] || sku.specs.size;
+        }
+        return { id: sku.id, size };
+    }) || [];
+---
+
+<div class='space-y-10' data-sku-map={JSON.stringify(skuMap)}>
+    <!-- Size Selection -->
+    <div>
+        <div class='flex justify-between items-center mb-4'>
+            <span class='font-bold'>选择尺码</span>
+            <button class='text-sm underline text-nike-dark-grey'>
+                尺码表
+            </button>
+        </div>
+        <div class='grid grid-cols-3 gap-2' id='size-grid'>
+            {
+                sizes.map((size) => (
+                    <label class='cursor-pointer'>
+                        <input
+                            type='radio'
+                            name='selectedSize'
+                            value={size}
+                            class='sr-only peer'
+                            required
+                        />
+                        <div class='py-3 font-medium text-center rounded border transition-all border-nike-grey peer-checked:border-nike-black peer-checked:bg-nike-black peer-checked:text-white hover:border-nike-black'>
+                            {size}
+                        </div>
+                    </label>
+                ))
+            }
+        </div>
+    </div>
+
+    <!-- Call to Actions -->
+    <div class='space-y-3'>
+        <form
+            id='add-to-cart-form'
+            method='POST'
+            action={actions.cart.addToCart}
+        >
+            <input type='hidden' name='productId' value={product.id} />
+            <input type='hidden' name='skuId' id='selected-sku-id' />
+            <input type='hidden' name='quantity' value='1' />
+            <button
+                type='submit'
+                id='add-to-cart-btn'
+                class='py-5 w-full text-lg btn-nike-black disabled:opacity-50'
+            >
+                加入购物车
+            </button>
+        </form>
+
+        <form method='POST' action={actions.favorite.toggle}>
+            <input type='hidden' name='productId' value={product.id} />
+            <button
+                type='submit'
+                class={`flex gap-2 justify-center items-center py-5 w-full text-lg btn-nike-outline transition-colors ${isFavorited ? 'text-red-500 border-red-500 hover:bg-red-50' : ''}`}
+            >
+                {isFavorited ? '已收藏' : '收藏'}
+                <svg
+                    class='w-5 h-5'
+                    fill={isFavorited ? 'currentColor' : 'none'}
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                >
+                    <path
+                        stroke-linecap='round'
+                        stroke-linejoin='round'
+                        stroke-width='2'
+                        d='M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z'
+                    ></path>
+                </svg>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    import { actions } from 'astro:actions';
+
+    const container = document.querySelector('[data-sku-map]');
+    const skuMap = JSON.parse(container?.getAttribute('data-sku-map') || '[]');
+    const sizeGrid = document.getElementById('size-grid');
+    const skuIdInput = document.getElementById(
+        'selected-sku-id'
+    ) as HTMLInputElement;
+    const addToCartForm = document.getElementById(
+        'add-to-cart-form'
+    ) as HTMLFormElement;
+    const addToCartBtn = document.getElementById(
+        'add-to-cart-btn'
+    ) as HTMLButtonElement;
+
+    // 监听尺码选择
+    sizeGrid?.addEventListener('change', (e) => {
+        const target = e.target as HTMLInputElement;
+        const size = target.value;
+        const sku = skuMap.find((s: any) => s.size === size);
+        if (sku) {
+            skuIdInput.value = sku.id;
+        }
+    });
+
+    // 处理购物车提交
+    addToCartForm?.addEventListener('submit', async (e) => {
+        if (!skuIdInput.value) {
+            e.preventDefault();
+            alert('请选择尺码');
+            return;
+        }
+
+        e.preventDefault();
+
+        const formData = new FormData(addToCartForm);
+        addToCartBtn.disabled = true;
+        addToCartBtn.textContent = '添加中...';
+
+        try {
+            const { data, error } = await actions.cart.addToCart(formData);
+
+            if (error) {
+                alert(error.message || '添加失败');
+            } else {
+                alert('已添加到购物车');
+                window.dispatchEvent(new CustomEvent('cart-updated'));
+            }
+        } catch (error) {
+            alert('添加到购物车失败');
+        } finally {
+            addToCartBtn.disabled = false;
+            addToCartBtn.textContent = '加入购物车';
+        }
+    });
+</script>

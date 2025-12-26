@@ -28,10 +28,21 @@ const CartButton: React.FC<{ initialCount?: number }> = ({
             }
         };
 
+        const handleCartUpdate = () => {
+            fetchCartData();
+        };
+
         // 在客户端执行，因为需要浏览器环境
         if (typeof window !== 'undefined') {
             fetchCartData();
+            window.addEventListener('cart-updated', handleCartUpdate);
         }
+
+        return () => {
+            if (typeof window !== 'undefined') {
+                window.removeEventListener('cart-updated', handleCartUpdate);
+            }
+        };
     }, []);
 
     return (

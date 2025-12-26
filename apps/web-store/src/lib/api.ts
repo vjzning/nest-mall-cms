@@ -23,4 +23,7 @@ export const API_ENDPOINTS = {
 
   // 会员地址
   MEMBER_ADDRESS: `${API_BASE_URL}/member/address`,
+
+  // 订单
+  MEMBER_ORDERS: `${API_BASE_URL}/mall/orders`,
 };

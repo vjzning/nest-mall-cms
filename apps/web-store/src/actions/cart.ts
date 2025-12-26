@@ -68,7 +68,7 @@ const getCartState = async (context: any) => {
 export const cartActions = {
     // 添加到购物车 action
     addToCart: defineAction({
-        accept: 'json',
+        accept: 'form',
         input: z.object({
             productId: z.number(),
             skuId: z.number(),

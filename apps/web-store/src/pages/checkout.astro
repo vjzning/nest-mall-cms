@@ -1,0 +1,305 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { actions } from 'astro:actions';
+import { getSession } from '../lib/session';
+import type { MemberAddress } from '@app/shared';
+
+const session = await getSession(Astro);
+const token = session?.token;
+if (!token) {
+    return Astro.redirect('/login?redirect=/checkout');
+}
+
+// 1. 获取购物车数据
+let cartData: any = null;
+try {
+    const result = await Astro.callAction(actions.cart.getCart, new FormData());
+    if (result.data?.success) {
+        cartData = result.data;
+    }
+} catch (e) {
+    console.error('获取购物车失败', e);
+}
+
+if (!cartData || cartData.cartItems.length === 0) {
+    return Astro.redirect('/');
+}
+
+// 2. 获取收货地址
+let addresses: MemberAddress[] = [];
+try {
+    const response = await fetch(
+        `${import.meta.env.PUBLIC_API_URL || 'http://localhost:3001'}/member/address`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+    if (response.ok) {
+        addresses = await response.json();
+        // console.log('获取地址成功', addresses);
+    }
+} catch (e) {
+    console.error('获取地址失败', e);
+}
+
+const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0];
+---
+
+<Layout title='结算 - NIKE'>
+    <main class='max-w-[1200px] mx-auto px-4 py-12'>
+        <div class='flex flex-col gap-12 lg:flex-row'>
+            <!-- Left: Checkout Form -->
+            <div class='flex-1 space-y-12'>
+                <section>
+                    <h2
+                        class='mb-8 text-2xl italic font-bold tracking-tighter uppercase'
+                    >
+                        配送选项
+                    </h2>
+
+                    <div class='space-y-4'>
+                        {
+                            addresses.length > 0 ? (
+                                <div class='grid grid-cols-1 gap-4'>
+                                    {addresses.map((addr) => (
+                                        <label class='relative flex p-6 border-2 cursor-pointer rounded-xl transition-all hover:border-nike-black has-[:checked]:border-nike-black'>
+                                            <input
+                                                type='radio'
+                                                name='addressId'
+                                                value={addr.id}
+                                                class='sr-only'
+                                                checked={
+                                                    Number(addr.id) ===
+                                                    Number(defaultAddress?.id)
+                                                }
+                                            />
+                                            <div class='flex-1'>
+                                                <div class='flex justify-between items-start mb-2'>
+                                                    <span class='text-lg font-bold'>
+                                                        {addr.receiverName}
+                                                    </span>
+                                                    <span class='text-nike-dark-grey'>
+                                                        {addr.receiverPhone}
+                                                    </span>
+                                                </div>
+                                                <p class='text-nike-dark-grey'>
+                                                    {addr.stateProvince}{' '}
+                                                    {addr.city}{' '}
+                                                    {addr.districtCounty}
+                                                </p>
+                                                <p class='text-nike-dark-grey'>
+                                                    {addr.addressLine1}
+                                                </p>
+                                                {addr.isDefault && (
+                                                    <span class='inline-block mt-2 text-[10px] bg-nike-grey px-2 py-0.5 font-bold uppercase'>
+                                                        默认地址
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </label>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div class='p-12 text-center rounded-xl border-2 border-dashed border-nike-grey'>
+                                    <p class='mb-4 text-nike-dark-grey'>
+                                        您还没有保存收货地址
+                                    </p>
+                                    <a
+                                        href='/member/address'
+                                        class='inline-block btn-nike-outline'
+                                    >
+                                        添加新地址
+                                    </a>
+                                </div>
+                            )
+                        }
+                    </div>
+                </section>
+
+                <section>
+                    <h2
+                        class='mb-8 text-2xl italic font-bold tracking-tighter uppercase'
+                    >
+                        支付方式
+                    </h2>
+                    <div class='grid grid-cols-2 gap-4'>
+                        <label
+                            class='relative flex flex-col items-center justify-center p-6 border-2 cursor-pointer rounded-xl transition-all hover:border-nike-black has-[:checked]:border-nike-black'
+                        >
+                            <input
+                                type='radio'
+                                name='paymentMethod'
+                                value='alipay'
+                                class='sr-only'
+                                checked
+                            />
+                            <img
+                                src='/images/alipay.png'
+                                alt='支付宝'
+                                class='h-8 mb-2 grayscale has-[:checked]:grayscale-0'
+                            />
+                            <span class='font-medium'>支付宝</span>
+                        </label>
+                        <label
+                            class='relative flex flex-col items-center justify-center p-6 border-2 cursor-pointer rounded-xl transition-all hover:border-nike-black has-[:checked]:border-nike-black'
+                        >
+                            <input
+                                type='radio'
+                                name='paymentMethod'
+                                value='wechat'
+                                class='sr-only'
+                            />
+                            <img
+                                src='/images/wechat.png'
+                                alt='微信支付'
+                                class='h-8 mb-2 grayscale has-[:checked]:grayscale-0'
+                            />
+                            <span class='font-medium'>微信支付</span>
+                        </label>
+                    </div>
+                </section>
+
+                <section>
+                    <h2
+                        class='mb-8 text-2xl italic font-bold tracking-tighter uppercase'
+                    >
+                        订单备注
+                    </h2>
+                    <textarea
+                        name='remark'
+                        rows='3'
+                        class='p-4 w-full rounded-xl border-2 transition-all outline-none border-nike-grey focus:border-nike-black'
+                        placeholder='如有特殊要求，请在此输入...'></textarea>
+                </section>
+            </div>
+
+            <!-- Right: Summary -->
+            <div class='lg:w-[400px]'>
+                <div class='sticky top-24 p-8 rounded-xl bg-nike-grey/30'>
+                    <h2
+                        class='mb-6 text-xl italic font-bold tracking-tighter uppercase'
+                    >
+                        订单摘要
+                    </h2>
+
+                    <div class='mb-6 space-y-4'>
+                        <div class='flex justify-between text-nike-dark-grey'>
+                            <span>小计</span>
+                            <span>￥{cartData.total}</span>
+                        </div>
+                        <div class='flex justify-between text-nike-dark-grey'>
+                            <span>预估运费</span>
+                            <span>免费</span>
+                        </div>
+                        <div
+                            class='flex justify-between pt-4 text-lg font-bold border-t border-nike-grey'
+                        >
+                            <span>总额</span>
+                            <span>￥{cartData.total}</span>
+                        </div>
+                    </div>
+
+                    <div class='mb-8 space-y-6'>
+                        <h3 class='text-sm font-bold uppercase'>
+                            您的订单 ({cartData.count} 件商品)
+                        </h3>
+                        {
+                            cartData.cartItems.map((item: any) => (
+                                <div class='flex gap-4'>
+                                    <div class='w-16 h-16 bg-white shrink-0'>
+                                        <img
+                                            src={item.cover}
+                                            alt={item.name}
+                                            class='object-cover w-full h-full mix-blend-multiply'
+                                        />
+                                    </div>
+                                    <div class='flex-1 text-sm'>
+                                        <p class='font-bold uppercase line-clamp-1'>
+                                            {item.name}
+                                        </p>
+                                        <p class='text-nike-dark-grey'>
+                                            数量: {item.quantity}
+                                        </p>
+                                        <p class='text-nike-dark-grey'>
+                                            ￥{item.price}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+
+                    <button
+                        id='place-order-btn'
+                        class='py-5 w-full text-lg btn-nike-black'
+                    >
+                        立即下单
+                    </button>
+
+                    <p
+                        class='mt-4 text-[10px] text-nike-dark-grey leading-tight text-center'
+                    >
+                        点击“立即下单”即表示您同意我们的《销售条款》和《隐私政策》。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+</Layout>
+
+<script>
+    import { actions } from 'astro:actions';
+
+    const placeOrderBtn = document.getElementById('place-order-btn');
+
+    placeOrderBtn?.addEventListener('click', async () => {
+        const selectedAddress = document.querySelector(
+            'input[name="addressId"]:checked'
+        ) as HTMLInputElement;
+        const selectedPayment = document.querySelector(
+            'input[name="paymentMethod"]:checked'
+        ) as HTMLInputElement;
+        const remark = (
+            document.querySelector(
+                'textarea[name="remark"]'
+            ) as HTMLTextAreaElement
+        )?.value;
+
+        if (!selectedAddress) {
+            alert('请选择收货地址');
+            return;
+        }
+
+        placeOrderBtn.setAttribute('disabled', 'true');
+        placeOrderBtn.textContent = '正在处理...';
+
+        try {
+            const formData = new FormData();
+            formData.append('addressId', selectedAddress.value);
+            formData.append('paymentMethod', selectedPayment.value);
+            formData.append('remark', remark);
+
+            const { data, error } = await actions.order.create(formData);
+
+            if (error) {
+                alert(error.message || '下单失败，请稍后再试');
+            } else if (data?.success) {
+                // 下单成功，如果是支付宝/微信，通常会返回支付参数或跳转链接
+                if (data.payParams?.payUrl) {
+                    window.location.href = data.payParams.payUrl;
+                } else {
+                    // 模拟支付成功跳转
+                    alert('订单已创建，正在跳转至订单详情...');
+                    window.location.href = `/member/orders/${data.order.id}`;
+                }
+            }
+        } catch (e) {
+            alert('下单过程中发生错误');
+        } finally {
+            placeOrderBtn.removeAttribute('disabled');
+            placeOrderBtn.textContent = '立即下单';
+        }
+    });
+</script>

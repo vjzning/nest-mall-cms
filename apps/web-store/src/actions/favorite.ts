@@ -4,6 +4,7 @@ import { getApiUrl } from '../lib/api';
 
 export const favorite = {
     toggle: defineAction({
+        accept: 'form',
         input: z.object({
             productId: z.union([z.number(), z.string().transform(Number)]),
         }),

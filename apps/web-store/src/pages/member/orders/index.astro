@@ -115,7 +115,10 @@ const formatPrice = (price: number) => {
                                                     <div class="flex-1">
                                                         <h4 class="font-medium text-nike-black">{item.productName}</h4>
                                                         <p class="text-sm text-nike-dark-grey">
-                                                            {Object.entries(item.skuSpecs || {}).map(([k, v]) => `${k}: ${v}`).join('; ')}
+                                                            {Array.isArray(item.skuSpecs) 
+                                                                ? item.skuSpecs.map((spec: any) => `${spec.key}: ${spec.value}`).join('; ')
+                                                                : Object.entries(item.skuSpecs || {}).map(([k, v]) => `${k}: ${v}`).join('; ')
+                                                            }
                                                         </p>
                                                         <div class="flex justify-between items-center mt-2">
                                                             <span class="text-sm">x{item.quantity}</span>
@@ -203,7 +206,7 @@ const formatPrice = (price: number) => {
     // 取消订单逻辑
     document.querySelectorAll('[data-cancel-id]').forEach(button => {
         button.addEventListener('click', async (e) => {
-            const id = parseInt((e.target as HTMLButtonElement).dataset.cancelId!);
+            const id = (e.target as HTMLButtonElement).dataset.cancelId!;
             if (confirm('确定要取消该订单吗？')) {
                 const { error } = await actions.order.cancelOrder({ id });
                 if (error) {
@@ -218,7 +221,7 @@ const formatPrice = (price: number) => {
     // 确认收货逻辑
     document.querySelectorAll('[data-confirm-id]').forEach(button => {
         button.addEventListener('click', async (e) => {
-            const id = parseInt((e.target as HTMLButtonElement).dataset.confirmId!);
+            const id = (e.target as HTMLButtonElement).dataset.confirmId!;
             if (confirm('确定已收到商品吗？')) {
                 const { error } = await actions.order.confirmReceipt({ id });
                 if (error) {

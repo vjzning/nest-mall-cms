@@ -58,10 +58,10 @@ const CartDrawer: React.FC<{ initialData?: any }> = ({ initialData }) => {
 
     // 获取购物车数据
     useEffect(() => {
-        if (isOpen && !initialData) {
+        if (isOpen) {
             fetchCartData();
         }
-    }, [isOpen, initialData]);
+    }, [isOpen]);
 
     const fetchCartData = async () => {
         try {
@@ -186,9 +186,12 @@ const CartDrawer: React.FC<{ initialData?: any }> = ({ initialData }) => {
                             订单满 ￥399 即可享受免运费及七天无理由退货。
                         </p>
                         <div className='space-y-2'>
-                            <button className='py-4 w-full font-bold tracking-tight uppercase btn-nike-black'>
+                            <a 
+                                href="/checkout"
+                                className='block py-4 w-full text-center font-bold tracking-tight uppercase btn-nike-black'
+                            >
                                 去结算
-                            </button>
+                            </a>
                         </div>
                     </div>
                 )}

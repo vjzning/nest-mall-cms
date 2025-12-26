@@ -21,17 +21,17 @@ export class AddressController {
 
   @Get()
   async findAll(@Request() req) {
-    return this.addressService.findAll(req.user.sub);
+    return this.addressService.findAll(req.user.id);
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string, @Request() req) {
-    return this.addressService.findOne(+id, req.user.sub);
+    return this.addressService.findOne(+id, req.user.id);
   }
 
   @Post()
   async create(@Request() req, @Body() dto: CreateAddressDto) {
-    return this.addressService.create(req.user.sub, dto);
+    return this.addressService.create(req.user.id, dto);
   }
 
   @Put(':id')
@@ -40,16 +40,16 @@ export class AddressController {
     @Request() req,
     @Body() dto: UpdateAddressDto,
   ) {
-    return this.addressService.update(+id, req.user.sub, dto);
+    return this.addressService.update(+id, req.user.id, dto);
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string, @Request() req) {
-    return this.addressService.remove(+id, req.user.sub);
+    return this.addressService.remove(+id, req.user.id);
   }
 
   @Patch(':id/default')
   async setDefault(@Param('id') id: string, @Request() req) {
-    return this.addressService.setDefault(+id, req.user.sub);
+    return this.addressService.setDefault(+id, req.user.id);
   }
 }
