@@ -80,9 +80,14 @@ export class SystemConfigService implements OnModuleInit, OnModuleDestroy {
 
     for (const config of configs) {
       let value = config.value;
-      if (config.isEncrypted) {
+      if (config.isEncrypted && value) {
         try {
-          value = this.decrypt(value);
+          // 只有当值符合 iv:encrypted 格式时才尝试解密
+          if (value.includes(':')) {
+            value = this.decrypt(value);
+          } else {
+            this.logger.warn(`Config key ${config.key} is marked as encrypted but value is plain text. Please update it through the admin panel to encrypt it.`);
+          }
         } catch (e) {
           this.logger.error(`Failed to decrypt config key: ${config.key}`, e);
           continue; // Skip invalid values

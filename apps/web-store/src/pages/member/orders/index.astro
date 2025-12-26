@@ -1,0 +1,232 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import MemberSidebar from '../../../components/member/MemberSidebar.astro';
+import { getSession } from '../../../lib/session';
+import { actions } from 'astro:actions';
+
+const session = await getSession(Astro);
+if (!session) {
+    return Astro.redirect('/login');
+}
+
+const { user } = session;
+
+// 获取查询参数
+const currentStatus = Astro.url.searchParams.get('status') || 'ALL';
+const currentPage = parseInt(Astro.url.searchParams.get('page') || '1');
+
+// 获取订单列表
+const { data: ordersData, error } = await Astro.callAction(actions.order.getMyOrders, {
+    status: currentStatus,
+    page: currentPage,
+    limit: 10
+});
+
+const tabs = [
+    { label: '全部', value: 'ALL' },
+    { label: '待付款', value: 'PENDING_PAY' },
+    { label: '待收货', value: 'SHIPPED' },
+    { label: '已完成', value: 'COMPLETED' },
+    { label: '已取消', value: 'CANCELLED' },
+];
+
+const getStatusLabel = (status: string) => {
+    const statusMap: Record<string, string> = {
+        'PENDING_PAY': '待付款',
+        'PENDING_DELIVERY': '待发货',
+        'SHIPPED': '待收货',
+        'DELIVERED': '已送达',
+        'COMPLETED': '已完成',
+        'CANCELLED': '已取消',
+    };
+    return statusMap[status] || status;
+};
+
+const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'CNY' }).format(price);
+};
+---
+
+<Layout title="我的订单">
+    <div class="py-10 min-h-screen bg-nike-grey">
+        <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
+                <!-- Sidebar -->
+                <div class="md:col-span-1">
+                    <MemberSidebar user={user} activeTab="orders" />
+                </div>
+
+                <!-- Main Content -->
+                <div class="md:col-span-3">
+                    <div class="p-6 bg-white rounded-lg shadow-lg">
+                        <h3 class="mb-6 text-2xl font-bold">我的订单</h3>
+
+                        <!-- Tabs -->
+                        <div class="flex mb-8 border-b border-nike-grey">
+                            {tabs.map(tab => (
+                                <a
+                                    href={`?status=${tab.value}`}
+                                    class={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+                                        currentStatus === tab.value
+                                            ? 'border-nike-black text-nike-black'
+                                            : 'border-transparent text-nike-dark-grey hover:text-nike-black'
+                                    }`}
+                                >
+                                    {tab.label}
+                                </a>
+                            ))}
+                        </div>
+
+                        {error && (
+                            <div class="p-4 mb-6 text-red-600 bg-red-50 rounded border border-red-200">
+                                {error.message}
+                            </div>
+                        )}
+
+                        <!-- Order List -->
+                        <div class="space-y-6">
+                            {ordersData?.items && ordersData.items.length > 0 ? (
+                                ordersData.items.map((order: any) => (
+                                    <div class="overflow-hidden rounded-lg border border-nike-grey">
+                                        <!-- Order Header -->
+                                        <div class="flex justify-between items-center p-4 bg-nike-grey/30">
+                                            <div class="flex gap-6 text-sm">
+                                                <div>
+                                                    <p class="text-nike-dark-grey">订单号</p>
+                                                    <p class="font-medium">{order.orderNo}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-nike-dark-grey">下单时间</p>
+                                                    <p class="font-medium">{new Date(order.createdAt).toLocaleString()}</p>
+                                                </div>
+                                            </div>
+                                            <div class="text-sm font-bold text-nike-black">
+                                                {getStatusLabel(order.status)}
+                                            </div>
+                                        </div>
+
+                                        <!-- Order Items -->
+                                        <div class="p-4 divide-y divide-nike-grey">
+                                            {order.items.map((item: any) => (
+                                                <div class="flex gap-4 py-4 first:pt-0 last:pb-0">
+                                                    <div class="overflow-hidden w-20 h-20 rounded bg-nike-grey">
+                                                        <img src={item.productImg} alt={item.productName} class="object-cover w-full h-full" />
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <h4 class="font-medium text-nike-black">{item.productName}</h4>
+                                                        <p class="text-sm text-nike-dark-grey">
+                                                            {Object.entries(item.skuSpecs || {}).map(([k, v]) => `${k}: ${v}`).join('; ')}
+                                                        </p>
+                                                        <div class="flex justify-between items-center mt-2">
+                                                            <span class="text-sm">x{item.quantity}</span>
+                                                            <span class="font-medium">{formatPrice(item.price)}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <!-- Order Footer -->
+                                        <div class="flex justify-between items-center p-4 border-t border-nike-grey">
+                                            <div class="text-sm">
+                                                实付金额：<span class="text-lg font-bold">{formatPrice(order.payAmount)}</span>
+                                            </div>
+                                            <div class="flex gap-3">
+                                                <a
+                                                    href={`/member/orders/${order.id}`}
+                                                    class="px-4 py-2 text-sm font-medium rounded border transition-colors border-nike-black hover:bg-nike-grey"
+                                                >
+                                                    查看详情
+                                                </a>
+                                                {order.status === 'PENDING_PAY' && (
+                                                    <>
+                                                        <button
+                                                            class="px-4 py-2 text-sm font-medium text-red-600 rounded border border-red-600 transition-colors hover:bg-red-50"
+                                                            data-cancel-id={order.id}
+                                                        >
+                                                            取消订单
+                                                        </button>
+                                                        <button
+                                                            class="px-4 py-2 text-sm font-medium text-white rounded transition-colors bg-nike-black hover:bg-gray-800"
+                                                        >
+                                                            立即付款
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {(order.status === 'SHIPPED' || order.status === 'DELIVERED') && (
+                                                    <button
+                                                        class="px-4 py-2 text-sm font-medium text-white rounded transition-colors bg-nike-black hover:bg-gray-800"
+                                                        data-confirm-id={order.id}
+                                                    >
+                                                        确认收货
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div class="py-20 text-center">
+                                    <p class="text-nike-dark-grey">暂无相关订单</p>
+                                    <a href="/" class="inline-block mt-4 font-bold underline">去挑选心仪商品</a>
+                                </div>
+                            )}
+                        </div>
+
+                        <!-- Pagination -->
+                        {ordersData?.totalPages > 1 && (
+                            <div class="flex gap-2 justify-center mt-10">
+                                {Array.from({ length: ordersData.totalPages }).map((_, i) => (
+                                    <a
+                                        href={`?status=${currentStatus}&page=${i + 1}`}
+                                        class={`w-10 h-10 flex items-center justify-center rounded border transition-colors ${
+                                            currentPage === i + 1
+                                                ? 'bg-nike-black text-white border-nike-black'
+                                                : 'border-nike-grey hover:border-nike-black'
+                                        }`}
+                                    >
+                                        {i + 1}
+                                    </a>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</Layout>
+
+<script>
+    import { actions } from 'astro:actions';
+
+    // 取消订单逻辑
+    document.querySelectorAll('[data-cancel-id]').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const id = parseInt((e.target as HTMLButtonElement).dataset.cancelId!);
+            if (confirm('确定要取消该订单吗？')) {
+                const { error } = await actions.order.cancelOrder({ id });
+                if (error) {
+                    alert(error.message);
+                } else {
+                    window.location.reload();
+                }
+            }
+        });
+    });
+
+    // 确认收货逻辑
+    document.querySelectorAll('[data-confirm-id]').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const id = parseInt((e.target as HTMLButtonElement).dataset.confirmId!);
+            if (confirm('确定已收到商品吗？')) {
+                const { error } = await actions.order.confirmReceipt({ id });
+                if (error) {
+                    alert(error.message);
+                } else {
+                    window.location.reload();
+                }
+            }
+        });
+    });
+</script>

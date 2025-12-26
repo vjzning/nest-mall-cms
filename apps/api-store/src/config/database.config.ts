@@ -8,6 +8,8 @@ import { TagEntity } from '@app/db/entities/tag.entity';
 import { CommentEntity } from '@app/db/entities/comment.entity';
 import { ResourceEntity } from '@app/db/entities/resource.entity';
 import { MemberEntity } from '@app/db/entities/member.entity';
+import { MemberAddressEntity } from '@app/db/entities/member-address.entity';
+import { MemberFavoriteEntity } from '@app/db/entities/member-favorite.entity';
 import { MallProductEntity } from '@app/db/entities/mall-product.entity';
 import { MallProductSkuEntity } from '@app/db/entities/mall-product-sku.entity';
 import { MallOrderEntity } from '@app/db/entities/mall-order.entity';
@@ -17,30 +19,32 @@ import { MallDeliveryEntity } from '@app/db/entities/mall-delivery.entity';
 import { SystemConfigEntity } from '@app/db/entities/system-config.entity';
 
 export default registerAs('database', () => ({
-  type: 'mysql',
-  host: process.env.MYSQL_HOST || 'localhost',
-  port: parseInt(process.env.MYSQL_PORT || '3306', 10),
-  username: process.env.MYSQL_USER || 'root',
-  password: process.env.MYSQL_PASSWORD || 'root123456',
-  database: process.env.CMS_DB_NAME || 'cms_admin',
-  entities: [
-    UserEntity,
-    RoleEntity,
-    MenuEntity,
-    ArticleEntity,
-    CategoryEntity,
-    TagEntity,
-    CommentEntity,
-    ResourceEntity,
-    MemberEntity,
-    MallProductEntity,
-    MallProductSkuEntity,
-    MallOrderEntity,
-    MallOrderItemEntity,
-    MallPaymentEntity,
-    MallDeliveryEntity,
-    SystemConfigEntity,
-  ],
-  synchronize: process.env.NODE_ENV !== 'production',
-  logging: process.env.NODE_ENV !== 'production',
+    type: 'mysql',
+    host: process.env.MYSQL_HOST || 'localhost',
+    port: parseInt(process.env.MYSQL_PORT || '3306', 10),
+    username: process.env.MYSQL_USER || 'root',
+    password: process.env.MYSQL_PASSWORD || 'root123456',
+    database: process.env.CMS_DB_NAME || 'cms_admin',
+    entities: [
+        UserEntity,
+        RoleEntity,
+        MenuEntity,
+        ArticleEntity,
+        CategoryEntity,
+        TagEntity,
+        CommentEntity,
+        ResourceEntity,
+        MemberEntity,
+        MemberAddressEntity,
+        MemberFavoriteEntity,
+        MallProductEntity,
+        MallProductSkuEntity,
+        MallOrderEntity,
+        MallOrderItemEntity,
+        MallPaymentEntity,
+        MallDeliveryEntity,
+        SystemConfigEntity,
+    ],
+    synchronize: process.env.NODE_ENV !== 'production',
+    logging: process.env.NODE_ENV !== 'production',
 }));

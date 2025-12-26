@@ -1,0 +1,229 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import MemberSidebar from '../../components/member/MemberSidebar.astro';
+import { getSession } from '../../lib/session';
+import { actions } from 'astro:actions';
+
+const session = await getSession(Astro);
+if (!session) {
+    return Astro.redirect('/login');
+}
+
+const { user } = session;
+const currentPage = parseInt(Astro.url.searchParams.get('page') || '1');
+
+// 获取收藏列表
+const { data: favoritesData, error } = await Astro.callAction(
+    actions.favorite.list,
+    {
+        page: currentPage,
+        limit: 12,
+    }
+);
+
+const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('zh-CN', {
+        style: 'currency',
+        currency: 'CNY',
+    }).format(price);
+};
+---
+
+<Layout title='我的收藏'>
+    <div class='py-10 min-h-screen bg-nike-grey'>
+        <div class='px-4 mx-auto max-w-7xl sm:px-6 lg:px-8'>
+            <div class='grid grid-cols-1 gap-6 md:grid-cols-4'>
+                <!-- Sidebar -->
+                <div class='md:col-span-1'>
+                    <MemberSidebar user={user} activeTab='favorites' />
+                </div>
+
+                <!-- Main Content -->
+                <div class='md:col-span-3'>
+                    <div class='p-6 bg-white rounded-lg shadow-lg'>
+                        <div class='flex justify-between items-center mb-8'>
+                            <h3 class='text-2xl font-bold'>我的收藏</h3>
+                            <span class='text-nike-dark-grey'
+                                >{favoritesData?.total || 0} 个项目</span
+                            >
+                        </div>
+
+                        {
+                            error && (
+                                <div class='p-4 mb-6 text-red-600 bg-red-50 rounded border border-red-200'>
+                                    {error.message}
+                                </div>
+                            )
+                        }
+
+                        {
+                            favoritesData?.items &&
+                            favoritesData.items.length > 0 ? (
+                                <>
+                                    <div class='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+                                        {favoritesData.items.map(
+                                            (item: any) => (
+                                                <div class='overflow-hidden relative bg-white rounded-lg border transition-shadow group border-nike-grey hover:shadow-md'>
+                                                    <div class='overflow-hidden aspect-square bg-nike-grey/30'>
+                                                        <a
+                                                            href={`/product/${item.product.id}`}
+                                                        >
+                                                            <img
+                                                                src={
+                                                                    item.product
+                                                                        .cover
+                                                                }
+                                                                alt={
+                                                                    item.product
+                                                                        .name
+                                                                }
+                                                                class='object-cover object-center w-full h-full transition-transform duration-500 group-hover:scale-105'
+                                                            />
+                                                        </a>
+                                                    </div>
+                                                    <div class='p-4'>
+                                                        <div class='flex justify-between items-start mb-2'>
+                                                            <div>
+                                                                <p class='text-sm text-nike-dark-grey'>
+                                                                    {
+                                                                        item
+                                                                            .product
+                                                                            .category
+                                                                            ?.name
+                                                                    }
+                                                                </p>
+                                                                <h4 class='font-medium text-nike-black truncate max-w-[150px]'>
+                                                                    <a
+                                                                        href={`/product/${item.product.id}`}
+                                                                        class='hover:underline'
+                                                                    >
+                                                                        {
+                                                                            item
+                                                                                .product
+                                                                                .name
+                                                                        }
+                                                                    </a>
+                                                                </h4>
+                                                            </div>
+                                                            <p class='font-bold'>
+                                                                {formatPrice(
+                                                                    item.product
+                                                                        .price
+                                                                )}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class='flex gap-2 mt-4'>
+                                                            <a
+                                                                href={`/product/${item.product.id}`}
+                                                                class='flex-1 py-2 text-sm text-center text-white rounded transition-colors bg-nike-black hover:bg-nike-black/80'
+                                                            >
+                                                                查看详情
+                                                            </a>
+                                                            <form
+                                                                method='POST'
+                                                                action={
+                                                                    actions
+                                                                        .favorite
+                                                                        .toggle
+                                                                }
+                                                                class='inline'
+                                                            >
+                                                                <input
+                                                                    type='hidden'
+                                                                    name='productId'
+                                                                    value={
+                                                                        item
+                                                                            .product
+                                                                            .id
+                                                                    }
+                                                                />
+                                                                <button
+                                                                    type='submit'
+                                                                    class='p-2 text-red-500 rounded border transition-colors border-nike-grey hover:bg-nike-grey'
+                                                                    title='取消收藏'
+                                                                >
+                                                                    <svg
+                                                                        xmlns='http://www.w3.org/2000/svg'
+                                                                        fill='currentColor'
+                                                                        viewBox='0 0 24 24'
+                                                                        stroke-width='1.5'
+                                                                        stroke='currentColor'
+                                                                        class='w-5 h-5'
+                                                                    >
+                                                                        <path
+                                                                            stroke-linecap='round'
+                                                                            stroke-linejoin='round'
+                                                                            d='M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z'
+                                                                        />
+                                                                    </svg>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )
+                                        )}
+                                    </div>
+
+                                    {favoritesData.totalPages > 1 && (
+                                        <div class='flex gap-2 justify-center mt-12'>
+                                            {Array.from(
+                                                {
+                                                    length: favoritesData.totalPages,
+                                                },
+                                                (_, i) => i + 1
+                                            ).map((page) => (
+                                                <a
+                                                    href={`?page=${page}`}
+                                                    class={`px-4 py-2 text-sm rounded border ${
+                                                        currentPage === page
+                                                            ? 'bg-nike-black text-white border-nike-black'
+                                                            : 'bg-white text-nike-black border-nike-grey hover:bg-nike-grey'
+                                                    }`}
+                                                >
+                                                    {page}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div class='py-20 text-center'>
+                                    <div class='mb-4 text-nike-dark-grey'>
+                                        <svg
+                                            xmlns='http://www.w3.org/2000/svg'
+                                            fill='none'
+                                            viewBox='0 0 24 24'
+                                            stroke-width='1'
+                                            stroke='currentColor'
+                                            class='mx-auto w-16 h-16'
+                                        >
+                                            <path
+                                                stroke-linecap='round'
+                                                stroke-linejoin='round'
+                                                d='M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z'
+                                            />
+                                        </svg>
+                                    </div>
+                                    <h4 class='mb-2 text-xl font-medium'>
+                                        您还没有收藏任何商品
+                                    </h4>
+                                    <p class='mb-8 text-nike-dark-grey'>
+                                        收藏您喜爱的商品，随时回来查看。
+                                    </p>
+                                    <a
+                                        href='/'
+                                        class='inline-block px-8 py-3 text-white rounded-full transition-colors bg-nike-black hover:bg-nike-black/80'
+                                    >
+                                        去逛逛
+                                    </a>
+                                </div>
+                            )
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</Layout>

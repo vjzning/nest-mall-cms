@@ -88,11 +88,57 @@ export class OrderService {
     }
   }
 
-  async findMyOrders(memberId: number) {
-    return this.orderRepo.find({
-      where: { memberId },
-      order: { createdAt: 'DESC' },
+  async findMyOrders(memberId: number, status?: OrderStatus, page: number = 1, limit: number = 10) {
+    const query = this.orderRepo.createQueryBuilder('order')
+      .leftJoinAndSelect('order.items', 'items')
+      .where('order.memberId = :memberId', { memberId })
+      .orderBy('order.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    if (status) {
+      query.andWhere('order.status = :status', { status });
+    }
+
+    const [items, total] = await query.getManyAndCount();
+    
+    return {
+      items,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    };
+  }
+
+  async findOne(id: number, memberId: number) {
+    return this.orderRepo.findOne({
+      where: { id, memberId },
       relations: ['items'],
     });
+  }
+
+  async cancel(id: number, memberId: number) {
+    const order = await this.findOne(id, memberId);
+    if (!order) {
+      throw new BadRequestException('Order not found');
+    }
+    if (order.status !== OrderStatus.PENDING_PAY) {
+      throw new BadRequestException('Only pending payment orders can be cancelled');
+    }
+    order.status = OrderStatus.CANCELLED;
+    return this.orderRepo.save(order);
+  }
+
+  async confirmReceipt(id: number, memberId: number) {
+    const order = await this.findOne(id, memberId);
+    if (!order) {
+      throw new BadRequestException('Order not found');
+    }
+    if (order.status !== OrderStatus.SHIPPED && order.status !== OrderStatus.DELIVERED) {
+      throw new BadRequestException('Order cannot be confirmed yet');
+    }
+    order.status = OrderStatus.COMPLETED;
+    return this.orderRepo.save(order);
   }
 }

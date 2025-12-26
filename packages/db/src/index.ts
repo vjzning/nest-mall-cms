@@ -13,6 +13,7 @@ export * from './entities/dict-type.entity';
 export * from './entities/dict-data.entity';
 export * from './entities/system-config.entity';
 export * from './entities/member.entity';
+export * from './entities/member-favorite.entity';
 export * from './entities/mall-product.entity';
 export * from './entities/mall-product-sku.entity';
 export * from './entities/mall-order.entity';

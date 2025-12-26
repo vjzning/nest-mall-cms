@@ -16,6 +16,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (payload.type !== 'member') {
       throw new UnauthorizedException('无效的令牌类型');
     }
-    return { sub: payload.sub, username: payload.username };
+    return { id: payload.sub, username: payload.username };
   }
 }
