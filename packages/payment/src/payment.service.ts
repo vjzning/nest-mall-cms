@@ -2,7 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SystemConfigEntity } from '@app/db/entities/system-config.entity';
-import { PaymentStrategy, PaymentStatus } from './interfaces/payment-strategy.interface';
+import { PaymentStrategy, PaymentStatus, PaymentOptions, CallbackResult } from './interfaces/payment-strategy.interface';
 import { AlipayStrategy } from './strategies/alipay.strategy';
 import { WechatPayStrategy } from './strategies/wechat-pay.strategy';
 import { MallOrderEntity, OrderStatus } from '@app/db/entities/mall-order.entity';
@@ -27,7 +27,10 @@ export class PaymentService {
       return acc;
     }, {} as Record<string, string>);
 
-    switch (method) {
+    // Handle wechat sub-methods if they are passed as wechat:h5, wechat:jsapi, etc.
+    const [mainMethod] = method.split(':');
+
+    switch (mainMethod.toLowerCase()) {
       case PaymentMethod.ALIPAY:
         return new AlipayStrategy(configMap);
       case PaymentMethod.WECHAT:
@@ -37,21 +40,29 @@ export class PaymentService {
     }
   }
 
-  async pay(order: MallOrderEntity, method: string) {
+  async pay(order: MallOrderEntity, method: string, options?: PaymentOptions) {
     if (order.status !== OrderStatus.PENDING_PAY) {
       throw new BadRequestException('Order status is not pending pay');
     }
+
+    // If method is wechat:h5, extract tradeType
+    if (method.includes(':')) {
+      const [main, sub] = method.split(':');
+      options = { ...options, tradeType: sub.toUpperCase() };
+      method = main;
+    }
+
     const strategy = await this.getStrategy(method);
-    return strategy.pay(order);
+    return strategy.pay(order, options);
   }
 
-  async query(orderNo: string, method: string) {
+  async handleCallback(method: string, data: any, headers?: any): Promise<CallbackResult> {
+    const strategy = await this.getStrategy(method);
+    return strategy.handleCallback(data, headers);
+  }
+
+  async queryStatus(method: string, orderNo: string): Promise<PaymentStatus> {
     const strategy = await this.getStrategy(method);
     return strategy.query(orderNo);
-  }
-
-  async verifyCallback(method: string, data: any) {
-    const strategy = await this.getStrategy(method);
-    return strategy.verifyCallback(data);
   }
 }

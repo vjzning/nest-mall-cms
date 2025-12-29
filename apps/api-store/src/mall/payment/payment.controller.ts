@@ -1,27 +1,60 @@
-import { Controller, Post, Body, Query, Get } from '@nestjs/common';
+import { Controller, Post, Body, Headers, Logger } from '@nestjs/common';
 import { PaymentService } from '@app/payment';
+import { OrderService } from '../order/order.service';
 
 @Controller('mall/payment')
 export class MallPaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+    private readonly logger = new Logger(MallPaymentController.name);
 
-  @Post('callback/alipay')
-  async alipayCallback(@Body() data: any) {
-    const valid = await this.paymentService.verifyCallback('alipay', data);
-    if (valid) {
-      // Update order status
-      return 'success';
-    }
-    return 'fail';
-  }
+    constructor(
+        private readonly paymentService: PaymentService,
+        private readonly orderService: OrderService
+    ) {}
 
-  @Post('callback/wechat')
-  async wechatCallback(@Body() data: any) {
-    const valid = await this.paymentService.verifyCallback('wechat', data);
-    if (valid) {
-        // Update order status
-      return { code: 'SUCCESS', message: 'OK' };
+    @Post('callback/alipay')
+    async alipayCallback(@Body() data: any) {
+        this.logger.log('Received Alipay callback');
+        try {
+            const result = await this.paymentService.handleCallback(
+                'alipay',
+                data
+            );
+            if (result.success && result.orderNo && result.transactionId) {
+                await this.orderService.handlePaid(
+                    result.orderNo,
+                    result.transactionId,
+                    result.amount || 0,
+                    'alipay'
+                );
+                return 'success';
+            }
+        } catch (error) {
+            this.logger.error('Alipay callback processing failed', error);
+        }
+        return 'fail';
     }
-    return { code: 'FAIL', message: 'Signature error' };
-  }
+
+    @Post('callback/wechat')
+    async wechatCallback(@Body() data: any, @Headers() headers: any) {
+        this.logger.log('Received WechatPay callback');
+        try {
+            const result = await this.paymentService.handleCallback(
+                'wechat',
+                data,
+                headers
+            );
+            if (result.success && result.orderNo && result.transactionId) {
+                await this.orderService.handlePaid(
+                    result.orderNo,
+                    result.transactionId,
+                    result.amount || 0,
+                    'wechat'
+                );
+                return { code: 'SUCCESS', message: 'OK' };
+            }
+        } catch (error) {
+            this.logger.error('WechatPay callback processing failed', error);
+        }
+        return { code: 'FAIL', message: 'Error' };
+    }
 }

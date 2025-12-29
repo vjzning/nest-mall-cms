@@ -37,6 +37,10 @@ export class CreateOrderDto {
   @IsString()
   @IsNotEmpty()
   paymentMethod: string;
+
+  @IsOptional()
+  @IsString()
+  remark?: string;
   
   // In real world, memberId comes from JWT token, not body. 
   // But for now, we might extract it from Request in Controller.

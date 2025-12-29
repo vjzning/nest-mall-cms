@@ -1,8 +1,11 @@
 export const getApiUrl = () => {
   // 优先从环境变量获取端口，确保 SSR 环境下能正确连接到后端
+  // @ts-ignore
   if (typeof process !== 'undefined' && process.env.CONTENT_API_PORT) {
+    // @ts-ignore
     return `http://localhost:${process.env.CONTENT_API_PORT}`;
   }
+  // @ts-ignore
   return import.meta.env.PUBLIC_API_URL || 'http://localhost:3001';
 };
 

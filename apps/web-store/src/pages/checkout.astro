@@ -47,7 +47,7 @@ if (!cartData || cartData.cartItems.length === 0) {
 ---
 
 <Layout title='结算 - NIKE'>
-    <main class='max-w-[1200px] mx-auto px-4 py-12' data-addresses={JSON.stringify(addresses)}>
+    <div id='checkout-form' class='max-w-[1200px] mx-auto px-4 py-12' data-addresses={JSON.stringify(addresses)}>
         <div class='flex flex-col gap-12 lg:flex-row'>
             <!-- Left: Checkout Form -->
             <div class='flex-1 space-y-12'>
@@ -147,7 +147,7 @@ if (!cartData || cartData.cartItems.length === 0) {
                             <input
                                 type='radio'
                                 name='paymentMethod'
-                                value='wechat'
+                                value='wechat:h5'
                                 class='sr-only'
                             />
                             <img
@@ -245,7 +245,7 @@ if (!cartData || cartData.cartItems.length === 0) {
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 </Layout>
 
 <script>
@@ -254,8 +254,8 @@ if (!cartData || cartData.cartItems.length === 0) {
     const placeOrderBtn = document.getElementById('place-order-btn');
 
     placeOrderBtn?.addEventListener('click', async () => {
-        const main = document.querySelector('main');
-        const addresses = JSON.parse(main?.dataset.addresses || '[]');
+        const checkoutForm = document.getElementById('checkout-form');
+        const addresses = JSON.parse(checkoutForm?.dataset.addresses || '[]');
         
         const selectedAddressInput = document.querySelector(
             'input[name="addressId"]:checked'
@@ -277,6 +277,7 @@ if (!cartData || cartData.cartItems.length === 0) {
         const addressId = selectedAddressInput.value;
         const addressData = addresses.find((a: any) => String(a.id) === String(addressId));
 
+        console.log(addressData, addresses);
         if (!addressData) {
             alert('地址信息无效');
             return;

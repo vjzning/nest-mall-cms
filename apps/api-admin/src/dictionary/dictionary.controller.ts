@@ -1,14 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors } from '@nestjs/common';
 import { DictionaryService } from './dictionary.service';
 import { CreateDictTypeDto, CreateDictDataDto } from './dto/create-dict.dto';
 import { UpdateDictTypeDto, UpdateDictDataDto } from './dto/update-dict.dto';
+import { Log } from '@app/shared/decorators/log.decorator';
+import { LogInterceptor } from '@app/shared/interceptors/log.interceptor';
 
 @Controller('dictionary')
+@UseInterceptors(LogInterceptor)
 export class DictionaryController {
   constructor(private readonly dictionaryService: DictionaryService) {}
 
   // Type Endpoints
   @Post('type')
+  @Log({ module: '字典管理', action: '创建字典类型' })
   createType(@Body() dto: CreateDictTypeDto) {
     return this.dictionaryService.createType(dto);
   }
@@ -24,17 +28,20 @@ export class DictionaryController {
   }
 
   @Patch('type/:id')
+  @Log({ module: '字典管理', action: '修改字典类型' })
   updateType(@Param('id') id: string, @Body() dto: UpdateDictTypeDto) {
     return this.dictionaryService.updateType(+id, dto);
   }
 
   @Delete('type/:id')
+  @Log({ module: '字典管理', action: '删除字典类型' })
   removeType(@Param('id') id: string) {
     return this.dictionaryService.removeType(+id);
   }
 
   // Data Endpoints
   @Post('data')
+  @Log({ module: '字典管理', action: '创建字典数据' })
   createData(@Body() dto: CreateDictDataDto) {
     return this.dictionaryService.createData(dto);
   }
@@ -50,11 +57,13 @@ export class DictionaryController {
   }
 
   @Patch('data/:id')
+  @Log({ module: '字典管理', action: '修改字典数据' })
   updateData(@Param('id') id: string, @Body() dto: UpdateDictDataDto) {
     return this.dictionaryService.updateData(+id, dto);
   }
 
   @Delete('data/:id')
+  @Log({ module: '字典管理', action: '删除字典数据' })
   removeData(@Param('id') id: string) {
     return this.dictionaryService.removeData(+id);
   }

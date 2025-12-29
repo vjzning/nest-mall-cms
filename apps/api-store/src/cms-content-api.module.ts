@@ -13,6 +13,7 @@ import { MemberModule } from './member/member.module';
 import { SystemConfigModule } from '@app/shared/system-config/system-config.module';
 import databaseConfig from './config/database.config';
 import { RedisClientModule, RedisLockModule } from '@app/redis';
+import { QueueModule } from '@app/queue';
 import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv as createKeyvRedis } from '@keyv/redis';
 
@@ -52,6 +53,7 @@ import { createKeyv as createKeyvRedis } from '@keyv/redis';
         }),
         RedisClientModule,
         RedisLockModule,
+        QueueModule,
         ArticleModule,
         CategoryModule,
         TagModule,

@@ -103,6 +103,23 @@ export function AppSidebar({ children }: AppSidebarProps) {
       }
     });
 
+    // Add hardcoded system monitor group
+    groups.push({
+      label: 'System Monitor',
+      items: [
+        {
+          label: 'Queue Dashboard',
+          path: '/system/queues',
+          icon: getIcon('Activity'),
+        },
+        {
+          label: '操作日志',
+          path: '/system/log',
+          icon: getIcon('ClipboardList'),
+        },
+      ],
+    });
+
     return groups;
   }, [menus]);
 

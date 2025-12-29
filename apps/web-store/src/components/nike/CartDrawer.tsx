@@ -17,7 +17,7 @@ const CartItemRow: React.FC<{
     removeItem: (skuId: number) => void;
 }> = ({ item, removeItem }) => {
     return (
-        <div key={item.skuId} className='flex gap-4'>
+        <div className='flex gap-4'>
             <div className='w-24 h-24 bg-nike-grey shrink-0'>
                 {item.cover && (
                     <img

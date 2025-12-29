@@ -15,7 +15,9 @@ import { Route as R403RouteImport } from './routes/403'
 import { Route as AuthIndexRouteImport } from './routes/_auth.index'
 import { Route as AuthSystemUserRouteImport } from './routes/_auth.system.user'
 import { Route as AuthSystemRoleRouteImport } from './routes/_auth.system.role'
+import { Route as AuthSystemQueuesRouteImport } from './routes/_auth.system.queues'
 import { Route as AuthSystemMenuRouteImport } from './routes/_auth.system.menu'
+import { Route as AuthSystemLogRouteImport } from './routes/_auth.system.log'
 import { Route as AuthSystemDictRouteImport } from './routes/_auth.system.dict'
 import { Route as AuthSystemConfigRouteImport } from './routes/_auth.system.config'
 import { Route as AuthContentTagRouteImport } from './routes/_auth.content.tag'
@@ -64,12 +66,24 @@ const AuthSystemRoleRoute = AuthSystemRoleRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_auth.system.role.lazy').then((d) => d.Route),
 )
+const AuthSystemQueuesRoute = AuthSystemQueuesRouteImport.update({
+  id: '/system/queues',
+  path: '/system/queues',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthSystemMenuRoute = AuthSystemMenuRouteImport.update({
   id: '/system/menu',
   path: '/system/menu',
   getParentRoute: () => AuthRoute,
 } as any).lazy(() =>
   import('./routes/_auth.system.menu.lazy').then((d) => d.Route),
+)
+const AuthSystemLogRoute = AuthSystemLogRouteImport.update({
+  id: '/system/log',
+  path: '/system/log',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() =>
+  import('./routes/_auth.system.log.lazy').then((d) => d.Route),
 )
 const AuthSystemDictRoute = AuthSystemDictRouteImport.update({
   id: '/system/dict',
@@ -183,7 +197,9 @@ export interface FileRoutesByFullPath {
   '/content/tag': typeof AuthContentTagRoute
   '/system/config': typeof AuthSystemConfigRoute
   '/system/dict': typeof AuthSystemDictRoute
+  '/system/log': typeof AuthSystemLogRoute
   '/system/menu': typeof AuthSystemMenuRoute
+  '/system/queues': typeof AuthSystemQueuesRoute
   '/system/role': typeof AuthSystemRoleRoute
   '/system/user': typeof AuthSystemUserRoute
   '/mall/collection/create': typeof AuthMallCollectionCreateRoute
@@ -205,7 +221,9 @@ export interface FileRoutesByTo {
   '/content/tag': typeof AuthContentTagRoute
   '/system/config': typeof AuthSystemConfigRoute
   '/system/dict': typeof AuthSystemDictRoute
+  '/system/log': typeof AuthSystemLogRoute
   '/system/menu': typeof AuthSystemMenuRoute
+  '/system/queues': typeof AuthSystemQueuesRoute
   '/system/role': typeof AuthSystemRoleRoute
   '/system/user': typeof AuthSystemUserRoute
   '/mall/collection/create': typeof AuthMallCollectionCreateRoute
@@ -229,7 +247,9 @@ export interface FileRoutesById {
   '/_auth/content/tag': typeof AuthContentTagRoute
   '/_auth/system/config': typeof AuthSystemConfigRoute
   '/_auth/system/dict': typeof AuthSystemDictRoute
+  '/_auth/system/log': typeof AuthSystemLogRoute
   '/_auth/system/menu': typeof AuthSystemMenuRoute
+  '/_auth/system/queues': typeof AuthSystemQueuesRoute
   '/_auth/system/role': typeof AuthSystemRoleRoute
   '/_auth/system/user': typeof AuthSystemUserRoute
   '/_auth/mall/collection/create': typeof AuthMallCollectionCreateRoute
@@ -253,7 +273,9 @@ export interface FileRouteTypes {
     | '/content/tag'
     | '/system/config'
     | '/system/dict'
+    | '/system/log'
     | '/system/menu'
+    | '/system/queues'
     | '/system/role'
     | '/system/user'
     | '/mall/collection/create'
@@ -275,7 +297,9 @@ export interface FileRouteTypes {
     | '/content/tag'
     | '/system/config'
     | '/system/dict'
+    | '/system/log'
     | '/system/menu'
+    | '/system/queues'
     | '/system/role'
     | '/system/user'
     | '/mall/collection/create'
@@ -298,7 +322,9 @@ export interface FileRouteTypes {
     | '/_auth/content/tag'
     | '/_auth/system/config'
     | '/_auth/system/dict'
+    | '/_auth/system/log'
     | '/_auth/system/menu'
+    | '/_auth/system/queues'
     | '/_auth/system/role'
     | '/_auth/system/user'
     | '/_auth/mall/collection/create'
@@ -360,11 +386,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSystemRoleRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/system/queues': {
+      id: '/_auth/system/queues'
+      path: '/system/queues'
+      fullPath: '/system/queues'
+      preLoaderRoute: typeof AuthSystemQueuesRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/system/menu': {
       id: '/_auth/system/menu'
       path: '/system/menu'
       fullPath: '/system/menu'
       preLoaderRoute: typeof AuthSystemMenuRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/system/log': {
+      id: '/_auth/system/log'
+      path: '/system/log'
+      fullPath: '/system/log'
+      preLoaderRoute: typeof AuthSystemLogRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/system/dict': {
@@ -477,7 +517,9 @@ interface AuthRouteChildren {
   AuthContentTagRoute: typeof AuthContentTagRoute
   AuthSystemConfigRoute: typeof AuthSystemConfigRoute
   AuthSystemDictRoute: typeof AuthSystemDictRoute
+  AuthSystemLogRoute: typeof AuthSystemLogRoute
   AuthSystemMenuRoute: typeof AuthSystemMenuRoute
+  AuthSystemQueuesRoute: typeof AuthSystemQueuesRoute
   AuthSystemRoleRoute: typeof AuthSystemRoleRoute
   AuthSystemUserRoute: typeof AuthSystemUserRoute
   AuthMallCollectionCreateRoute: typeof AuthMallCollectionCreateRoute
@@ -498,7 +540,9 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthContentTagRoute: AuthContentTagRoute,
   AuthSystemConfigRoute: AuthSystemConfigRoute,
   AuthSystemDictRoute: AuthSystemDictRoute,
+  AuthSystemLogRoute: AuthSystemLogRoute,
   AuthSystemMenuRoute: AuthSystemMenuRoute,
+  AuthSystemQueuesRoute: AuthSystemQueuesRoute,
   AuthSystemRoleRoute: AuthSystemRoleRoute,
   AuthSystemUserRoute: AuthSystemUserRoute,
   AuthMallCollectionCreateRoute: AuthMallCollectionCreateRoute,

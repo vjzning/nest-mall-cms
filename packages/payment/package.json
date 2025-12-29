@@ -2,5 +2,8 @@
   "name": "@app/payment",
   "version": "0.0.1",
   "private": true,
-  "main": "./src/index.ts"
+  "main": "./src/index.ts",
+  "dependencies": {
+    "wechatpay-node-v3": "^2.2.1"
+  }
 }

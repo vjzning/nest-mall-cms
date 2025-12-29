@@ -1,14 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductQueryDto } from './dto/product-query.dto';
+import { Log } from '@app/shared/decorators/log.decorator';
+import { LogInterceptor } from '@app/shared/interceptors/log.interceptor';
 
 @Controller('mall/products')
+@UseInterceptors(LogInterceptor)
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
+  @Log({ module: '商品管理', action: '创建商品' })
   create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
   }
@@ -24,11 +28,13 @@ export class ProductController {
   }
 
   @Patch(':id')
+  @Log({ module: '商品管理', action: '修改商品' })
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
     return this.productService.update(+id, updateProductDto);
   }
 
   @Delete(':id')
+  @Log({ module: '商品管理', action: '删除商品' })
   remove(@Param('id') id: string) {
     return this.productService.remove(+id);
   }

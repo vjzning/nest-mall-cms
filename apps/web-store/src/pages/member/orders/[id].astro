@@ -131,6 +131,18 @@ const formatPrice = (price: number) => {
                                                 </div>
                                             )
                                         }
+                                        {
+                                            order.remark && (
+                                                <div class='flex justify-between'>
+                                                    <span class='text-nike-dark-grey'>
+                                                        订单备注
+                                                    </span>
+                                                    <span class='font-medium'>
+                                                        {order.remark}
+                                                    </span>
+                                                </div>
+                                            )
+                                        }
                                     </div>
                                 </section>
 

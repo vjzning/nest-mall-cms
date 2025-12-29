@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PaymentStrategy, PaymentStatus } from '../interfaces/payment-strategy.interface';
+import { PaymentStrategy, PaymentStatus, PaymentOptions, CallbackResult } from '../interfaces/payment-strategy.interface';
 import { MallOrderEntity } from '@app/db/entities/mall-order.entity';
 
 @Injectable()
@@ -10,21 +10,27 @@ export class AlipayStrategy implements PaymentStrategy {
     // Config would be injected from PaymentService
   }
 
-  async pay(order: MallOrderEntity): Promise<any> {
+  async pay(order: MallOrderEntity, options?: PaymentOptions): Promise<any> {
     this.logger.log(`Initiating Alipay for order ${order.orderNo}`);
     // TODO: Implement Alipay SDK call
     return {
       method: 'alipay',
       orderNo: order.orderNo,
       amount: order.payAmount,
-      gatewayUrl: 'https://openapi.alipay.com/gateway.do?...', // Mock
+      url: 'https://alipay.com/pay?xxx', // Mock
     };
   }
 
-  async verifyCallback(data: any): Promise<boolean> {
-    this.logger.log('Verifying Alipay callback');
-    // TODO: Implement signature verification
-    return true;
+  async handleCallback(data: any, headers?: any): Promise<CallbackResult> {
+    this.logger.log('Handling Alipay callback');
+    // TODO: Implement signature verification and data parsing
+    return {
+      success: true,
+      orderNo: data.out_trade_no,
+      transactionId: data.trade_no,
+      amount: Number(data.total_amount),
+      raw: data,
+    };
   }
 
   async query(orderNo: string): Promise<PaymentStatus> {
