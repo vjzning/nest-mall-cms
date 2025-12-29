@@ -99,6 +99,40 @@ nest-11/
 
 ---
 
+## 🚢 部署指南 (Docker)
+
+本项目支持将 4 个子应用（2 个 API，2 个 Web）打包到同一个 Docker 镜像中，方便在免费平台上部署。
+
+### 推荐的免费部署平台
+1. **[Zeabur](https://zeabur.com/)** (推荐): 对全栈项目非常友好，支持 Docker，有免费额度。
+2. **[Railway](https://railway.app/)**: 部署简单，提供试用额度。
+3. **[Hugging Face Spaces](https://huggingface.co/spaces)**: 免费提供 CPU 实例，支持 Docker。
+4. **[Oracle Cloud Always Free](https://www.oracle.com/cloud/free/)**: 提供强大的 ARM 实例，完全免费，适合长期运行。
+
+### Docker 部署步骤
+1. **构建镜像**
+   ```bash
+   docker build -t nest-11-fullstack .
+   ```
+2. **运行容器**
+   运行前请确保已准备好 MySQL 和 Redis 环境。
+   ```bash
+   docker run -d \
+     -p 80:80 \
+     -e DATABASE_URL="mysql://user:pass@host:3306/db" \
+     -e REDIS_HOST="your-redis-host" \
+     nest-11-fullstack
+   ```
+
+### 内部端口路由
+容器启动后，Nginx 会监听 80 端口并根据路径分发请求：
+- `http://localhost/` -> 商城前台 (Astro SSR)
+- `http://localhost/admin/` -> 管理后台 (React Static)
+- `http://localhost/api/admin/` -> 管理端 API
+- `http://localhost/api/store/` -> 商城端 API
+
+---
+
 ## 📜 许可证
 
 UNLICENSED (仅供学习与 AI 能力展示参考)

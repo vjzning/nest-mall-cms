@@ -267,7 +267,7 @@ export default function OrderList() {
                     <>
                       <p><span className="font-medium">Name:</span> {selectedOrder.receiverInfo.name}</p>
                       <p><span className="font-medium">Phone:</span> {selectedOrder.receiverInfo.phone}</p>
-                      <p><span className="font-medium">Address:</span> {selectedOrder.receiverInfo.province} {selectedOrder.receiverInfo.city} {selectedOrder.receiverInfo.district} {selectedOrder.receiverInfo.detailAddress}</p>
+                      <p><span className="font-medium">Address:</span> {selectedOrder.receiverInfo.address}</p>
                     </>
                   ) : 'No receiver info'}
                 </div>

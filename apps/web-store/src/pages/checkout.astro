@@ -25,30 +25,29 @@ if (!cartData || cartData.cartItems.length === 0) {
     return Astro.redirect('/');
 }
 
-// 2. 获取收货地址
-let addresses: MemberAddress[] = [];
-try {
-    const response = await fetch(
-        `${import.meta.env.PUBLIC_API_URL || 'http://localhost:3001'}/member/address`,
-        {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+    // 2. 获取收货地址
+    let addresses: MemberAddress[] = [];
+    try {
+        const response = await fetch(
+            `${import.meta.env.PUBLIC_API_URL || 'http://localhost:3001'}/member/address`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        if (response.ok) {
+            addresses = await response.json();
         }
-    );
-    if (response.ok) {
-        addresses = await response.json();
-        // console.log('获取地址成功', addresses);
+    } catch (e) {
+        console.error('获取地址失败', e);
     }
-} catch (e) {
-    console.error('获取地址失败', e);
-}
 
-const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0];
+    const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0];
 ---
 
 <Layout title='结算 - NIKE'>
-    <main class='max-w-[1200px] mx-auto px-4 py-12'>
+    <main class='max-w-[1200px] mx-auto px-4 py-12' data-addresses={JSON.stringify(addresses)}>
         <div class='flex flex-col gap-12 lg:flex-row'>
             <!-- Left: Checkout Form -->
             <div class='flex-1 space-y-12'>
@@ -255,7 +254,10 @@ const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0];
     const placeOrderBtn = document.getElementById('place-order-btn');
 
     placeOrderBtn?.addEventListener('click', async () => {
-        const selectedAddress = document.querySelector(
+        const main = document.querySelector('main');
+        const addresses = JSON.parse(main?.dataset.addresses || '[]');
+        
+        const selectedAddressInput = document.querySelector(
             'input[name="addressId"]:checked'
         ) as HTMLInputElement;
         const selectedPayment = document.querySelector(
@@ -267,8 +269,16 @@ const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0];
             ) as HTMLTextAreaElement
         )?.value;
 
-        if (!selectedAddress) {
+        if (!selectedAddressInput) {
             alert('请选择收货地址');
+            return;
+        }
+
+        const addressId = selectedAddressInput.value;
+        const addressData = addresses.find((a: any) => String(a.id) === String(addressId));
+
+        if (!addressData) {
+            alert('地址信息无效');
             return;
         }
 
@@ -276,12 +286,17 @@ const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0];
         placeOrderBtn.textContent = '正在处理...';
 
         try {
-            const formData = new FormData();
-            formData.append('addressId', selectedAddress.value);
-            formData.append('paymentMethod', selectedPayment.value);
-            formData.append('remark', remark);
+            const orderPayload = {
+                receiverInfo: {
+                    name: addressData.receiverName,
+                    phone: addressData.receiverPhone,
+                    address: `${addressData.stateProvince} ${addressData.city} ${addressData.districtCounty} ${addressData.addressLine1}`
+                },
+                paymentMethod: selectedPayment.value,
+                remark: remark
+            };
 
-            const { data, error } = await actions.order.create(formData);
+            const { data, error } = await actions.order.create(orderPayload);
 
             if (error) {
                 alert(error.message || '下单失败，请稍后再试');

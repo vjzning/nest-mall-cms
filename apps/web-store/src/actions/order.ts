@@ -5,9 +5,13 @@ import { API_ENDPOINTS } from '../lib/api';
 export const orderActions = {
     // 创建订单
     create: defineAction({
-        accept: 'form',
+        accept: 'json',
         input: z.object({
-            addressId: z.number(),
+            receiverInfo: z.object({
+                name: z.string(),
+                phone: z.string(),
+                address: z.string(),
+            }),
             paymentMethod: z.string().default('alipay'),
             remark: z.string().optional(),
         }),
@@ -24,7 +28,7 @@ export const orderActions = {
             }
 
             const orderData = {
-                addressId: input.addressId,
+                receiverInfo: input.receiverInfo,
                 paymentMethod: input.paymentMethod,
                 remark: input.remark,
                 items: cartItems.map((item: any) => ({
