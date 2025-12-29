@@ -20,9 +20,10 @@ import { CommentModule } from './comment/comment.module';
 import { UploadModule } from './upload/upload.module';
 import { DictionaryModule } from './dictionary/dictionary.module';
 import { ResourceModule } from './resource/resource.module';
-import { SystemConfigModule } from './system-config/system-config.module';
+import { SystemConfigModule } from './system/config/system-config.module';
 import { SystemLogModule } from './system/log/system-log.module';
 import { MallModule } from './mall/mall.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import databaseConfig from './config/database.config';
 import { createKeyv as createKeyvRedis } from '@keyv/redis';
 import { BullBoardModule } from '@bull-board/nestjs';
@@ -85,6 +86,7 @@ import { BullBoardAuthMiddleware } from './common/middleware/bull-board-auth.mid
         SystemConfigModule,
         SystemLogModule,
         MallModule,
+        DashboardModule,
     ],
     controllers: [CmsAdminApiController],
     providers: [

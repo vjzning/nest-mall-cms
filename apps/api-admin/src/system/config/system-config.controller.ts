@@ -11,7 +11,7 @@ import {
     UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { RequirePermissions } from '../common/decorators/auth.decorator';
+import { RequirePermissions } from '../../common/decorators/auth.decorator';
 import { SystemConfigController as SharedSystemConfigController } from '@app/shared/system-config/system-config.controller';
 import { SystemConfigEntity } from '@app/db/entities/system-config.entity';
 import { Log } from '@app/shared/decorators/log.decorator';
