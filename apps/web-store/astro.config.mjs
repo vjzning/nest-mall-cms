@@ -11,6 +11,9 @@ export default defineConfig({
         mode: 'standalone',
     }),
     site: process.env.SITE,
+    security: {
+        checkOrigin: false,
+    },
     env: {
         schema: {
             REDIS_URI: envField.string({
