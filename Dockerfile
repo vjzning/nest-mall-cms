@@ -1,44 +1,69 @@
+# 启用 BuildKit 语法特性（建议在文件首行添加）
+# syntax=docker/dockerfile:1
+
 FROM node:20-slim AS base
-RUN npm install -g pnpm
+# 使用 Corepack 启用 pnpm，比 npm i -g 快且版本固定
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
-# 1. 依赖阶段：只安装生产环境依赖，用于最终运行
-FROM base AS prod-deps
-WORKDIR /app
-COPY pnpm-lock.yaml package.json pnpm-workspace.yaml ./
-COPY apps/web-admin/package.json ./apps/web-admin/
-COPY apps/web-store/package.json ./apps/web-store/
-COPY packages/shared/package.json ./packages/shared/
-COPY packages/queue/package.json ./packages/queue/
-RUN pnpm install --prod --frozen-lockfile
-
-# 2. 构建阶段：安装所有依赖并编译
+# 1. 构建与依赖安装阶段（合并以利用缓存）
 FROM base AS builder
 WORKDIR /app
-# 先复制所有文件，确保 pnpm install 时能正确处理 monorepo 链接
-COPY . .
-RUN pnpm config set fetch-retries 5
-RUN pnpm config set network-concurrency 1
-RUN pnpm install --frozen-lockfile
 
-# 使用 pnpm deploy 为 web-admin 创建独立目录并构建
-# 使用 --legacy 标志以兼容 pnpm v10+ 的部署行为
+# 关键优化 A: 首先只复制 lockfile，利用 pnpm fetch 下载依赖到虚拟存储
+# 这样只有 lockfile 变动时才会重新下载包
+COPY pnpm-lock.yaml ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch
+
+# 关键优化 B: 复制剩余源码
+COPY . .
+
+# 关键优化 C: 离线安装依赖（利用 fetch 的结果），并挂载缓存
+# --offline: 使用 fetch 预下载的包
+# --frozen-lockfile: 确保不做版本变更
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --offline
+
+# Web Admin 构建
 RUN pnpm deploy --legacy --filter @app/web-admin /pruned/web-admin
-# 覆盖 vite.config.ts 中的 outDir，确保产物生成在本地 dist 目录
 RUN cd /pruned/web-admin && pnpm vite build --outDir dist
 
-# 使用 pnpm deploy 为 web-store 创建独立目录并构建
+# Web Store 构建
 RUN pnpm deploy --legacy --filter @app/web-store /pruned/web-store
-# Astro 默认输出到 dist，确保一致性
 RUN cd /pruned/web-store && pnpm astro build --outDir dist
 
-# 构建 API
-RUN pnpm build:api-admin && pnpm build:api-store
+# API 构建 (关键优化 D: 并行执行构建命令)
+# 假设 package.json 中有 build:api-admin 和 build:api-store
+# 使用 & 同时运行，wait 等待结束
+RUN pnpm build:api-admin & pnpm build:api-store & wait
+
+# 2. 生产依赖提取阶段
+# 为了得到纯净的 node_modules，我们基于 builder 再次处理，或者重新 install --prod
+FROM base AS prod-deps
+WORKDIR /app
+COPY pnpm-lock.yaml ./
+# 从 builder 阶段复制 fetch 好的缓存，避免再次网络下载（可选，或者直接 mount）
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/packages ./packages
+# 注意：这里需要复制相关 workspace 的 package.json，如果结构复杂，建议使用 pnpm deploy 导出 prod 包
+# 这里为了简便，复用 builder 的源码结构，但只安装 prod 依赖
+COPY --from=builder /app/apps/web-admin/package.json ./apps/web-admin/
+COPY --from=builder /app/apps/web-store/package.json ./apps/web-store/
+COPY --from=builder /app/packages/shared/package.json ./packages/shared/
+COPY --from=builder /app/packages/queue/package.json ./packages/queue/
+COPY --from=builder /app/pnpm-workspace.yaml ./
+
+# 只安装生产依赖
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile --ignore-scripts
 
 # 3. 运行阶段
 FROM node:20-slim AS runtime
-RUN apt-get update && apt-get install -y nginx && \
+
+# 优化 E: 合并 RUN 指令减少层数，清理缓存
+RUN apt-get update && apt-get install -y nginx --no-install-recommends && \
     npm install -g pm2 serve && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
 
 WORKDIR /app
 
@@ -49,11 +74,11 @@ COPY --from=builder /app/dist ./dist
 # 复制 Web 产物
 COPY --from=builder /pruned/web-admin/dist ./apps/web-admin/dist
 COPY --from=builder /pruned/web-store/dist ./apps/web-store/dist
-# 复制配置文件
+# 复制配置
 COPY --from=builder /app/ecosystem.config.cjs ./
 COPY --from=builder /app/nginx.conf /etc/nginx/nginx.conf
 COPY --from=builder /app/package.json ./
 
 EXPOSE 80
 
-CMD service nginx start && pm2-runtime start ecosystem.config.cjs
+CMD ["sh", "-c", "service nginx start && pm2-runtime start ecosystem.config.cjs"]
