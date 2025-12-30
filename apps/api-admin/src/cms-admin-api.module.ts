@@ -48,10 +48,10 @@ import { BullBoardAuthMiddleware } from './common/middleware/bull-board-auth.mid
             isGlobal: true,
             useFactory: (configService: ConfigService) => {
                 const redisHost =
-                    configService.get('redis.host') ?? '127.0.0.1';
-                const redisPort = configService.get('redis.port') ?? 6379;
-                const redisPassword = configService.get('redis.password');
-                const redisDb = configService.get('redis.db') ?? 1;
+                    configService.get('REDIS_HOST') ?? '127.0.0.1';
+                const redisPort = configService.get('REDIS_PORT') ?? 6379;
+                const redisPassword = configService.get('REDIS_PASSWORD');
+                const redisDb = configService.get('REDIS_DB') ?? 1;
                 // redis[s]://[[username][:password]@][host][:port][/db-number]
                 const store = createKeyvRedis({
                     password: redisPassword,
