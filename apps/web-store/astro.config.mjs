@@ -10,7 +10,7 @@ export default defineConfig({
     adapter: node({
         mode: 'standalone',
     }),
-
+    site: process.env.SITE,
     env: {
         schema: {
             REDIS_URI: envField.string({
