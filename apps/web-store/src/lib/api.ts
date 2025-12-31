@@ -29,4 +29,7 @@ export const API_ENDPOINTS = {
 
   // 订单
   MEMBER_ORDERS: `${API_BASE_URL}/mall/orders`,
+
+  // 售后
+  MEMBER_AFTER_SALES: `${API_BASE_URL}/mall/after-sales`,
 };

@@ -41,3 +41,5 @@ tsconfig.tsbuildinfo
 # Misc
 .DS_Store
 Thumbs.db
+
+*.md

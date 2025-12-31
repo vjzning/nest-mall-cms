@@ -1,8 +1,10 @@
 import { IsString, IsNotEmpty, IsInt, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateMenuDto {
   @IsInt()
   @IsOptional()
+  @Type(() => Number)
   parentId?: number;
 
   @IsString()
@@ -15,6 +17,7 @@ export class CreateMenuDto {
 
   @IsInt()
   @IsNotEmpty()
+  @Type(() => Number)
   type: number;
 
   @IsString()
@@ -31,5 +34,6 @@ export class CreateMenuDto {
 
   @IsInt()
   @IsOptional()
+  @Type(() => Number)
   sort?: number;
 }

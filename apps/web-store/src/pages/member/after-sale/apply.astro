@@ -1,0 +1,59 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import MemberSidebar from '../../../components/member/MemberSidebar.astro';
+import { getSession } from '../../../lib/session';
+import { actions } from 'astro:actions';
+import AfterSaleApplyForm from '../../../components/after-sale/AfterSaleApplyForm';
+
+const session = await getSession(Astro);
+if (!session) {
+    return Astro.redirect('/login');
+}
+
+const { user } = session;
+const orderId = Astro.url.searchParams.get('orderId');
+const orderItemId = Astro.url.searchParams.get('orderItemId');
+
+if (!orderId || !orderItemId) {
+    return Astro.redirect('/member/orders');
+}
+
+const { data: order, error } = await Astro.callAction(actions.order.getDetail, {
+    id: orderId,
+});
+
+if (error || !order) {
+    return Astro.redirect('/member/orders?error=not_found');
+}
+---
+
+<Layout title="申请售后">
+    <div class="py-10 min-h-screen bg-nike-grey">
+        <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
+                <div class="md:col-span-1">
+                    <MemberSidebar user={user} activeTab="orders" />
+                </div>
+
+                <div class="md:col-span-3">
+                    <div class="p-8 bg-white rounded-lg shadow-lg">
+                        <div class="flex gap-4 items-center mb-8">
+                            <a href={`/member/orders/${orderId}`} class="text-nike-dark-grey hover:text-nike-black transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                </svg>
+                            </a>
+                            <h3 class="text-2xl font-bold">申请售后</h3>
+                        </div>
+
+                        <AfterSaleApplyForm 
+                            client:load 
+                            order={order} 
+                            orderItemId={parseInt(orderItemId)} 
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</Layout>

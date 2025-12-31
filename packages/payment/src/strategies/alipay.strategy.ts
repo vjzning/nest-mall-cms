@@ -37,4 +37,9 @@ export class AlipayStrategy implements PaymentStrategy {
     this.logger.log(`Querying Alipay status for ${orderNo}`);
     return PaymentStatus.SUCCESS; // Mock
   }
+
+  async refund(transactionId: string, amount: number, reason: string): Promise<any> {
+    this.logger.log(`Initiating Alipay refund for ${transactionId}`);
+    return { success: true }; // Mock
+  }
 }

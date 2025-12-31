@@ -25,7 +25,8 @@ const { data: ordersData, error } = await Astro.callAction(actions.order.getMyOr
 const tabs = [
     { label: '全部', value: 'ALL' },
     { label: '待付款', value: 'PENDING_PAY' },
-    { label: '待收货', value: 'SHIPPED' },
+    { label: '待发货', value: 'PENDING_DELIVERY' },
+    { label: '待收货', value: 'WAITING_RECEIVE' },
     { label: '已完成', value: 'COMPLETED' },
     { label: '已取消', value: 'CANCELLED' },
 ];

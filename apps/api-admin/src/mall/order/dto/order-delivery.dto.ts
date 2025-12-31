@@ -1,13 +1,15 @@
-import { IsString, IsNotEmpty, IsArray, ValidateNested, IsNumber, Min } from 'class-validator';
+import { IsString, IsNotEmpty, IsArray, ValidateNested, IsNumber, Min, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class DeliveryItemDto {
   @IsNumber()
   @Min(1)
+  @Type(() => Number)
   skuId: number;
 
   @IsNumber()
   @Min(1)
+  @Type(() => Number)
   quantity: number;
 }
 
@@ -26,5 +28,6 @@ export class OrderDeliveryDto {
   items: DeliveryItemDto[];
 
   @IsString()
+  @IsOptional()
   remark?: string;
 }

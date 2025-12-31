@@ -13,12 +13,16 @@ import {
 import { MallOrderItemEntity } from '@app/db/entities/mall-order-item.entity';
 import { MallDeliveryEntity } from '@app/db/entities/mall-delivery.entity';
 import {
+    MallAfterSaleEntity,
+    AfterSaleStatus,
+} from '@app/db/entities/mall-after-sale.entity';
+import {
     MallPaymentEntity,
     PaymentStatus,
 } from '@app/db/entities/mall-payment.entity';
 import { OrderDeliveryDto } from './dto/order-delivery.dto';
 import { QueryOrderDto } from './dto/query-order.dto';
-import { Like } from 'typeorm';
+import { Like, Not } from 'typeorm';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { ORDER_QUEUE, ORDER_AUTO_CONFIRM_JOB } from '@app/queue';
@@ -106,9 +110,29 @@ export class OrderService {
                 ].includes(order.status)
             ) {
                 throw new BadRequestException(
-                    `Order status ${order.status} allows shipping`
+                    `Order status ${order.status} does not allow shipping`
                 );
             }
+
+            // 1.5 Check for active after-sales
+            const activeAfterSales = await manager.find(MallAfterSaleEntity, {
+                where: {
+                    orderId: order.id,
+                    status: Not(
+                        In([
+                            AfterSaleStatus.REJECTED,
+                            AfterSaleStatus.CANCELLED,
+                        ])
+                    ),
+                },
+                relations: ['items'],
+            });
+
+            const afterSaleSkuIds = new Set(
+                activeAfterSales.flatMap((as) =>
+                    as.items.map((i) => Number(i.skuId))
+                )
+            );
 
             // 2. Validate Items to Ship
             const itemsToShip: {
@@ -118,6 +142,13 @@ export class OrderService {
             }[] = [];
 
             for (const shipItem of deliveryDto.items) {
+                // Check if this item is in after-sale
+                if (afterSaleSkuIds.has(Number(shipItem.skuId))) {
+                    throw new BadRequestException(
+                        `SKU ${shipItem.skuId} is currently in an active after-sale process and cannot be shipped.`
+                    );
+                }
+
                 const orderItem = order.items.find(
                     (i) => Number(i.skuId) === Number(shipItem.skuId)
                 );

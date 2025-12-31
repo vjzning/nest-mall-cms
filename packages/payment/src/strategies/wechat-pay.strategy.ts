@@ -132,21 +132,45 @@ export class WechatPayStrategy implements PaymentStrategy {
     }
 
     async query(orderNo: string): Promise<PaymentStatus> {
-        this.logger.log(`Querying WechatPay status for ${orderNo}`);
         try {
-            const result = await this.payInstance.query({
-                out_trade_no: orderNo,
-            });
+            const result = await this.payInstance.transactions_out_trade_no(
+                orderNo,
+                this.config.wechat_mchid
+            );
             if (result.trade_state === 'SUCCESS') return PaymentStatus.SUCCESS;
-            if (
-                result.trade_state === 'NOTPAY' ||
-                result.trade_state === 'USERPAYING'
-            )
-                return PaymentStatus.PENDING;
-            return PaymentStatus.FAILED;
+            if (['CLOSED', 'PAYERROR', 'REVOKED'].includes(result.trade_state))
+                return PaymentStatus.FAILED;
+            return PaymentStatus.PENDING;
         } catch (error) {
-            this.logger.error('Query failed', error);
+            this.logger.error(`Query status error: ${orderNo}`, error);
             return PaymentStatus.FAILED;
+        }
+    }
+
+    async refund(
+        transactionId: string,
+        amount: number,
+        reason: string
+    ): Promise<any> {
+        this.logger.log(`Initiating WechatPay refund for ${transactionId}`);
+        const params = {
+            transaction_id: transactionId,
+            out_refund_no: `REF${Date.now()}`,
+            amount: {
+                refund: Math.round(amount * 100),
+                total: Math.round(amount * 100), // TODO: 这里应该传入订单原金额，目前简单处理
+                currency: 'CNY',
+            },
+            reason,
+        };
+
+        try {
+            return await this.payInstance.refunds(params);
+        } catch (error) {
+            this.logger.error(`WechatPay refund error:`, error);
+            throw new BadRequestException(
+                error.message || 'WechatPay refund failed'
+            );
         }
     }
 }

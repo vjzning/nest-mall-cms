@@ -1,0 +1,157 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import MemberSidebar from '../../../components/member/MemberSidebar.astro';
+import { getSession } from '../../../lib/session';
+import { actions } from 'astro:actions';
+
+const session = await getSession(Astro);
+if (!session) {
+    return Astro.redirect('/login');
+}
+
+const { user } = session;
+const currentPage = parseInt(Astro.url.searchParams.get('page') || '1');
+
+const { data: afterSaleData, error } = await Astro.callAction(actions.afterSale.getList, {
+    page: currentPage,
+    limit: 10
+});
+
+const getStatusLabel = (status: string) => {
+    const statusMap: Record<string, string> = {
+        'APPLIED': '已申请',
+        'APPROVED': '审核通过',
+        'REJECTED': '已拒绝',
+        'WAITING_RECEIPT': '待收货',
+        'PROCESSING': '处理中',
+        'COMPLETED': '已完成',
+        'CANCELLED': '已取消',
+    };
+    return statusMap[status] || status;
+};
+
+const getTypeLabel = (type: string) => {
+    const typeMap: Record<string, string> = {
+        'REFUND': '仅退款',
+        'RETURN_REFUND': '退货退款',
+        'EXCHANGE': '换货',
+    };
+    return typeMap[type] || type;
+};
+
+const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'CNY' }).format(price);
+};
+---
+
+<Layout title="退换/售后">
+    <div class="py-10 min-h-screen bg-nike-grey">
+        <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
+                <div class="md:col-span-1">
+                    <MemberSidebar user={user} activeTab="after-sale" />
+                </div>
+
+                <div class="md:col-span-3">
+                    <div class="p-6 bg-white rounded-lg shadow-lg">
+                        <h3 class="mb-6 text-2xl font-bold">退换/售后</h3>
+
+                        {error && (
+                            <div class="p-4 mb-6 text-red-600 bg-red-50 rounded border border-red-200">
+                                {error.message}
+                            </div>
+                        )}
+
+                        <div class="space-y-6">
+                            {afterSaleData?.items && afterSaleData.items.length > 0 ? (
+                                afterSaleData.items.map((item: any) => (
+                                    <div class="overflow-hidden rounded-lg border border-nike-grey">
+                                        <div class="flex justify-between items-center p-4 bg-nike-grey/30">
+                                            <div class="flex gap-6 text-sm">
+                                                <div>
+                                                    <p class="text-nike-dark-grey">售后单号</p>
+                                                    <p class="font-medium">{item.afterSaleNo}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-nike-dark-grey">申请时间</p>
+                                                    <p class="font-medium">{new Date(item.createdAt).toLocaleString()}</p>
+                                                </div>
+                                            </div>
+                                            <div class="text-sm font-bold text-nike-black">
+                                                {getStatusLabel(item.status)}
+                                            </div>
+                                        </div>
+
+                                        <div class="p-4">
+                                            <div class="flex gap-4 items-center mb-4">
+                                                <div class="px-2 py-1 text-xs font-bold text-white rounded bg-nike-black">
+                                                    {getTypeLabel(item.type)}
+                                                </div>
+                                                <div class="text-sm text-nike-dark-grey">
+                                                    订单号: {item.orderNo}
+                                                </div>
+                                            </div>
+
+                                            <div class="space-y-4">
+                                                {item.items?.map((afterSaleItem: any) => (
+                                                    <div class="flex gap-4">
+                                                        <img 
+                                                            src={afterSaleItem.orderItem?.productImg} 
+                                                            alt={afterSaleItem.orderItem?.productName}
+                                                            class="object-cover w-16 h-16 rounded bg-nike-grey"
+                                                        />
+                                                        <div class="flex-1 min-w-0">
+                                                            <h5 class="text-sm font-bold truncate">{afterSaleItem.orderItem?.productName}</h5>
+                                                            <p class="text-xs text-nike-dark-grey">数量: {afterSaleItem.quantity}</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div class="flex justify-between items-center mt-6 pt-4 border-t border-nike-grey">
+                                                <div class="text-sm">
+                                                    申请金额: <span class="font-bold">{formatPrice(item.applyAmount)}</span>
+                                                </div>
+                                                <a 
+                                                    href={`/member/after-sale/${item.id}`}
+                                                    class="px-6 py-2 text-sm font-bold text-nike-black rounded border border-nike-black transition-colors hover:bg-nike-black hover:text-white"
+                                                >
+                                                    查看详情
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div class="py-20 text-center">
+                                    <p class="text-nike-dark-grey">暂无售后记录</p>
+                                    <a href="/member/orders" class="inline-block mt-4 text-sm font-bold underline">去查看订单</a>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Pagination */}
+                        {afterSaleData?.total > 10 && (
+                            <div class="flex justify-center mt-10">
+                                <div class="flex gap-2">
+                                    {Array.from({ length: Math.ceil(afterSaleData.total / 10) }).map((_, i) => (
+                                        <a
+                                            href={`?page=${i + 1}`}
+                                            class={`w-10 h-10 flex items-center justify-center rounded border transition-colors ${
+                                                currentPage === i + 1
+                                                    ? 'bg-nike-black text-white border-nike-black'
+                                                    : 'border-nike-grey text-nike-black hover:bg-nike-grey'
+                                            }`}
+                                        >
+                                            {i + 1}
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</Layout>

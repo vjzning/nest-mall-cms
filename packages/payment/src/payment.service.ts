@@ -65,4 +65,9 @@ export class PaymentService {
     const strategy = await this.getStrategy(method);
     return strategy.query(orderNo);
   }
+
+  async refund(method: string, transactionId: string, amount: number, reason: string) {
+    const strategy = await this.getStrategy(method);
+    return strategy.refund(transactionId, amount, reason);
+  }
 }

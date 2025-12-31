@@ -128,7 +128,7 @@ export class OrderService {
 
   async findMyOrders(
     memberId: number,
-    status?: OrderStatus,
+    status?: string,
     page: number = 1,
     limit: number = 10
   ) {
@@ -140,8 +140,14 @@ export class OrderService {
       .skip((page - 1) * limit)
       .take(limit);
 
-    if (status) {
-      query.andWhere("order.status = :status", { status });
+    if (status && status !== "ALL") {
+      if (status === "WAITING_RECEIVE") {
+        query.andWhere("order.status IN (:...statuses)", {
+          statuses: [OrderStatus.SHIPPED, OrderStatus.DELIVERED],
+        });
+      } else {
+        query.andWhere("order.status = :status", { status });
+      }
     }
 
     const [items, total] = await query.getManyAndCount();

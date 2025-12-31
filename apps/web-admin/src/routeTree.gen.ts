@@ -28,8 +28,11 @@ import { Route as AuthContentArticleRouteImport } from './routes/_auth.content.a
 import { Route as AuthMallProductIndexRouteImport } from './routes/_auth.mall.product.index'
 import { Route as AuthMallOrderIndexRouteImport } from './routes/_auth.mall.order.index'
 import { Route as AuthMallCollectionIndexRouteImport } from './routes/_auth.mall.collection.index'
+import { Route as AuthMallAfterSaleIndexRouteImport } from './routes/_auth.mall.after-sale.index'
 import { Route as AuthMallProductCreateRouteImport } from './routes/_auth.mall.product.create'
+import { Route as AuthMallOrderIdRouteImport } from './routes/_auth.mall.order.$id'
 import { Route as AuthMallCollectionCreateRouteImport } from './routes/_auth.mall.collection.create'
+import { Route as AuthMallAfterSaleIdRouteImport } from './routes/_auth.mall.after-sale.$id'
 import { Route as AuthMallProductEditIdRouteImport } from './routes/_auth.mall.product.edit.$id'
 import { Route as AuthMallCollectionEditIdRouteImport } from './routes/_auth.mall.collection.edit.$id'
 
@@ -155,6 +158,13 @@ const AuthMallCollectionIndexRoute = AuthMallCollectionIndexRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_auth.mall.collection.index.lazy').then((d) => d.Route),
 )
+const AuthMallAfterSaleIndexRoute = AuthMallAfterSaleIndexRouteImport.update({
+  id: '/mall/after-sale/',
+  path: '/mall/after-sale/',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() =>
+  import('./routes/_auth.mall.after-sale.index.lazy').then((d) => d.Route),
+)
 const AuthMallProductCreateRoute = AuthMallProductCreateRouteImport.update({
   id: '/mall/product/create',
   path: '/mall/product/create',
@@ -162,6 +172,11 @@ const AuthMallProductCreateRoute = AuthMallProductCreateRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_auth.mall.product.create.lazy').then((d) => d.Route),
 )
+const AuthMallOrderIdRoute = AuthMallOrderIdRouteImport.update({
+  id: '/mall/order/$id',
+  path: '/mall/order/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthMallCollectionCreateRoute =
   AuthMallCollectionCreateRouteImport.update({
     id: '/mall/collection/create',
@@ -170,6 +185,13 @@ const AuthMallCollectionCreateRoute =
   } as any).lazy(() =>
     import('./routes/_auth.mall.collection.create.lazy').then((d) => d.Route),
   )
+const AuthMallAfterSaleIdRoute = AuthMallAfterSaleIdRouteImport.update({
+  id: '/mall/after-sale/$id',
+  path: '/mall/after-sale/$id',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() =>
+  import('./routes/_auth.mall.after-sale.$id.lazy').then((d) => d.Route),
+)
 const AuthMallProductEditIdRoute = AuthMallProductEditIdRouteImport.update({
   id: '/mall/product/edit/$id',
   path: '/mall/product/edit/$id',
@@ -202,8 +224,11 @@ export interface FileRoutesByFullPath {
   '/system/queues': typeof AuthSystemQueuesRoute
   '/system/role': typeof AuthSystemRoleRoute
   '/system/user': typeof AuthSystemUserRoute
+  '/mall/after-sale/$id': typeof AuthMallAfterSaleIdRoute
   '/mall/collection/create': typeof AuthMallCollectionCreateRoute
+  '/mall/order/$id': typeof AuthMallOrderIdRoute
   '/mall/product/create': typeof AuthMallProductCreateRoute
+  '/mall/after-sale': typeof AuthMallAfterSaleIndexRoute
   '/mall/collection': typeof AuthMallCollectionIndexRoute
   '/mall/order': typeof AuthMallOrderIndexRoute
   '/mall/product': typeof AuthMallProductIndexRoute
@@ -226,8 +251,11 @@ export interface FileRoutesByTo {
   '/system/queues': typeof AuthSystemQueuesRoute
   '/system/role': typeof AuthSystemRoleRoute
   '/system/user': typeof AuthSystemUserRoute
+  '/mall/after-sale/$id': typeof AuthMallAfterSaleIdRoute
   '/mall/collection/create': typeof AuthMallCollectionCreateRoute
+  '/mall/order/$id': typeof AuthMallOrderIdRoute
   '/mall/product/create': typeof AuthMallProductCreateRoute
+  '/mall/after-sale': typeof AuthMallAfterSaleIndexRoute
   '/mall/collection': typeof AuthMallCollectionIndexRoute
   '/mall/order': typeof AuthMallOrderIndexRoute
   '/mall/product': typeof AuthMallProductIndexRoute
@@ -252,8 +280,11 @@ export interface FileRoutesById {
   '/_auth/system/queues': typeof AuthSystemQueuesRoute
   '/_auth/system/role': typeof AuthSystemRoleRoute
   '/_auth/system/user': typeof AuthSystemUserRoute
+  '/_auth/mall/after-sale/$id': typeof AuthMallAfterSaleIdRoute
   '/_auth/mall/collection/create': typeof AuthMallCollectionCreateRoute
+  '/_auth/mall/order/$id': typeof AuthMallOrderIdRoute
   '/_auth/mall/product/create': typeof AuthMallProductCreateRoute
+  '/_auth/mall/after-sale/': typeof AuthMallAfterSaleIndexRoute
   '/_auth/mall/collection/': typeof AuthMallCollectionIndexRoute
   '/_auth/mall/order/': typeof AuthMallOrderIndexRoute
   '/_auth/mall/product/': typeof AuthMallProductIndexRoute
@@ -278,8 +309,11 @@ export interface FileRouteTypes {
     | '/system/queues'
     | '/system/role'
     | '/system/user'
+    | '/mall/after-sale/$id'
     | '/mall/collection/create'
+    | '/mall/order/$id'
     | '/mall/product/create'
+    | '/mall/after-sale'
     | '/mall/collection'
     | '/mall/order'
     | '/mall/product'
@@ -302,8 +336,11 @@ export interface FileRouteTypes {
     | '/system/queues'
     | '/system/role'
     | '/system/user'
+    | '/mall/after-sale/$id'
     | '/mall/collection/create'
+    | '/mall/order/$id'
     | '/mall/product/create'
+    | '/mall/after-sale'
     | '/mall/collection'
     | '/mall/order'
     | '/mall/product'
@@ -327,8 +364,11 @@ export interface FileRouteTypes {
     | '/_auth/system/queues'
     | '/_auth/system/role'
     | '/_auth/system/user'
+    | '/_auth/mall/after-sale/$id'
     | '/_auth/mall/collection/create'
+    | '/_auth/mall/order/$id'
     | '/_auth/mall/product/create'
+    | '/_auth/mall/after-sale/'
     | '/_auth/mall/collection/'
     | '/_auth/mall/order/'
     | '/_auth/mall/product/'
@@ -477,6 +517,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthMallCollectionIndexRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/mall/after-sale/': {
+      id: '/_auth/mall/after-sale/'
+      path: '/mall/after-sale'
+      fullPath: '/mall/after-sale'
+      preLoaderRoute: typeof AuthMallAfterSaleIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/mall/product/create': {
       id: '/_auth/mall/product/create'
       path: '/mall/product/create'
@@ -484,11 +531,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthMallProductCreateRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/mall/order/$id': {
+      id: '/_auth/mall/order/$id'
+      path: '/mall/order/$id'
+      fullPath: '/mall/order/$id'
+      preLoaderRoute: typeof AuthMallOrderIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/mall/collection/create': {
       id: '/_auth/mall/collection/create'
       path: '/mall/collection/create'
       fullPath: '/mall/collection/create'
       preLoaderRoute: typeof AuthMallCollectionCreateRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/mall/after-sale/$id': {
+      id: '/_auth/mall/after-sale/$id'
+      path: '/mall/after-sale/$id'
+      fullPath: '/mall/after-sale/$id'
+      preLoaderRoute: typeof AuthMallAfterSaleIdRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/mall/product/edit/$id': {
@@ -522,8 +583,11 @@ interface AuthRouteChildren {
   AuthSystemQueuesRoute: typeof AuthSystemQueuesRoute
   AuthSystemRoleRoute: typeof AuthSystemRoleRoute
   AuthSystemUserRoute: typeof AuthSystemUserRoute
+  AuthMallAfterSaleIdRoute: typeof AuthMallAfterSaleIdRoute
   AuthMallCollectionCreateRoute: typeof AuthMallCollectionCreateRoute
+  AuthMallOrderIdRoute: typeof AuthMallOrderIdRoute
   AuthMallProductCreateRoute: typeof AuthMallProductCreateRoute
+  AuthMallAfterSaleIndexRoute: typeof AuthMallAfterSaleIndexRoute
   AuthMallCollectionIndexRoute: typeof AuthMallCollectionIndexRoute
   AuthMallOrderIndexRoute: typeof AuthMallOrderIndexRoute
   AuthMallProductIndexRoute: typeof AuthMallProductIndexRoute
@@ -545,8 +609,11 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthSystemQueuesRoute: AuthSystemQueuesRoute,
   AuthSystemRoleRoute: AuthSystemRoleRoute,
   AuthSystemUserRoute: AuthSystemUserRoute,
+  AuthMallAfterSaleIdRoute: AuthMallAfterSaleIdRoute,
   AuthMallCollectionCreateRoute: AuthMallCollectionCreateRoute,
+  AuthMallOrderIdRoute: AuthMallOrderIdRoute,
   AuthMallProductCreateRoute: AuthMallProductCreateRoute,
+  AuthMallAfterSaleIndexRoute: AuthMallAfterSaleIndexRoute,
   AuthMallCollectionIndexRoute: AuthMallCollectionIndexRoute,
   AuthMallOrderIndexRoute: AuthMallOrderIndexRoute,
   AuthMallProductIndexRoute: AuthMallProductIndexRoute,

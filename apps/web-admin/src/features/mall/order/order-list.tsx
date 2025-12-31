@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getOrders, getOrder, shipOrder, OrderStatus } from './api';
+import { useQuery } from '@tanstack/react-query';
+import { getOrders, OrderStatus, getOrder } from './api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -12,20 +12,6 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetDescription,
-} from '@/components/ui/sheet';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from '@/components/ui/dialog';
-import {
     Select,
     SelectContent,
     SelectItem,
@@ -33,17 +19,48 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
 import {
     Loader2,
     Search,
-    Truck,
     Eye,
+    Truck,
     ChevronLeft,
     ChevronRight,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { Label } from '@/components/ui/label';
+import { Link } from '@tanstack/react-router';
+import { ShipDialog } from './ship-dialog';
+
+const orderStatusMap: Record<string, { label: string; color: string }> = {
+    [OrderStatus.PENDING_PAY]: {
+        label: '待付款',
+        color: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
+    },
+    [OrderStatus.PENDING_DELIVERY]: {
+        label: '待发货',
+        color: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    },
+    [OrderStatus.PARTIALLY_SHIPPED]: {
+        label: '部分发货',
+        color: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20',
+    },
+    [OrderStatus.SHIPPED]: {
+        label: '已发货',
+        color: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+    },
+    [OrderStatus.DELIVERED]: {
+        label: '已送达',
+        color: 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20',
+    },
+    [OrderStatus.COMPLETED]: {
+        label: '已完成',
+        color: 'bg-green-500/10 text-green-500 border-green-500/20',
+    },
+    [OrderStatus.CANCELLED]: {
+        label: '已取消',
+        color: 'bg-gray-500/10 text-gray-500 border-gray-500/20',
+    },
+};
 
 export default function OrderList() {
     const [page, setPage] = useState(1);
@@ -51,9 +68,8 @@ export default function OrderList() {
     const [orderNo, setOrderNo] = useState('');
     const [status, setStatus] = useState<OrderStatus | 'ALL'>('ALL');
 
-    // Drawer & Dialog State
+    // Ship Dialog State
     const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isShipDialogOpen, setIsShipDialogOpen] = useState(false);
 
     // Queries
@@ -68,30 +84,20 @@ export default function OrderList() {
             }),
     });
 
-    // Selected Order Detail Query (enabled when drawer or ship dialog is open)
+    // Selected Order Detail Query (enabled when ship dialog is open)
     const { data: selectedOrder, isPending: isDetailLoading } = useQuery({
         queryKey: ['order', selectedOrderId],
         queryFn: () => getOrder(selectedOrderId!),
-        enabled: !!selectedOrderId,
+        enabled: !!selectedOrderId && isShipDialogOpen,
     });
 
     const handleSearch = () => {
         setPage(1);
     };
 
-    const handleView = (id: number) => {
-        setSelectedOrderId(id);
-        setIsDrawerOpen(true);
-    };
-
     const handleShip = (id: number) => {
         setSelectedOrderId(id);
         setIsShipDialogOpen(true);
-    };
-
-    const closeDrawer = () => {
-        setIsDrawerOpen(false);
-        setSelectedOrderId(null);
     };
 
     const closeShipDialog = () => {
@@ -104,11 +110,9 @@ export default function OrderList() {
             <div className='flex justify-between items-center'>
                 <div>
                     <h2 className='text-2xl font-bold tracking-tight'>
-                        Order Management
+                        订单管理
                     </h2>
-                    <p className='text-muted-foreground'>
-                        View and manage orders
-                    </p>
+                    <p className='text-muted-foreground'>查看和管理商城订单</p>
                 </div>
             </div>
 
@@ -116,7 +120,7 @@ export default function OrderList() {
                 <div className='relative flex-1 max-w-sm'>
                     <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
                     <Input
-                        placeholder='Search Order No...'
+                        placeholder='搜索订单号...'
                         className='pl-8'
                         value={orderNo}
                         onChange={(e) => setOrderNo(e.target.value)}
@@ -125,23 +129,23 @@ export default function OrderList() {
                 </div>
                 <Select
                     value={status}
-                    onValueChange={(val: any) => setStatus(val)}
+                    onValueChange={(val: OrderStatus | 'ALL') => setStatus(val)}
                 >
                     <SelectTrigger className='w-[180px]'>
-                        <SelectValue placeholder='Status' />
+                        <SelectValue placeholder='订单状态' />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value='ALL'>All Status</SelectItem>
+                        <SelectItem value='ALL'>全部状态</SelectItem>
                         {Object.values(OrderStatus).map((s) => (
                             <SelectItem key={s} value={s}>
-                                {s}
+                                {orderStatusMap[s]?.label || s}
                             </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
 
                 <Button variant='secondary' onClick={handleSearch}>
-                    Search
+                    搜索
                 </Button>
             </div>
 
@@ -149,14 +153,12 @@ export default function OrderList() {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Order No</TableHead>
-                            <TableHead>Member ID</TableHead>
-                            <TableHead>Total Amount</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Created At</TableHead>
-                            <TableHead className='text-right'>
-                                Actions
-                            </TableHead>
+                            <TableHead>订单号</TableHead>
+                            <TableHead>会员 ID</TableHead>
+                            <TableHead>订单金额</TableHead>
+                            <TableHead>状态</TableHead>
+                            <TableHead>创建时间</TableHead>
+                            <TableHead className='text-right'>操作</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -179,17 +181,14 @@ export default function OrderList() {
                                     <TableCell>¥{order.totalAmount}</TableCell>
                                     <TableCell>
                                         <Badge
-                                            variant={
-                                                order.status ===
-                                                OrderStatus.COMPLETED
-                                                    ? 'default'
-                                                    : order.status ===
-                                                        OrderStatus.CANCELLED
-                                                      ? 'destructive'
-                                                      : 'secondary'
+                                            variant='outline'
+                                            className={
+                                                orderStatusMap[order.status]
+                                                    ?.color
                                             }
                                         >
-                                            {order.status}
+                                            {orderStatusMap[order.status]
+                                                ?.label || order.status}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
@@ -203,11 +202,16 @@ export default function OrderList() {
                                             <Button
                                                 variant='ghost'
                                                 size='icon'
-                                                onClick={() =>
-                                                    handleView(order.id)
-                                                }
+                                                asChild
                                             >
-                                                <Eye className='w-4 h-4' />
+                                                <Link
+                                                    to='/mall/order/$id'
+                                                    params={{
+                                                        id: order.id.toString(),
+                                                    }}
+                                                >
+                                                    <Eye className='w-4 h-4' />
+                                                </Link>
                                             </Button>
                                             {(order.status ===
                                                 OrderStatus.PENDING_DELIVERY ||
@@ -234,7 +238,7 @@ export default function OrderList() {
                                     colSpan={6}
                                     className='h-24 text-center text-muted-foreground'
                                 >
-                                    No orders found.
+                                    暂无订单数据
                                 </TableCell>
                             </TableRow>
                         )}
@@ -244,9 +248,8 @@ export default function OrderList() {
 
             {/* Pagination */}
             <div className='flex justify-between items-center px-2'>
-                {/* ... (Reuse pagination logic or component) ... */}
                 <div className='flex items-center space-x-2 text-sm text-muted-foreground'>
-                    <span>Total {data?.total || 0} items</span>
+                    <span>共 {data?.total || 0} 条数据</span>
                 </div>
                 <div className='flex items-center space-x-2'>
                     <Button
@@ -257,7 +260,7 @@ export default function OrderList() {
                     >
                         <ChevronLeft className='w-4 h-4' />
                     </Button>
-                    <div className='text-sm font-medium'>Page {page}</div>
+                    <div className='text-sm font-medium'>第 {page} 页</div>
                     <Button
                         variant='outline'
                         size='sm'
@@ -269,229 +272,6 @@ export default function OrderList() {
                 </div>
             </div>
 
-            {/* Detail Drawer */}
-            <Sheet
-                open={isDrawerOpen}
-                onOpenChange={(open) => !open && closeDrawer()}
-            >
-                <SheetContent
-                    side='right'
-                    className='overflow-y-auto sm:max-w-xl'
-                >
-                    <SheetHeader>
-                        <SheetTitle>Order Details</SheetTitle>
-                        <SheetDescription>
-                            Order # {selectedOrder?.orderNo}
-                        </SheetDescription>
-                    </SheetHeader>
-
-                    {isDetailLoading || !selectedOrder ? (
-                        <div className='flex justify-center p-8'>
-                            <Loader2 className='animate-spin' />
-                        </div>
-                    ) : (
-                        <div className='mt-6 space-y-6'>
-                            {/* Basic Info */}
-                            <div className='grid grid-cols-2 gap-4'>
-                                <div>
-                                    <Label className='text-muted-foreground'>
-                                        Status
-                                    </Label>
-                                    <div className='font-medium'>
-                                        {selectedOrder.status}
-                                    </div>
-                                </div>
-                                <div>
-                                    <Label className='text-muted-foreground'>
-                                        Total Amount
-                                    </Label>
-                                    <div className='font-medium'>
-                                        ¥{selectedOrder.totalAmount}
-                                    </div>
-                                </div>
-                                <div>
-                                    <Label className='text-muted-foreground'>
-                                        Created At
-                                    </Label>
-                                    <div className='font-medium'>
-                                        {format(
-                                            new Date(selectedOrder.createdAt),
-                                            'yyyy-MM-dd HH:mm'
-                                        )}
-                                    </div>
-                                </div>
-                                {selectedOrder.payment && (
-                                    <div>
-                                        <Label className='text-muted-foreground'>
-                                            Payment Method
-                                        </Label>
-                                        <div className='font-medium'>
-                                            {
-                                                selectedOrder.payment
-                                                    .paymentMethod
-                                            }
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Receiver Info */}
-                            <div>
-                                <h3 className='mb-2 font-semibold'>
-                                    Receiver Info
-                                </h3>
-                                <div className='p-3 text-sm rounded border bg-muted/20'>
-                                    {selectedOrder.receiverInfo ? (
-                                        <>
-                                            <p>
-                                                <span className='font-medium'>
-                                                    Name:
-                                                </span>{' '}
-                                                {
-                                                    selectedOrder.receiverInfo
-                                                        .name
-                                                }
-                                            </p>
-                                            <p>
-                                                <span className='font-medium'>
-                                                    Phone:
-                                                </span>{' '}
-                                                {
-                                                    selectedOrder.receiverInfo
-                                                        .phone
-                                                }
-                                            </p>
-                                            <p>
-                                                <span className='font-medium'>
-                                                    Address:
-                                                </span>{' '}
-                                                {
-                                                    selectedOrder.receiverInfo
-                                                        .address
-                                                }
-                                            </p>
-                                        </>
-                                    ) : (
-                                        'No receiver info'
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Remark */}
-                            {selectedOrder.remark && (
-                                <div>
-                                    <h3 className='mb-2 font-semibold'>
-                                        Order Remark
-                                    </h3>
-                                    <div className='p-3 text-sm italic rounded border border-yellow-100 bg-yellow-50/50 dark:bg-yellow-900/20 dark:border-yellow-900/50 text-muted-foreground'>
-                                        {selectedOrder.remark}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Items */}
-                            <div>
-                                <h3 className='mb-2 font-semibold'>
-                                    Order Items
-                                </h3>
-                                <div className='rounded-md border'>
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Product</TableHead>
-                                                <TableHead>Price</TableHead>
-                                                <TableHead>Qty</TableHead>
-                                                <TableHead>Shipped</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {selectedOrder.items?.map(
-                                                (item) => (
-                                                    <TableRow key={item.id}>
-                                                        <TableCell>
-                                                            <div className='flex gap-2 items-center'>
-                                                                {item.productImg && (
-                                                                    <img
-                                                                        src={
-                                                                            item.productImg
-                                                                        }
-                                                                        className='object-cover w-8 h-8 rounded'
-                                                                    />
-                                                                )}
-                                                                <span
-                                                                    className='truncate max-w-[150px]'
-                                                                    title={
-                                                                        item.productName
-                                                                    }
-                                                                >
-                                                                    {
-                                                                        item.productName
-                                                                    }
-                                                                </span>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            ¥{item.price}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            {item.quantity}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            {
-                                                                item.shippedQuantity
-                                                            }
-                                                        </TableCell>
-                                                    </TableRow>
-                                                )
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            </div>
-
-                            {/* Deliveries */}
-                            {selectedOrder.deliveries &&
-                                selectedOrder.deliveries.length > 0 && (
-                                    <div>
-                                        <h3 className='mb-2 font-semibold'>
-                                            Deliveries
-                                        </h3>
-                                        <div className='space-y-2'>
-                                            {selectedOrder.deliveries.map(
-                                                (d) => (
-                                                    <div
-                                                        key={d.id}
-                                                        className='p-3 text-sm rounded border'
-                                                    >
-                                                        <div className='flex justify-between'>
-                                                            <span className='font-medium'>
-                                                                {
-                                                                    d.deliveryCompany
-                                                                }
-                                                            </span>
-                                                            <span>
-                                                                {d.deliverySn}
-                                                            </span>
-                                                        </div>
-                                                        <div className='mt-1 text-xs text-muted-foreground'>
-                                                            {format(
-                                                                new Date(
-                                                                    d.createdAt
-                                                                ),
-                                                                'yyyy-MM-dd HH:mm'
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                )
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                        </div>
-                    )}
-                </SheetContent>
-            </Sheet>
-
             {/* Ship Dialog */}
             <ShipDialog
                 isOpen={isShipDialogOpen}
@@ -500,180 +280,5 @@ export default function OrderList() {
                 isLoading={isDetailLoading}
             />
         </div>
-    );
-}
-
-function ShipDialog({
-    isOpen,
-    onClose,
-    order,
-    isLoading,
-}: {
-    isOpen: boolean;
-    onClose: () => void;
-    order?: any;
-    isLoading: boolean;
-}) {
-    const queryClient = useQueryClient();
-    const [trackingNo, setTrackingNo] = useState('');
-    const [carrier, setCarrier] = useState('');
-    const [items, setItems] = useState<
-        { skuId: number; quantity: number; max: number; name: string }[]
-    >([]);
-
-    const shipMutation = useMutation({
-        mutationFn: (data: any) => shipOrder(order.id, data),
-        onSuccess: () => {
-            toast.success('Order shipped successfully');
-            queryClient.invalidateQueries({ queryKey: ['orders'] });
-            queryClient.invalidateQueries({ queryKey: ['order', order.id] });
-            onClose();
-        },
-        onError: (err) => {
-            toast.error('Failed to ship order');
-            console.error(err);
-        },
-    });
-
-    // Reset form when order changes
-    if (isOpen && order && items.length === 0 && !isLoading) {
-        // Filter items that can be shipped
-        const shippable = order.items
-            .filter((i: any) => i.quantity > i.shippedQuantity)
-            .map((i: any) => ({
-                skuId: i.skuId,
-                quantity: i.quantity - i.shippedQuantity,
-                max: i.quantity - i.shippedQuantity,
-                name: i.productName,
-            }));
-        if (shippable.length > 0 && items.length === 0) {
-            setItems(shippable);
-        }
-    }
-
-    // Clear items on close
-    if (!isOpen && items.length > 0) setItems([]);
-
-    const handleSubmit = () => {
-        if (!trackingNo || !carrier) {
-            toast.error('Please fill logistics info');
-            return;
-        }
-        const data = {
-            trackingNo,
-            carrier,
-            items: items
-                .filter((i) => i.quantity > 0)
-                .map((i) => ({ skuId: i.skuId, quantity: i.quantity })),
-        };
-        shipMutation.mutate(data);
-    };
-
-    return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className='sm:max-w-[600px]'>
-                <DialogHeader>
-                    <DialogTitle>Ship Order {order?.orderNo}</DialogTitle>
-                </DialogHeader>
-
-                {isLoading ? (
-                    <Loader2 className='animate-spin' />
-                ) : (
-                    <div className='grid gap-4 py-4'>
-                        <div className='grid grid-cols-4 gap-4 items-center'>
-                            <Label className='text-right'>Tracking No</Label>
-                            <Input
-                                value={trackingNo}
-                                onChange={(e) => setTrackingNo(e.target.value)}
-                                className='col-span-3'
-                            />
-                        </div>
-                        <div className='grid grid-cols-4 gap-4 items-center'>
-                            <Label className='text-right'>Carrier</Label>
-                            <Input
-                                value={carrier}
-                                onChange={(e) => setCarrier(e.target.value)}
-                                className='col-span-3'
-                                placeholder='e.g. SF Express'
-                            />
-                        </div>
-
-                        <div className='pt-4 border-t'>
-                            <Label className='block mb-2'>Items to Ship</Label>
-                            <div className='max-h-[200px] overflow-y-auto border rounded'>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Product</TableHead>
-                                            <TableHead className='w-[80px]'>
-                                                Max
-                                            </TableHead>
-                                            <TableHead className='w-[100px]'>
-                                                Ship Qty
-                                            </TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {items.map((item, idx) => (
-                                            <TableRow key={item.skuId}>
-                                                <TableCell className='text-sm'>
-                                                    {item.name}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {item.max}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Input
-                                                        type='number'
-                                                        min={0}
-                                                        max={item.max}
-                                                        value={item.quantity}
-                                                        onChange={(e) => {
-                                                            const val = Number(
-                                                                e.target.value
-                                                            );
-                                                            const newItems = [
-                                                                ...items,
-                                                            ];
-                                                            newItems[
-                                                                idx
-                                                            ].quantity =
-                                                                Math.min(
-                                                                    Math.max(
-                                                                        0,
-                                                                        val
-                                                                    ),
-                                                                    item.max
-                                                                );
-                                                            setItems(newItems);
-                                                        }}
-                                                        className='h-8'
-                                                    />
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                <DialogFooter>
-                    <Button variant='outline' onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={handleSubmit}
-                        disabled={shipMutation.isPending}
-                    >
-                        {shipMutation.isPending && (
-                            <Loader2 className='mr-2 w-4 h-4 animate-spin' />
-                        )}
-                        Confirm Ship
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
     );
 }

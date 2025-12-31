@@ -293,6 +293,18 @@ const formatPrice = (price: number) => {
                                                     数量: {item.quantity}
                                                 </p>
                                             </div>
+                                            <div class='flex items-center'>
+                                                {
+                                                    ['PENDING_DELIVERY', 'SHIPPED', 'DELIVERED', 'COMPLETED'].includes(order.status) && (
+                                                        <a
+                                                            href={`/member/after-sale/apply?orderId=${order.id}&orderItemId=${item.id}`}
+                                                            class='px-4 py-2 text-xs font-bold text-nike-black rounded border border-nike-black transition-colors hover:bg-nike-black hover:text-white'
+                                                        >
+                                                            申请售后
+                                                        </a>
+                                                    )
+                                                }
+                                            </div>
                                         </div>
                                     ))
                                 }
