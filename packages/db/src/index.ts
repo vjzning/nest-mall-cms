@@ -24,3 +24,7 @@ export * from './entities/collection-item.entity';
 export * from './entities/member-auth.entity';
 export * from './entities/member-address.entity';
 export * from './entities/system-log.entity';
+export * from './entities/mall-shipping-template.entity';
+export * from './entities/mall-shipping-rule.entity';
+export * from './entities/mall-shipping-free-rule.entity';
+export * from './entities/region.entity';

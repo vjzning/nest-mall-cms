@@ -34,6 +34,7 @@ const getCartState = async (context: any) => {
                         ...item,
                         name: product.name,
                         cover: product.cover,
+                        categoryId: product.categoryId,
                         price: sku.price,
                         totalPrice: Number(
                             (sku.price * item.quantity).toFixed(2)

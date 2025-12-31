@@ -49,6 +49,11 @@ export class OrderController {
         };
     }
 
+    @Post('calculate')
+    async calculate(@Body() createOrderDto: CreateOrderDto, @Request() req) {
+        return this.orderService.calculate(createOrderDto, req.user.id);
+    }
+
     @Get()
     async findMyOrders(
         @Request() req,

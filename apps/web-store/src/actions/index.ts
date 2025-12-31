@@ -4,6 +4,7 @@ import { addressActions } from './address';
 import { orderActions } from './order';
 import { afterSaleActions } from './after-sale';
 import { favorite as favoriteActions } from './favorite';
+import { couponActions } from './coupon';
 
 export const server = {
     auth: authActions,
@@ -12,4 +13,5 @@ export const server = {
     order: orderActions,
     afterSale: afterSaleActions,
     favorite: favoriteActions,
+    coupon: couponActions,
 };

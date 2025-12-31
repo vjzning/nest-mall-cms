@@ -1,7 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { SystemConfigEntity } from '@app/db/entities/system-config.entity';
+import { SystemConfigService } from '@app/shared/system-config/system-config.service';
 import { PaymentStrategy, PaymentStatus, PaymentOptions, CallbackResult } from './interfaces/payment-strategy.interface';
 import { AlipayStrategy } from './strategies/alipay.strategy';
 import { WechatPayStrategy } from './strategies/wechat-pay.strategy';
@@ -11,21 +9,33 @@ import { PaymentMethod } from '@app/db/entities/mall-payment.entity';
 @Injectable()
 export class PaymentService {
   constructor(
-    @InjectRepository(SystemConfigEntity)
-    private readonly configRepo: Repository<SystemConfigEntity>,
+    private readonly configService: SystemConfigService,
   ) {}
 
   private async getStrategy(method: string): Promise<PaymentStrategy> {
-    // Load config from DB
-    const configs = await this.configRepo.find({
-      where: { group: 'payment' },
-    });
+    // WeChat configuration keys
+    const wechatKeys = [
+      'wechat_appid',
+      'wechat_mchid',
+      'wechat_public_key',
+      'wechat_private_key',
+      'wechat_api_v3_key',
+      'wechat_serial_no',
+      'wechat_notify_url',
+      'wechat_appid_mini',
+      'wechat_appid_h5',
+    ];
+
+    // Construct config map from SystemConfigService
+    const configMap: Record<string, string> = {};
     
-    // Convert list to object map
-    const configMap = configs.reduce((acc, curr) => {
-      acc[curr.key] = curr.value;
-      return acc;
-    }, {} as Record<string, string>);
+    // For Alipay (mock/future)
+    const alipayKeys = ['alipay_appid', 'alipay_public_key', 'alipay_private_key'];
+    
+    [...wechatKeys, ...alipayKeys].forEach(key => {
+      const val = this.configService.get(key);
+      if (val) configMap[key] = val;
+    });
 
     // Handle wechat sub-methods if they are passed as wechat:h5, wechat:jsapi, etc.
     const [mainMethod] = method.split(':');

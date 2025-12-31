@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { PaymentService } from './payment.service';
-import { SystemConfigEntity } from '@app/db/entities/system-config.entity';
+import { SystemConfigModule } from '@app/shared/system-config/system-config.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SystemConfigEntity])],
+  imports: [SystemConfigModule],
   providers: [PaymentService],
   exports: [PaymentService],
 })

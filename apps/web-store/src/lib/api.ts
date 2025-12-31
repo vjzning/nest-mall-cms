@@ -29,6 +29,13 @@ export const API_ENDPOINTS = {
 
   // 订单
   MEMBER_ORDERS: `${API_BASE_URL}/mall/orders`,
+  ORDER_CALCULATE: `${API_BASE_URL}/mall/orders/calculate`,
+
+  // 优惠券
+  MEMBER_COUPONS: `${API_BASE_URL}/mall/coupons/my`,
+  COUPON_AVAILABLE: `${API_BASE_URL}/mall/coupons/available`,
+  COUPON_MATCH: `${API_BASE_URL}/mall/coupons/match`,
+  COUPON_CLAIM: `${API_BASE_URL}/mall/coupons/claim/:id`,
 
   // 售后
   MEMBER_AFTER_SALES: `${API_BASE_URL}/mall/after-sales`,

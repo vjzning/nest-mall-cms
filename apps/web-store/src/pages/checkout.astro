@@ -44,26 +44,58 @@ if (!cartData || cartData.cartItems.length === 0) {
     }
 
     const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0];
+
+    // 3. 获取可用优惠券
+    let availableCoupons = [];
+    try {
+        const { data, error } = await Astro.callAction(actions.coupon.getMatch, {
+            totalAmount: Number(cartData.total),
+            items: cartData.cartItems.map((item: any) => ({
+                productId: Number(item.productId),
+                categoryId: Number(item.categoryId || 0),
+                price: Number(item.price),
+                quantity: Number(item.quantity),
+            })),
+        });
+        
+        if (error) {
+            console.error('获取匹配优惠券失败 Action Error:', error);
+        }
+        
+        if (data) {
+            availableCoupons = data;
+        }
+    } catch (e) {
+        console.error('获取优惠券异常:', e);
+    }
 ---
 
 <Layout title='结算 - NIKE'>
-    <div id='checkout-form' class='max-w-[1200px] mx-auto px-4 py-12' data-addresses={JSON.stringify(addresses)}>
+    <div
+        id='checkout-form'
+        class='max-w-[1200px] mx-auto px-4 py-12'
+        data-addresses={JSON.stringify(addresses)}
+        data-cart-total={cartData.total}
+    >
         <div class='flex flex-col gap-12 lg:flex-row'>
             <!-- Left: Checkout Form -->
             <div class='flex-1 space-y-12'>
                 <section>
-                    <h2
-                        class='mb-8 text-2xl italic font-bold tracking-tighter uppercase'
-                    >
-                        配送选项
-                    </h2>
+                    <div class='flex justify-between items-center mb-8'>
+                        <h2 class='text-2xl italic font-bold tracking-tighter uppercase'>
+                            配送选项
+                        </h2>
+                        <a href='/member/address' class='text-sm font-bold underline hover:text-nike-dark-grey'>
+                            管理地址
+                        </a>
+                    </div>
 
                     <div class='space-y-4'>
                         {
                             addresses.length > 0 ? (
                                 <div class='grid grid-cols-1 gap-4'>
                                     {addresses.map((addr) => (
-                                        <label class='relative flex p-6 border-2 cursor-pointer rounded-xl transition-all hover:border-nike-black has-[:checked]:border-nike-black'>
+                                        <label class='relative flex p-6 border-2 cursor-pointer rounded-xl transition-all hover:border-nike-black has-[:checked]:border-nike-black has-[:checked]:bg-nike-grey/10 group'>
                                             <input
                                                 type='radio'
                                                 name='addressId'
@@ -91,11 +123,21 @@ if (!cartData || cartData.cartItems.length === 0) {
                                                 <p class='text-nike-dark-grey'>
                                                     {addr.addressLine1}
                                                 </p>
-                                                {addr.isDefault && (
-                                                    <span class='inline-block mt-2 text-[10px] bg-nike-grey px-2 py-0.5 font-bold uppercase'>
-                                                        默认地址
+                                                <div class='flex gap-2 mt-2'>
+                                                    {addr.isDefault && (
+                                                        <span class='inline-block text-[10px] bg-nike-black text-white px-2 py-0.5 font-bold uppercase'>
+                                                            默认地址
+                                                        </span>
+                                                    )}
+                                                    <span class='text-[10px] border border-nike-black px-2 py-0.5 font-bold uppercase hidden group-has-[:checked]:inline-block'>
+                                                        已选择
                                                     </span>
-                                                )}
+                                                </div>
+                                            </div>
+                                            <div class='absolute top-6 right-6 opacity-0 group-has-[:checked]:opacity-100 transition-opacity'>
+                                                <svg class='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                                    <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 13l4 4L19 7'></path>
+                                                </svg>
                                             </div>
                                         </label>
                                     ))}
@@ -118,14 +160,12 @@ if (!cartData || cartData.cartItems.length === 0) {
                 </section>
 
                 <section>
-                    <h2
-                        class='mb-8 text-2xl italic font-bold tracking-tighter uppercase'
-                    >
+                    <h2 class='mb-8 text-2xl italic font-bold tracking-tighter uppercase'>
                         支付方式
                     </h2>
                     <div class='grid grid-cols-2 gap-4'>
                         <label
-                            class='relative flex flex-col items-center justify-center p-6 border-2 cursor-pointer rounded-xl transition-all hover:border-nike-black has-[:checked]:border-nike-black'
+                            class='relative flex flex-col items-center justify-center p-6 border-2 cursor-pointer rounded-xl transition-all hover:border-nike-black has-[:checked]:border-nike-black has-[:checked]:bg-nike-grey/10 group'
                         >
                             <input
                                 type='radio'
@@ -137,12 +177,17 @@ if (!cartData || cartData.cartItems.length === 0) {
                             <img
                                 src='/images/alipay.png'
                                 alt='支付宝'
-                                class='h-8 mb-2 grayscale has-[:checked]:grayscale-0'
+                                class='h-8 mb-2 grayscale group-has-[:checked]:grayscale-0 transition-all'
                             />
                             <span class='font-medium'>支付宝</span>
+                            <div class='absolute top-4 right-4 opacity-0 group-has-[:checked]:opacity-100 transition-opacity'>
+                                <svg class='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                    <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 13l4 4L19 7'></path>
+                                </svg>
+                            </div>
                         </label>
                         <label
-                            class='relative flex flex-col items-center justify-center p-6 border-2 cursor-pointer rounded-xl transition-all hover:border-nike-black has-[:checked]:border-nike-black'
+                            class='relative flex flex-col items-center justify-center p-6 border-2 cursor-pointer rounded-xl transition-all hover:border-nike-black has-[:checked]:border-nike-black has-[:checked]:bg-nike-grey/10 group'
                         >
                             <input
                                 type='radio'
@@ -153,17 +198,73 @@ if (!cartData || cartData.cartItems.length === 0) {
                             <img
                                 src='/images/wechat.png'
                                 alt='微信支付'
-                                class='h-8 mb-2 grayscale has-[:checked]:grayscale-0'
+                                class='h-8 mb-2 grayscale group-has-[:checked]:grayscale-0 transition-all'
                             />
                             <span class='font-medium'>微信支付</span>
+                            <div class='absolute top-4 right-4 opacity-0 group-has-[:checked]:opacity-100 transition-opacity'>
+                                <svg class='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                    <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 13l4 4L19 7'></path>
+                                </svg>
+                            </div>
                         </label>
                     </div>
                 </section>
 
                 <section>
-                    <h2
-                        class='mb-8 text-2xl italic font-bold tracking-tighter uppercase'
-                    >
+                    <h2 class='mb-8 text-2xl italic font-bold tracking-tighter uppercase'>
+                        可用优惠券
+                    </h2>
+                    <div class='space-y-4'>
+                        {availableCoupons.length > 0 ? (
+                            <div class='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                                {availableCoupons.map((coupon: any) => (
+                                    <label class='relative flex p-4 border-2 cursor-pointer rounded-xl transition-all hover:border-nike-black has-[:checked]:border-nike-black has-[:checked]:bg-nike-grey/10 group'>
+                                        <input
+                                            type='radio'
+                                            name='memberCouponId'
+                                            value={coupon.memberCouponId}
+                                            class='sr-only'
+                                        />
+                                        <div class='flex-1'>
+                                            <div class='flex justify-between items-center mb-1'>
+                                                <span class='text-lg font-bold'>￥{coupon.discountAmount}</span>
+                                                <span class='px-2 py-0.5 text-xs font-bold text-white uppercase bg-nike-black'>
+                                                    {coupon.isFreeShipping ? '免邮' : '满减'}
+                                                </span>
+                                            </div>
+                                            <p class='mb-1 text-sm font-bold uppercase'>{coupon.name}</p>
+                                            <p class='text-[10px] text-nike-dark-grey'>
+                                                {coupon.isStackable ? '可叠加使用' : '不可叠加使用'}
+                                            </p>
+                                        </div>
+                                        <div class='absolute top-4 right-4 opacity-0 group-has-[:checked]:opacity-100 transition-opacity'>
+                                            <svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 13l4 4L19 7'></path>
+                                            </svg>
+                                        </div>
+                                    </label>
+                                ))}
+                                <label class='relative flex p-4 border-2 cursor-pointer rounded-xl transition-all hover:border-nike-black has-[:checked]:border-nike-black has-[:checked]:bg-nike-grey/10 group items-center justify-center border-dashed'>
+                                    <input
+                                        type='radio'
+                                        name='memberCouponId'
+                                        value=''
+                                        class='sr-only'
+                                        checked
+                                    />
+                                    <span class='text-sm font-bold uppercase'>不使用优惠券</span>
+                                </label>
+                            </div>
+                        ) : (
+                            <div class='p-8 text-center rounded-xl border-2 border-dashed border-nike-grey'>
+                                <p class='text-sm text-nike-dark-grey'>暂无可用的优惠券</p>
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class='mb-8 text-2xl italic font-bold tracking-tighter uppercase'>
                         订单备注
                     </h2>
                     <textarea
@@ -177,9 +278,7 @@ if (!cartData || cartData.cartItems.length === 0) {
             <!-- Right: Summary -->
             <div class='lg:w-[400px]'>
                 <div class='sticky top-24 p-8 rounded-xl bg-nike-grey/30'>
-                    <h2
-                        class='mb-6 text-xl italic font-bold tracking-tighter uppercase'
-                    >
+                    <h2 class='mb-6 text-xl italic font-bold tracking-tighter uppercase'>
                         订单摘要
                     </h2>
 
@@ -190,13 +289,15 @@ if (!cartData || cartData.cartItems.length === 0) {
                         </div>
                         <div class='flex justify-between text-nike-dark-grey'>
                             <span>预估运费</span>
-                            <span>免费</span>
+                            <span id='summary-shipping'>￥0.00</span>
                         </div>
-                        <div
-                            class='flex justify-between pt-4 text-lg font-bold border-t border-nike-grey'
-                        >
+                        <div id='summary-discount-row' class='flex hidden justify-between text-green-600'>
+                            <span>优惠券减免</span>
+                            <span id='summary-discount'>-￥0.00</span>
+                        </div>
+                        <div class='flex justify-between pt-4 text-lg font-bold border-t border-nike-grey'>
                             <span>总额</span>
-                            <span>￥{cartData.total}</span>
+                            <span id='summary-total'>￥{cartData.total}</span>
                         </div>
                     </div>
 
@@ -232,14 +333,12 @@ if (!cartData || cartData.cartItems.length === 0) {
 
                     <button
                         id='place-order-btn'
-                        class='py-5 w-full text-lg btn-nike-black'
+                        class='py-5 w-full text-lg btn-nike-black disabled:opacity-50 disabled:cursor-not-allowed'
                     >
                         立即下单
                     </button>
 
-                    <p
-                        class='mt-4 text-[10px] text-nike-dark-grey leading-tight text-center'
-                    >
+                    <p class='mt-4 text-[10px] text-nike-dark-grey leading-tight text-center'>
                         点击“立即下单”即表示您同意我们的《销售条款》和《隐私政策》。
                     </p>
                 </div>
@@ -251,23 +350,66 @@ if (!cartData || cartData.cartItems.length === 0) {
 <script>
     import { actions } from 'astro:actions';
 
-    const placeOrderBtn = document.getElementById('place-order-btn');
+    const checkoutForm = document.getElementById('checkout-form');
+    const placeOrderBtn = document.getElementById('place-order-btn') as HTMLButtonElement;
+    
+    const summaryShipping = document.getElementById('summary-shipping');
+    const summaryDiscount = document.getElementById('summary-discount');
+    const summaryDiscountRow = document.getElementById('summary-discount-row');
+    const summaryTotal = document.getElementById('summary-total');
 
+    // 计算订单预览
+    async function updateOrderPreview() {
+        const selectedAddressInput = document.querySelector('input[name="addressId"]:checked') as HTMLInputElement;
+        const selectedCouponInput = document.querySelector('input[name="memberCouponId"]:checked') as HTMLInputElement;
+        
+        const addressId = selectedAddressInput?.value;
+        const memberCouponId = selectedCouponInput?.value;
+
+        try {
+            const { data, error } = await actions.order.calculate({
+                addressId: addressId ? Number(addressId) : undefined,
+                memberCouponId: memberCouponId ? Number(memberCouponId) : undefined
+            });
+
+            if (error) {
+                console.error('计算订单预览失败:', error);
+                return;
+            }
+
+            if (data) {
+                if (summaryShipping) summaryShipping.textContent = `￥${data.shippingFee.toFixed(2)}`;
+                
+                if (data.discountAmount > 0) {
+                    if (summaryDiscount) summaryDiscount.textContent = `-￥${data.discountAmount.toFixed(2)}`;
+                    summaryDiscountRow?.classList.remove('hidden');
+                } else {
+                    summaryDiscountRow?.classList.add('hidden');
+                }
+                
+                if (summaryTotal) summaryTotal.textContent = `￥${data.payAmount.toFixed(2)}`;
+            }
+        } catch (e) {
+            console.error('更新预览出错:', e);
+        }
+    }
+
+    // 监听地址和优惠券变化
+    document.querySelectorAll('input[name="addressId"], input[name="memberCouponId"]').forEach(input => {
+        input.addEventListener('change', updateOrderPreview);
+    });
+
+    // 初始计算一次
+    updateOrderPreview();
+
+    // 提交订单
     placeOrderBtn?.addEventListener('click', async () => {
-        const checkoutForm = document.getElementById('checkout-form');
         const addresses = JSON.parse(checkoutForm?.dataset.addresses || '[]');
         
-        const selectedAddressInput = document.querySelector(
-            'input[name="addressId"]:checked'
-        ) as HTMLInputElement;
-        const selectedPayment = document.querySelector(
-            'input[name="paymentMethod"]:checked'
-        ) as HTMLInputElement;
-        const remark = (
-            document.querySelector(
-                'textarea[name="remark"]'
-            ) as HTMLTextAreaElement
-        )?.value;
+        const selectedAddressInput = document.querySelector('input[name="addressId"]:checked') as HTMLInputElement;
+        const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked') as HTMLInputElement;
+        const selectedCouponInput = document.querySelector('input[name="memberCouponId"]:checked') as HTMLInputElement;
+        const remark = (document.querySelector('textarea[name="remark"]') as HTMLTextAreaElement)?.value;
 
         if (!selectedAddressInput) {
             alert('请选择收货地址');
@@ -277,13 +419,12 @@ if (!cartData || cartData.cartItems.length === 0) {
         const addressId = selectedAddressInput.value;
         const addressData = addresses.find((a: any) => String(a.id) === String(addressId));
 
-        console.log(addressData, addresses);
         if (!addressData) {
             alert('地址信息无效');
             return;
         }
 
-        placeOrderBtn.setAttribute('disabled', 'true');
+        placeOrderBtn.disabled = true;
         placeOrderBtn.textContent = '正在处理...';
 
         try {
@@ -291,10 +432,12 @@ if (!cartData || cartData.cartItems.length === 0) {
                 receiverInfo: {
                     name: addressData.receiverName,
                     phone: addressData.receiverPhone,
-                    address: `${addressData.stateProvince} ${addressData.city} ${addressData.districtCounty} ${addressData.addressLine1}`
+                    address: `${addressData.stateProvince} ${addressData.city} ${addressData.districtCounty} ${addressData.addressLine1}`,
+                    provinceId: addressData.provinceId ? Number(addressData.provinceId) : null
                 },
                 paymentMethod: selectedPayment.value,
-                remark: remark
+                remark: remark,
+                memberCouponId: selectedCouponInput?.value ? Number(selectedCouponInput.value) : undefined
             };
 
             const { data, error } = await actions.order.create(orderPayload);
@@ -302,11 +445,9 @@ if (!cartData || cartData.cartItems.length === 0) {
             if (error) {
                 alert(error.message || '下单失败，请稍后再试');
             } else if (data?.success) {
-                // 下单成功，如果是支付宝/微信，通常会返回支付参数或跳转链接
                 if (data.payParams?.payUrl) {
                     window.location.href = data.payParams.payUrl;
                 } else {
-                    // 模拟支付成功跳转
                     alert('订单已创建，正在跳转至订单详情...');
                     window.location.href = `/member/orders/${data.order.id}`;
                 }
@@ -314,7 +455,7 @@ if (!cartData || cartData.cartItems.length === 0) {
         } catch (e) {
             alert('下单过程中发生错误');
         } finally {
-            placeOrderBtn.removeAttribute('disabled');
+            placeOrderBtn.disabled = false;
             placeOrderBtn.textContent = '立即下单';
         }
     });

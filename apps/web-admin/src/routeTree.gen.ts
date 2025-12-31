@@ -25,15 +25,21 @@ import { Route as AuthContentResourceRouteImport } from './routes/_auth.content.
 import { Route as AuthContentCommentRouteImport } from './routes/_auth.content.comment'
 import { Route as AuthContentCategoryRouteImport } from './routes/_auth.content.category'
 import { Route as AuthContentArticleRouteImport } from './routes/_auth.content.article'
+import { Route as AuthMallShippingTemplateIndexRouteImport } from './routes/_auth.mall.shipping-template.index'
 import { Route as AuthMallProductIndexRouteImport } from './routes/_auth.mall.product.index'
 import { Route as AuthMallOrderIndexRouteImport } from './routes/_auth.mall.order.index'
+import { Route as AuthMallCouponIndexRouteImport } from './routes/_auth.mall.coupon.index'
 import { Route as AuthMallCollectionIndexRouteImport } from './routes/_auth.mall.collection.index'
 import { Route as AuthMallAfterSaleIndexRouteImport } from './routes/_auth.mall.after-sale.index'
+import { Route as AuthMallShippingTemplateCreateRouteImport } from './routes/_auth.mall.shipping-template.create'
 import { Route as AuthMallProductCreateRouteImport } from './routes/_auth.mall.product.create'
 import { Route as AuthMallOrderIdRouteImport } from './routes/_auth.mall.order.$id'
+import { Route as AuthMallCouponCreateRouteImport } from './routes/_auth.mall.coupon.create'
 import { Route as AuthMallCollectionCreateRouteImport } from './routes/_auth.mall.collection.create'
 import { Route as AuthMallAfterSaleIdRouteImport } from './routes/_auth.mall.after-sale.$id'
+import { Route as AuthMallShippingTemplateEditIdRouteImport } from './routes/_auth.mall.shipping-template.edit.$id'
 import { Route as AuthMallProductEditIdRouteImport } from './routes/_auth.mall.product.edit.$id'
+import { Route as AuthMallCouponEditIdRouteImport } from './routes/_auth.mall.coupon.edit.$id'
 import { Route as AuthMallCollectionEditIdRouteImport } from './routes/_auth.mall.collection.edit.$id'
 
 const LoginRoute = LoginRouteImport.update({
@@ -137,6 +143,16 @@ const AuthContentArticleRoute = AuthContentArticleRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_auth.content.article.lazy').then((d) => d.Route),
 )
+const AuthMallShippingTemplateIndexRoute =
+  AuthMallShippingTemplateIndexRouteImport.update({
+    id: '/mall/shipping-template/',
+    path: '/mall/shipping-template/',
+    getParentRoute: () => AuthRoute,
+  } as any).lazy(() =>
+    import('./routes/_auth.mall.shipping-template.index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
 const AuthMallProductIndexRoute = AuthMallProductIndexRouteImport.update({
   id: '/mall/product/',
   path: '/mall/product/',
@@ -150,6 +166,13 @@ const AuthMallOrderIndexRoute = AuthMallOrderIndexRouteImport.update({
   getParentRoute: () => AuthRoute,
 } as any).lazy(() =>
   import('./routes/_auth.mall.order.index.lazy').then((d) => d.Route),
+)
+const AuthMallCouponIndexRoute = AuthMallCouponIndexRouteImport.update({
+  id: '/mall/coupon/',
+  path: '/mall/coupon/',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() =>
+  import('./routes/_auth.mall.coupon.index.lazy').then((d) => d.Route),
 )
 const AuthMallCollectionIndexRoute = AuthMallCollectionIndexRouteImport.update({
   id: '/mall/collection/',
@@ -165,6 +188,16 @@ const AuthMallAfterSaleIndexRoute = AuthMallAfterSaleIndexRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_auth.mall.after-sale.index.lazy').then((d) => d.Route),
 )
+const AuthMallShippingTemplateCreateRoute =
+  AuthMallShippingTemplateCreateRouteImport.update({
+    id: '/mall/shipping-template/create',
+    path: '/mall/shipping-template/create',
+    getParentRoute: () => AuthRoute,
+  } as any).lazy(() =>
+    import('./routes/_auth.mall.shipping-template.create.lazy').then(
+      (d) => d.Route,
+    ),
+  )
 const AuthMallProductCreateRoute = AuthMallProductCreateRouteImport.update({
   id: '/mall/product/create',
   path: '/mall/product/create',
@@ -177,6 +210,13 @@ const AuthMallOrderIdRoute = AuthMallOrderIdRouteImport.update({
   path: '/mall/order/$id',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthMallCouponCreateRoute = AuthMallCouponCreateRouteImport.update({
+  id: '/mall/coupon/create',
+  path: '/mall/coupon/create',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() =>
+  import('./routes/_auth.mall.coupon.create.lazy').then((d) => d.Route),
+)
 const AuthMallCollectionCreateRoute =
   AuthMallCollectionCreateRouteImport.update({
     id: '/mall/collection/create',
@@ -192,12 +232,29 @@ const AuthMallAfterSaleIdRoute = AuthMallAfterSaleIdRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_auth.mall.after-sale.$id.lazy').then((d) => d.Route),
 )
+const AuthMallShippingTemplateEditIdRoute =
+  AuthMallShippingTemplateEditIdRouteImport.update({
+    id: '/mall/shipping-template/edit/$id',
+    path: '/mall/shipping-template/edit/$id',
+    getParentRoute: () => AuthRoute,
+  } as any).lazy(() =>
+    import('./routes/_auth.mall.shipping-template.edit.$id.lazy').then(
+      (d) => d.Route,
+    ),
+  )
 const AuthMallProductEditIdRoute = AuthMallProductEditIdRouteImport.update({
   id: '/mall/product/edit/$id',
   path: '/mall/product/edit/$id',
   getParentRoute: () => AuthRoute,
 } as any).lazy(() =>
   import('./routes/_auth.mall.product.edit.$id.lazy').then((d) => d.Route),
+)
+const AuthMallCouponEditIdRoute = AuthMallCouponEditIdRouteImport.update({
+  id: '/mall/coupon/edit/$id',
+  path: '/mall/coupon/edit/$id',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() =>
+  import('./routes/_auth.mall.coupon.edit.$id.lazy').then((d) => d.Route),
 )
 const AuthMallCollectionEditIdRoute =
   AuthMallCollectionEditIdRouteImport.update({
@@ -226,14 +283,20 @@ export interface FileRoutesByFullPath {
   '/system/user': typeof AuthSystemUserRoute
   '/mall/after-sale/$id': typeof AuthMallAfterSaleIdRoute
   '/mall/collection/create': typeof AuthMallCollectionCreateRoute
+  '/mall/coupon/create': typeof AuthMallCouponCreateRoute
   '/mall/order/$id': typeof AuthMallOrderIdRoute
   '/mall/product/create': typeof AuthMallProductCreateRoute
+  '/mall/shipping-template/create': typeof AuthMallShippingTemplateCreateRoute
   '/mall/after-sale': typeof AuthMallAfterSaleIndexRoute
   '/mall/collection': typeof AuthMallCollectionIndexRoute
+  '/mall/coupon': typeof AuthMallCouponIndexRoute
   '/mall/order': typeof AuthMallOrderIndexRoute
   '/mall/product': typeof AuthMallProductIndexRoute
+  '/mall/shipping-template': typeof AuthMallShippingTemplateIndexRoute
   '/mall/collection/edit/$id': typeof AuthMallCollectionEditIdRoute
+  '/mall/coupon/edit/$id': typeof AuthMallCouponEditIdRoute
   '/mall/product/edit/$id': typeof AuthMallProductEditIdRoute
+  '/mall/shipping-template/edit/$id': typeof AuthMallShippingTemplateEditIdRoute
 }
 export interface FileRoutesByTo {
   '/403': typeof R403Route
@@ -253,14 +316,20 @@ export interface FileRoutesByTo {
   '/system/user': typeof AuthSystemUserRoute
   '/mall/after-sale/$id': typeof AuthMallAfterSaleIdRoute
   '/mall/collection/create': typeof AuthMallCollectionCreateRoute
+  '/mall/coupon/create': typeof AuthMallCouponCreateRoute
   '/mall/order/$id': typeof AuthMallOrderIdRoute
   '/mall/product/create': typeof AuthMallProductCreateRoute
+  '/mall/shipping-template/create': typeof AuthMallShippingTemplateCreateRoute
   '/mall/after-sale': typeof AuthMallAfterSaleIndexRoute
   '/mall/collection': typeof AuthMallCollectionIndexRoute
+  '/mall/coupon': typeof AuthMallCouponIndexRoute
   '/mall/order': typeof AuthMallOrderIndexRoute
   '/mall/product': typeof AuthMallProductIndexRoute
+  '/mall/shipping-template': typeof AuthMallShippingTemplateIndexRoute
   '/mall/collection/edit/$id': typeof AuthMallCollectionEditIdRoute
+  '/mall/coupon/edit/$id': typeof AuthMallCouponEditIdRoute
   '/mall/product/edit/$id': typeof AuthMallProductEditIdRoute
+  '/mall/shipping-template/edit/$id': typeof AuthMallShippingTemplateEditIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -282,14 +351,20 @@ export interface FileRoutesById {
   '/_auth/system/user': typeof AuthSystemUserRoute
   '/_auth/mall/after-sale/$id': typeof AuthMallAfterSaleIdRoute
   '/_auth/mall/collection/create': typeof AuthMallCollectionCreateRoute
+  '/_auth/mall/coupon/create': typeof AuthMallCouponCreateRoute
   '/_auth/mall/order/$id': typeof AuthMallOrderIdRoute
   '/_auth/mall/product/create': typeof AuthMallProductCreateRoute
+  '/_auth/mall/shipping-template/create': typeof AuthMallShippingTemplateCreateRoute
   '/_auth/mall/after-sale/': typeof AuthMallAfterSaleIndexRoute
   '/_auth/mall/collection/': typeof AuthMallCollectionIndexRoute
+  '/_auth/mall/coupon/': typeof AuthMallCouponIndexRoute
   '/_auth/mall/order/': typeof AuthMallOrderIndexRoute
   '/_auth/mall/product/': typeof AuthMallProductIndexRoute
+  '/_auth/mall/shipping-template/': typeof AuthMallShippingTemplateIndexRoute
   '/_auth/mall/collection/edit/$id': typeof AuthMallCollectionEditIdRoute
+  '/_auth/mall/coupon/edit/$id': typeof AuthMallCouponEditIdRoute
   '/_auth/mall/product/edit/$id': typeof AuthMallProductEditIdRoute
+  '/_auth/mall/shipping-template/edit/$id': typeof AuthMallShippingTemplateEditIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -311,14 +386,20 @@ export interface FileRouteTypes {
     | '/system/user'
     | '/mall/after-sale/$id'
     | '/mall/collection/create'
+    | '/mall/coupon/create'
     | '/mall/order/$id'
     | '/mall/product/create'
+    | '/mall/shipping-template/create'
     | '/mall/after-sale'
     | '/mall/collection'
+    | '/mall/coupon'
     | '/mall/order'
     | '/mall/product'
+    | '/mall/shipping-template'
     | '/mall/collection/edit/$id'
+    | '/mall/coupon/edit/$id'
     | '/mall/product/edit/$id'
+    | '/mall/shipping-template/edit/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/403'
@@ -338,14 +419,20 @@ export interface FileRouteTypes {
     | '/system/user'
     | '/mall/after-sale/$id'
     | '/mall/collection/create'
+    | '/mall/coupon/create'
     | '/mall/order/$id'
     | '/mall/product/create'
+    | '/mall/shipping-template/create'
     | '/mall/after-sale'
     | '/mall/collection'
+    | '/mall/coupon'
     | '/mall/order'
     | '/mall/product'
+    | '/mall/shipping-template'
     | '/mall/collection/edit/$id'
+    | '/mall/coupon/edit/$id'
     | '/mall/product/edit/$id'
+    | '/mall/shipping-template/edit/$id'
   id:
     | '__root__'
     | '/403'
@@ -366,14 +453,20 @@ export interface FileRouteTypes {
     | '/_auth/system/user'
     | '/_auth/mall/after-sale/$id'
     | '/_auth/mall/collection/create'
+    | '/_auth/mall/coupon/create'
     | '/_auth/mall/order/$id'
     | '/_auth/mall/product/create'
+    | '/_auth/mall/shipping-template/create'
     | '/_auth/mall/after-sale/'
     | '/_auth/mall/collection/'
+    | '/_auth/mall/coupon/'
     | '/_auth/mall/order/'
     | '/_auth/mall/product/'
+    | '/_auth/mall/shipping-template/'
     | '/_auth/mall/collection/edit/$id'
+    | '/_auth/mall/coupon/edit/$id'
     | '/_auth/mall/product/edit/$id'
+    | '/_auth/mall/shipping-template/edit/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -496,6 +589,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthContentArticleRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/mall/shipping-template/': {
+      id: '/_auth/mall/shipping-template/'
+      path: '/mall/shipping-template'
+      fullPath: '/mall/shipping-template'
+      preLoaderRoute: typeof AuthMallShippingTemplateIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/mall/product/': {
       id: '/_auth/mall/product/'
       path: '/mall/product'
@@ -508,6 +608,13 @@ declare module '@tanstack/react-router' {
       path: '/mall/order'
       fullPath: '/mall/order'
       preLoaderRoute: typeof AuthMallOrderIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/mall/coupon/': {
+      id: '/_auth/mall/coupon/'
+      path: '/mall/coupon'
+      fullPath: '/mall/coupon'
+      preLoaderRoute: typeof AuthMallCouponIndexRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/mall/collection/': {
@@ -524,6 +631,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthMallAfterSaleIndexRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/mall/shipping-template/create': {
+      id: '/_auth/mall/shipping-template/create'
+      path: '/mall/shipping-template/create'
+      fullPath: '/mall/shipping-template/create'
+      preLoaderRoute: typeof AuthMallShippingTemplateCreateRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/mall/product/create': {
       id: '/_auth/mall/product/create'
       path: '/mall/product/create'
@@ -536,6 +650,13 @@ declare module '@tanstack/react-router' {
       path: '/mall/order/$id'
       fullPath: '/mall/order/$id'
       preLoaderRoute: typeof AuthMallOrderIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/mall/coupon/create': {
+      id: '/_auth/mall/coupon/create'
+      path: '/mall/coupon/create'
+      fullPath: '/mall/coupon/create'
+      preLoaderRoute: typeof AuthMallCouponCreateRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/mall/collection/create': {
@@ -552,11 +673,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthMallAfterSaleIdRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/mall/shipping-template/edit/$id': {
+      id: '/_auth/mall/shipping-template/edit/$id'
+      path: '/mall/shipping-template/edit/$id'
+      fullPath: '/mall/shipping-template/edit/$id'
+      preLoaderRoute: typeof AuthMallShippingTemplateEditIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/mall/product/edit/$id': {
       id: '/_auth/mall/product/edit/$id'
       path: '/mall/product/edit/$id'
       fullPath: '/mall/product/edit/$id'
       preLoaderRoute: typeof AuthMallProductEditIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/mall/coupon/edit/$id': {
+      id: '/_auth/mall/coupon/edit/$id'
+      path: '/mall/coupon/edit/$id'
+      fullPath: '/mall/coupon/edit/$id'
+      preLoaderRoute: typeof AuthMallCouponEditIdRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/mall/collection/edit/$id': {
@@ -585,14 +720,20 @@ interface AuthRouteChildren {
   AuthSystemUserRoute: typeof AuthSystemUserRoute
   AuthMallAfterSaleIdRoute: typeof AuthMallAfterSaleIdRoute
   AuthMallCollectionCreateRoute: typeof AuthMallCollectionCreateRoute
+  AuthMallCouponCreateRoute: typeof AuthMallCouponCreateRoute
   AuthMallOrderIdRoute: typeof AuthMallOrderIdRoute
   AuthMallProductCreateRoute: typeof AuthMallProductCreateRoute
+  AuthMallShippingTemplateCreateRoute: typeof AuthMallShippingTemplateCreateRoute
   AuthMallAfterSaleIndexRoute: typeof AuthMallAfterSaleIndexRoute
   AuthMallCollectionIndexRoute: typeof AuthMallCollectionIndexRoute
+  AuthMallCouponIndexRoute: typeof AuthMallCouponIndexRoute
   AuthMallOrderIndexRoute: typeof AuthMallOrderIndexRoute
   AuthMallProductIndexRoute: typeof AuthMallProductIndexRoute
+  AuthMallShippingTemplateIndexRoute: typeof AuthMallShippingTemplateIndexRoute
   AuthMallCollectionEditIdRoute: typeof AuthMallCollectionEditIdRoute
+  AuthMallCouponEditIdRoute: typeof AuthMallCouponEditIdRoute
   AuthMallProductEditIdRoute: typeof AuthMallProductEditIdRoute
+  AuthMallShippingTemplateEditIdRoute: typeof AuthMallShippingTemplateEditIdRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
@@ -611,14 +752,20 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthSystemUserRoute: AuthSystemUserRoute,
   AuthMallAfterSaleIdRoute: AuthMallAfterSaleIdRoute,
   AuthMallCollectionCreateRoute: AuthMallCollectionCreateRoute,
+  AuthMallCouponCreateRoute: AuthMallCouponCreateRoute,
   AuthMallOrderIdRoute: AuthMallOrderIdRoute,
   AuthMallProductCreateRoute: AuthMallProductCreateRoute,
+  AuthMallShippingTemplateCreateRoute: AuthMallShippingTemplateCreateRoute,
   AuthMallAfterSaleIndexRoute: AuthMallAfterSaleIndexRoute,
   AuthMallCollectionIndexRoute: AuthMallCollectionIndexRoute,
+  AuthMallCouponIndexRoute: AuthMallCouponIndexRoute,
   AuthMallOrderIndexRoute: AuthMallOrderIndexRoute,
   AuthMallProductIndexRoute: AuthMallProductIndexRoute,
+  AuthMallShippingTemplateIndexRoute: AuthMallShippingTemplateIndexRoute,
   AuthMallCollectionEditIdRoute: AuthMallCollectionEditIdRoute,
+  AuthMallCouponEditIdRoute: AuthMallCouponEditIdRoute,
   AuthMallProductEditIdRoute: AuthMallProductEditIdRoute,
+  AuthMallShippingTemplateEditIdRoute: AuthMallShippingTemplateEditIdRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)

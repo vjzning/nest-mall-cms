@@ -71,6 +71,21 @@ export class CreateProductDto {
     @Type(() => Number)
     sort: number;
 
+    @IsNumber()
+    @IsOptional()
+    @Type(() => Number)
+    shippingTemplateId: number;
+
+    @IsNumber()
+    @IsOptional()
+    @Type(() => Number)
+    weight: number;
+
+    @IsNumber()
+    @IsOptional()
+    @Type(() => Number)
+    volume: number;
+
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => CreateProductSkuDto)

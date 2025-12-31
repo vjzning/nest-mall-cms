@@ -8,6 +8,8 @@ import { OrderService } from './order/order.service';
 import { OrderProcessor } from './order/queue/order.processor';
 import { CollectionModule } from './collection/collection.module';
 import { AfterSaleModule } from './after-sale/after-sale.module';
+import { CouponModule } from './coupon/coupon.module';
+import { ShippingModule } from './shipping/shipping.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bullmq';
 import { ORDER_QUEUE, LOG_QUEUE } from '@app/queue';
@@ -40,6 +42,8 @@ import { LogInterceptor } from '@app/shared/interceptors/log.interceptor';
         ),
         CollectionModule,
         AfterSaleModule,
+        CouponModule,
+        ShippingModule,
     ],
     controllers: [MallPaymentController, ProductController, OrderController],
     providers: [ProductService, OrderService, OrderProcessor, LogInterceptor],

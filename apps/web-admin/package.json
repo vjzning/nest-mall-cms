@@ -29,6 +29,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tanstack/react-query": "^5.90.12",
     "@tanstack/react-router": "^1.143.4",
+    "@tanstack/react-virtual": "^3.13.14",
     "@tanstack/router-devtools": "^1.143.4",
     "axios": "^1.13.2",
     "cmdk": "^1.1.1",

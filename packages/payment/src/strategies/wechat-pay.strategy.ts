@@ -19,20 +19,50 @@ export class WechatPayStrategy implements PaymentStrategy {
 
     private initWxPay() {
         try {
+            const {
+                wechat_appid,
+                wechat_mchid,
+                wechat_public_key,
+                wechat_private_key,
+                wechat_api_v3_key,
+                wechat_serial_no,
+            } = this.config;
+
+            if (
+                !wechat_appid ||
+                !wechat_mchid ||
+                !wechat_api_v3_key ||
+                !wechat_serial_no
+            ) {
+                this.logger.warn(
+                    'WechatPay configuration is incomplete. Some features may not work.'
+                );
+                return;
+            }
+
             this.payInstance = new WxPay({
-                appid: this.config.wechat_appid,
-                mchid: this.config.wechat_mchid,
-                publicKey: Buffer.from(this.config.wechat_public_key || ''), // 微信支付公钥 (v3)
-                privateKey: Buffer.from(this.config.wechat_private_key || ''), // 商户私钥
-                key: this.config.wechat_api_v3_key, // API v3 密钥
-                serial_no: this.config.wechat_serial_no, // 商户证书序列号
+                appid: wechat_appid,
+                mchid: wechat_mchid,
+                publicKey: Buffer.from(wechat_public_key || ''), // 微信支付公钥 (v3)
+                privateKey: Buffer.from(wechat_private_key || ''), // 商户私钥
+                key: wechat_api_v3_key, // API v3 密钥
+                serial_no: wechat_serial_no, // 商户证书序列号
             });
         } catch (error) {
             this.logger.error('Failed to initialize WechatPay SDK', error);
         }
     }
 
+    private checkInstance() {
+        if (!this.payInstance) {
+            throw new BadRequestException(
+                '微信支付 SDK 未正确初始化，请检查后台支付配置（AppID, MchID, APIv3 Key, 证书序列号等）'
+            );
+        }
+    }
+
     async pay(order: MallOrderEntity, options?: PaymentOptions): Promise<any> {
+        this.checkInstance();
         const tradeType = options?.tradeType || 'JSAPI';
         this.logger.log(
             `Initiating WechatPay (${tradeType}) for order ${order.orderNo}`
@@ -97,6 +127,7 @@ export class WechatPayStrategy implements PaymentStrategy {
     }
 
     async handleCallback(data: any, headers?: any): Promise<CallbackResult> {
+        this.checkInstance();
         this.logger.log('Handling WechatPay callback');
         try {
             // 1. Verify signature
@@ -132,6 +163,7 @@ export class WechatPayStrategy implements PaymentStrategy {
     }
 
     async query(orderNo: string): Promise<PaymentStatus> {
+        this.checkInstance();
         try {
             const result = await this.payInstance.transactions_out_trade_no(
                 orderNo,
@@ -152,6 +184,7 @@ export class WechatPayStrategy implements PaymentStrategy {
         amount: number,
         reason: string
     ): Promise<any> {
+        this.checkInstance();
         this.logger.log(`Initiating WechatPay refund for ${transactionId}`);
         const params = {
             transaction_id: transactionId,

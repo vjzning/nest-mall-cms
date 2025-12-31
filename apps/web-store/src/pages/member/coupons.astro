@@ -1,0 +1,165 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import MemberSidebar from '../../components/member/MemberSidebar.astro';
+import { getSession } from '../../lib/session';
+import { actions } from 'astro:actions';
+
+const session = await getSession(Astro);
+if (!session) {
+    return Astro.redirect('/login');
+}
+
+const { user } = session;
+
+// 获取查询参数
+const currentStatus = (Astro.url.searchParams.get('status') || 'AVAILABLE') as 'AVAILABLE' | 'USED' | 'EXPIRED';
+
+// 获取优惠券列表
+const { data: coupons, error } = await Astro.callAction(actions.coupon.getMyCoupons, {
+    status: currentStatus
+});
+
+const tabs = [
+    { label: '未使用', value: 'AVAILABLE' },
+    { label: '已使用', value: 'USED' },
+    { label: '已过期', value: 'EXPIRED' },
+];
+
+const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    });
+};
+---
+
+<Layout title="我的优惠券">
+    <div class="py-10 min-h-screen bg-nike-grey">
+        <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
+                <!-- Sidebar -->
+                <div class="md:col-span-1">
+                    <MemberSidebar user={user} activeTab="coupons" />
+                </div>
+
+                <!-- Main Content -->
+                <div class="md:col-span-3">
+                    <div class="p-6 bg-white rounded-lg shadow-lg">
+                        <h3 class="mb-6 text-2xl font-bold">我的优惠券</h3>
+
+                        <!-- Tabs -->
+                        <div class="flex mb-8 border-b border-nike-grey">
+                            {tabs.map((tab) => (
+                                <a
+                                    href={`?status=${tab.value}`}
+                                    class={`px-6 py-4 text-sm font-bold uppercase transition-colors border-b-2 ${
+                                        currentStatus === tab.value
+                                            ? 'border-nike-black text-nike-black'
+                                            : 'border-transparent text-nike-dark-grey hover:text-nike-black'
+                                    }`}
+                                >
+                                    {tab.label}
+                                </a>
+                            ))}
+                        </div>
+
+                        {error && (
+                            <div class="p-4 mb-6 text-red-600 bg-red-50 rounded border border-red-200">
+                                {error.message}
+                            </div>
+                        )}
+
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            {coupons && coupons.length > 0 ? (
+                                coupons.map((item: any) => (
+                                    <div class={`relative flex flex-col overflow-hidden rounded-xl border-2 transition-all ${
+                                        currentStatus === 'AVAILABLE' 
+                                            ? 'border-nike-black/10 hover:border-nike-black' 
+                                            : 'border-nike-grey grayscale opacity-70'
+                                    }`}>
+                                        <div class={`p-6 ${
+                                            currentStatus === 'AVAILABLE' ? 'bg-nike-black text-white' : 'bg-nike-dark-grey text-white'
+                                        }`}>
+                                            <div class="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <span class="text-3xl font-bold italic">
+                                                        {item.coupon.type === 1 && `￥${parseFloat(item.coupon.value).toFixed(0)}`}
+                                                        {item.coupon.type === 2 && `${(parseFloat(item.coupon.value) * 10).toFixed(1)}折`}
+                                                        {item.coupon.type === 3 && '免邮'}
+                                                    </span>
+                                                    <p class="mt-1 text-xs opacity-80 uppercase tracking-widest">
+                                                        {parseFloat(item.coupon.minAmount) > 0 ? `满 ￥${parseFloat(item.coupon.minAmount).toFixed(0)} 可用` : '无门槛'}
+                                                    </p>
+                                                </div>
+                                                <div class="px-2 py-1 text-[10px] font-bold bg-white/20 rounded uppercase tracking-tighter">
+                                                    {item.coupon.type === 1 && '满减券'}
+                                                    {item.coupon.type === 2 && '折扣券'}
+                                                    {item.coupon.type === 3 && '免邮券'}
+                                                </div>
+                                            </div>
+                                            <h4 class="text-lg font-bold uppercase tracking-tight">{item.coupon.name}</h4>
+                                        </div>
+                                        
+                                        <div class="p-4 bg-white flex-1 flex flex-col justify-between">
+                                            <div class="space-y-2 mb-4">
+                                                <div class="flex items-center text-xs text-nike-dark-grey">
+                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    有效期至：{formatDate(item.expireTime)}
+                                                </div>
+                                                {item.coupon.description && (
+                                                    <p class="text-xs text-nike-dark-grey leading-relaxed">
+                                                        {item.coupon.description}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {currentStatus === 'AVAILABLE' && (
+                                                <a 
+                                                    href="/" 
+                                                    class="block w-full py-2 text-center text-xs font-bold uppercase tracking-widest border-2 border-nike-black hover:bg-nike-black hover:text-white transition-colors"
+                                                >
+                                                    立即使用
+                                                </a>
+                                            )}
+                                            {currentStatus === 'USED' && (
+                                                <div class="text-center text-xs font-bold uppercase text-nike-dark-grey py-2 border-2 border-nike-grey">
+                                                    已使用
+                                                </div>
+                                            )}
+                                            {currentStatus === 'EXPIRED' && (
+                                                <div class="text-center text-xs font-bold uppercase text-nike-dark-grey py-2 border-2 border-nike-grey">
+                                                    已过期
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Decorative Punch Holes */}
+                                        <div class="absolute top-[108px] -left-3 w-6 h-6 bg-white rounded-full border-2 border-transparent"></div>
+                                        <div class="absolute top-[108px] -right-3 w-6 h-6 bg-white rounded-full border-2 border-transparent"></div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div class="col-span-full py-20 text-center">
+                                    <div class="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-nike-grey">
+                                        <svg class="w-8 h-8 text-nike-dark-grey" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                        </svg>
+                                    </div>
+                                    <p class="text-nike-dark-grey">暂无优惠券</p>
+                                    <a href="/" class="inline-block mt-4 text-sm font-bold underline">去逛逛</a>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</Layout>
+
+<style>
+    /* Custom dashed line or decorative elements if needed */
+</style>

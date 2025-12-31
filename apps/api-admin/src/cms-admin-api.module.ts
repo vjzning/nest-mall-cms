@@ -22,6 +22,7 @@ import { DictionaryModule } from './dictionary/dictionary.module';
 import { ResourceModule } from './resource/resource.module';
 import { SystemConfigModule } from './system/config/system-config.module';
 import { SystemLogModule } from './system/log/system-log.module';
+import { RegionModule } from './system/region/region.module';
 import { MallModule } from './mall/mall.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import databaseConfig from './config/database.config';
@@ -85,6 +86,7 @@ import { BullBoardAuthMiddleware } from './common/middleware/bull-board-auth.mid
         ResourceModule,
         SystemConfigModule,
         SystemLogModule,
+        RegionModule,
         MallModule,
         DashboardModule,
     ],

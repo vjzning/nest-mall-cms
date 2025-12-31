@@ -3,13 +3,13 @@ import { actions } from 'astro:actions';
 
 interface Props {
     user: any;
-    activeTab: 'profile' | 'orders' | 'favorites' | 'addresses' | 'after-sale';
+    activeTab: 'profile' | 'orders' | 'favorites' | 'addresses' | 'after-sale' | 'coupons';
 }
 
 const { user, activeTab } = Astro.props;
 ---
 
-<div class='p-6 bg-white rounded-lg shadow-lg'>
+<div class='sticky top-24 p-6 bg-white rounded-lg shadow-lg'>
     <div class='mb-6 text-center'>
         <div
             class='flex overflow-hidden justify-center items-center mx-auto mb-4 w-24 h-24 rounded-full bg-nike-grey'
@@ -44,6 +44,18 @@ const { user, activeTab } = Astro.props;
             class={`block px-4 py-2 rounded transition-colors ${activeTab === 'orders' ? 'bg-nike-black text-white' : 'text-nike-black hover:bg-nike-grey'}`}
         >
             我的订单
+        </a>
+        <a
+            href='/member/coupons'
+            class={`block px-4 py-2 rounded transition-colors ${activeTab === 'coupons' ? 'bg-nike-black text-white' : 'text-nike-black hover:bg-nike-grey'}`}
+        >
+            我的优惠券
+        </a>
+        <a
+            href='/coupons'
+            class="block px-4 py-2 rounded transition-colors text-nike-black hover:bg-nike-grey"
+        >
+            领券中心
         </a>
         <a
             href='/member/after-sale'

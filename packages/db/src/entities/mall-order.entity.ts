@@ -32,6 +32,9 @@ export class MallOrderEntity extends BaseEntity {
     @Column({ name: 'pay_amount', type: 'decimal', precision: 10, scale: 2 })
     payAmount: number;
 
+    @Column({ name: 'shipping_fee', type: 'decimal', precision: 10, scale: 2, default: 0, comment: '运费' })
+    shippingFee: number;
+
     @Column({ type: 'varchar', length: 20, default: OrderStatus.PENDING_PAY })
     status: OrderStatus;
 
