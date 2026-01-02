@@ -1,4 +1,5 @@
 import { api } from '@/lib/axios';
+import { type MallCategory } from '../category/api';
 
 export interface ProductSku {
     id?: number;
@@ -14,6 +15,7 @@ export interface Product {
     name: string;
     description?: string;
     categoryId?: number;
+    category?: MallCategory;
     cover?: string;
     images?: string[];
     detail?: string;

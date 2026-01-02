@@ -31,11 +31,10 @@ export function Forbidden() {
           403
         </h1>
 
-        <h2 className="mb-3 text-2xl font-bold tracking-tight">Access Denied</h2>
+        <h2 className="mb-3 text-2xl font-bold tracking-tight">访问被拒绝</h2>
 
         <p className="text-muted-foreground max-w-[500px] mb-8 leading-relaxed">
-          Sorry, you don't have permission to access this page. Please contact your administrator if
-          you believe this is a mistake.
+          抱歉，您没有权限访问此页面。如果您认为这是一个错误，请联系管理员。
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 min-w-[300px] justify-center">
@@ -46,7 +45,7 @@ export function Forbidden() {
             className="gap-2 shadow-lg transition-all hover:shadow-primary/25"
           >
             <Home className="w-4 h-4" />
-            Back to Dashboard
+            返回仪表盘
           </Button>
           <Button
             variant="outline"
@@ -55,7 +54,7 @@ export function Forbidden() {
             className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20"
           >
             <LogOut className="w-4 h-4" />
-            Sign in with different account
+            使用其他账号登录
           </Button>
         </div>
       </div>

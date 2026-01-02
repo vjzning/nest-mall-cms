@@ -46,6 +46,7 @@
         "@nestjs/platform-express": "^11.0.1",
         "@nestjs/schedule": "^6.1.0",
         "@nestjs/swagger": "^11.2.3",
+        "@nestjs/throttler": "^6.5.0",
         "@nestjs/typeorm": "^11.0.0",
         "@types/passport-github2": "^1.2.9",
         "ali-oss": "^6.23.0",
@@ -149,5 +150,6 @@
             "^@app/redis(|/.*)$": "<rootDir>/packages/redis/src/$1",
             "^@app/shared(|/.*)$": "<rootDir>/packages/shared/src/$1"
         }
-    }
+    },
+    "pnpm": {}
 }

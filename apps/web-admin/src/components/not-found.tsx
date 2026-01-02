@@ -21,10 +21,10 @@ export function NotFound() {
           404
         </h1>
         
-        <h2 className="text-2xl font-bold tracking-tight mb-3">Page not found</h2>
+        <h2 className="mb-3 text-2xl font-bold tracking-tight">页面未找到</h2>
         
         <p className="text-muted-foreground max-w-[500px] mb-8 leading-relaxed">
-          Sorry, we couldn't find the page you're looking for. It might have been moved, deleted, or possibly never existed.
+          抱歉，我们找不到您要查找的页面。它可能已被移动、删除，或者根本不存在。
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 min-w-[300px] justify-center">
@@ -32,10 +32,10 @@ export function NotFound() {
             variant="default" 
             onClick={() => navigate({ to: '/' })}
             size="lg"
-            className="gap-2 shadow-lg hover:shadow-primary/25 transition-all"
+            className="gap-2 shadow-lg transition-all hover:shadow-primary/25"
           >
-            <Home className="h-4 w-4" />
-            Back to Dashboard
+            <Home className="w-4 h-4" />
+            返回仪表盘
           </Button>
           <Button 
             variant="outline" 
@@ -43,8 +43,8 @@ export function NotFound() {
             size="lg"
             className="gap-2"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Go Back
+            <ArrowLeft className="w-4 h-4" />
+            返回上一页
           </Button>
         </div>
       </div>

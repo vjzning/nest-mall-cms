@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth.store';
 import { menuApi } from '@/features/menu/api';
 import * as LucideIcons from 'lucide-react';
+import { ModeToggle } from '@/components/mode-toggle';
+import { NotificationCenter } from '@/components/notification-center';
 import {
     Sidebar,
     SidebarContent,
@@ -96,9 +98,9 @@ export function AppSidebar({ children }: AppSidebarProps) {
                 }
             } else if (root.type === 2) {
                 // It's a menu at root level
-                let generalGroup = groups.find((g) => g.label === 'General');
+                let generalGroup = groups.find((g) => g.label === '常规');
                 if (!generalGroup) {
-                    generalGroup = { label: 'General', items: [] };
+                    generalGroup = { label: '常规', items: [] };
                     groups.push(generalGroup);
                 }
                 generalGroup.items.push({
@@ -107,23 +109,6 @@ export function AppSidebar({ children }: AppSidebarProps) {
                     icon: getIcon(root.icon),
                 });
             }
-        });
-
-        // Add hardcoded system monitor group
-        groups.push({
-            label: 'System Monitor',
-            items: [
-                {
-                    label: 'Queue Dashboard',
-                    path: '/system/queues',
-                    icon: getIcon('Activity'),
-                },
-                {
-                    label: '操作日志',
-                    path: '/system/log',
-                    icon: getIcon('ClipboardList'),
-                },
-            ],
         });
 
         return groups;
@@ -156,10 +141,10 @@ export function AppSidebar({ children }: AppSidebarProps) {
 
     return (
         <SidebarProvider>
-            <div className='flex w-full min-h-screen'>
+            <div className='flex overflow-hidden w-full h-screen'>
                 <Sidebar>
                     <SidebarHeader className='p-4 border-b'>
-                        <h1 className='text-xl font-bold'>CMS Admin</h1>
+                        <h1 className='text-xl font-bold'>后台管理系统</h1>
                     </SidebarHeader>
                     <SidebarContent>
                         {menuGroups.map((group, index) => (
@@ -215,7 +200,7 @@ export function AppSidebar({ children }: AppSidebarProps) {
                                 </Avatar>
                                 <div className='flex overflow-hidden flex-col'>
                                     <span className='text-sm font-medium truncate'>
-                                        {user?.username || 'User'}
+                                        {user?.username || '用户'}
                                     </span>
                                     <span className='text-xs truncate text-muted-foreground'>
                                         {user?.email || 'admin@example.com'}
@@ -228,19 +213,25 @@ export function AppSidebar({ children }: AppSidebarProps) {
                                 onClick={handleLogout}
                             >
                                 <LucideIcons.LogOut size={16} />
-                                Logout
+                                退出登录
                             </Button>
                         </div>
                     </SidebarFooter>
                 </Sidebar>
-                <main className='overflow-auto flex-1'>
-                    <div className='flex gap-4 items-center p-4 border-b'>
+                <main className='flex overflow-hidden flex-col flex-1 min-h-0'>
+                    <div className='flex gap-4 items-center p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-20'>
                         <SidebarTrigger />
-                        <h2 className='text-lg font-semibold'>
-                            {currentLabel || 'Dashboard'}
+                        <h2 className='flex-1 text-lg font-semibold'>
+                            {currentLabel || '仪表盘'}
                         </h2>
+                        <div className='flex gap-2 items-center'>
+                            <NotificationCenter />
+                            <ModeToggle />
+                        </div>
                     </div>
-                    <div className='p-8'>{children}</div>
+                    <div className='overflow-auto flex-1'>
+                        <div className='p-8'>{children}</div>
+                    </div>
                 </main>
             </div>
         </SidebarProvider>

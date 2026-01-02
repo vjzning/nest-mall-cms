@@ -16,9 +16,29 @@ import { RedisClientModule, RedisLockModule } from '@app/redis';
 import { QueueModule } from '@app/queue';
 import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv as createKeyvRedis } from '@keyv/redis';
+import { ThrottlerBehindProxyGuard } from '@app/shared'; // 记得确保 shared 包导出了它
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { RedisThrottlerStorage, RedisClientService } from '@app/redis';
 
 @Module({
     imports: [
+        ThrottlerModule.forRootAsync({
+            imports: [RedisClientModule], // 确保能注入 RedisClientService
+            inject: [RedisClientService],
+            useFactory: (redis: RedisClientService) => ({
+                throttlers: [
+                    {
+                        // 全局默认限流规则：例如 60秒内最多 100 次请求
+                        name: 'default',
+                        ttl: 60000,
+                        limit: 100,
+                    },
+                ],
+                // 挂载我们自定义的 Redis 存储
+                storage: new RedisThrottlerStorage(redis),
+            }),
+        }),
         ConfigModule.forRoot({
             isGlobal: true,
             load: [databaseConfig],
@@ -64,6 +84,12 @@ import { createKeyv as createKeyvRedis } from '@keyv/redis';
         SystemConfigModule,
     ],
     controllers: [CmsContentApiController],
-    providers: [CmsContentApiService],
+    providers: [
+        CmsContentApiService,
+        // {
+        //     provide: APP_GUARD,
+        //     useClass: ThrottlerBehindProxyGuard,
+        // },
+    ],
 })
 export class CmsContentApiModule {}

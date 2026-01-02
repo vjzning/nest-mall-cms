@@ -7,13 +7,17 @@ import {
     Param,
     Delete,
     Query,
+    UseInterceptors,
 } from '@nestjs/common';
 import { CouponService } from './coupon.service';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { Log } from '@app/shared/decorators/log.decorator';
+import { LogInterceptor } from '@app/shared/interceptors/log.interceptor';
+import { RequirePermissions } from '../../common/decorators/auth.decorator';
 
 @Controller('mall/coupon')
+@UseInterceptors(LogInterceptor)
 export class CouponController {
     constructor(private readonly couponService: CouponService) {}
 
@@ -21,6 +25,7 @@ export class CouponController {
      * 创建优惠券模板
      */
     @Post()
+    @RequirePermissions('mall:coupon:create')
     @Log({ module: '优惠券管理', action: '创建优惠券' })
     create(@Body() createCouponDto: CreateCouponDto) {
         return this.couponService.create(createCouponDto);
@@ -30,6 +35,7 @@ export class CouponController {
      * 分页获取优惠券模板列表
      */
     @Get()
+    @RequirePermissions('mall:coupon:list')
     findAll(@Query() query: any) {
         return this.couponService.findAll(query);
     }
@@ -38,6 +44,7 @@ export class CouponController {
      * 获取优惠券模板详情
      */
     @Get(':id')
+    @RequirePermissions('mall:coupon:query')
     findOne(@Param('id') id: string) {
         return this.couponService.findOne(+id);
     }
@@ -46,6 +53,7 @@ export class CouponController {
      * 更新优惠券模板
      */
     @Patch(':id')
+    @RequirePermissions('mall:coupon:update')
     @Log({ module: '优惠券管理', action: '更新优惠券' })
     update(@Param('id') id: string, @Body() updateCouponDto: UpdateCouponDto) {
         return this.couponService.update(+id, updateCouponDto);
@@ -55,6 +63,7 @@ export class CouponController {
      * 删除优惠券模板
      */
     @Delete(':id')
+    @RequirePermissions('mall:coupon:delete')
     @Log({ module: '优惠券管理', action: '删除优惠券' })
     remove(@Param('id') id: string) {
         return this.couponService.remove(+id);

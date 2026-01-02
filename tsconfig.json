@@ -33,7 +33,9 @@
             "@app/shared": ["packages/shared/src"],
             "@app/shared/*": ["packages/shared/src/*"],
             "@app/queue": ["packages/queue/src"],
-            "@app/queue/*": ["packages/queue/src/*"]
+            "@app/queue/*": ["packages/queue/src/*"],
+            "@app/notification": ["packages/notification/src"],
+            "@app/notification/*": ["packages/notification/src/*"]
         }
     },
     "include": [

@@ -1,22 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import { UserEntity } from '@app/db/entities/user.entity';
-import { RoleEntity } from '@app/db/entities/role.entity';
-import { MenuEntity } from '@app/db/entities/menu.entity';
-import { ArticleEntity } from '@app/db/entities/article.entity';
-import { CategoryEntity } from '@app/db/entities/category.entity';
-import { TagEntity } from '@app/db/entities/tag.entity';
-import { CommentEntity } from '@app/db/entities/comment.entity';
-import { ResourceEntity } from '@app/db/entities/resource.entity';
-import { MemberEntity } from '@app/db/entities/member.entity';
-import { MemberAddressEntity } from '@app/db/entities/member-address.entity';
-import { MemberFavoriteEntity } from '@app/db/entities/member-favorite.entity';
-import { MallProductEntity } from '@app/db/entities/mall-product.entity';
-import { MallProductSkuEntity } from '@app/db/entities/mall-product-sku.entity';
-import { MallOrderEntity } from '@app/db/entities/mall-order.entity';
-import { MallOrderItemEntity } from '@app/db/entities/mall-order-item.entity';
-import { MallPaymentEntity } from '@app/db/entities/mall-payment.entity';
-import { MallDeliveryEntity } from '@app/db/entities/mall-delivery.entity';
-import { SystemConfigEntity } from '@app/db/entities/system-config.entity';
+import { ALL_ENTITIES } from '@app/db';
 
 export default registerAs('database', () => ({
     type: 'mysql',
@@ -25,26 +8,7 @@ export default registerAs('database', () => ({
     username: process.env.MYSQL_USER || 'root',
     password: process.env.MYSQL_PASSWORD || 'root123456',
     database: process.env.CMS_DB_NAME || 'cms_admin',
-    entities: [
-        UserEntity,
-        RoleEntity,
-        MenuEntity,
-        ArticleEntity,
-        CategoryEntity,
-        TagEntity,
-        CommentEntity,
-        ResourceEntity,
-        MemberEntity,
-        MemberAddressEntity,
-        MemberFavoriteEntity,
-        MallProductEntity,
-        MallProductSkuEntity,
-        MallOrderEntity,
-        MallOrderItemEntity,
-        MallPaymentEntity,
-        MallDeliveryEntity,
-        SystemConfigEntity,
-    ],
+    entities: ALL_ENTITIES,
     synchronize: process.env.NODE_ENV !== 'production',
-    logging: process.env.NODE_ENV !== 'production',
+    logging: false,
 }));

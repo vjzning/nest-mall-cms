@@ -1,6 +1,7 @@
-import { Entity, Column, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { MallProductSkuEntity } from './mall-product-sku.entity';
+import { type MallCategoryEntity } from './mall-category.entity';
 
 @Entity('mall_product')
 export class MallProductEntity extends BaseEntity {
@@ -10,8 +11,12 @@ export class MallProductEntity extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ name: 'category_id', type: 'bigint', nullable: true })
+  @Column({ name: 'category_id', type: 'bigint', nullable: true, comment: '分类ID' })
   categoryId: number;
+
+  @ManyToOne('MallCategoryEntity', (category: MallCategoryEntity) => category.products)
+  @JoinColumn({ name: 'category_id' })
+  category: MallCategoryEntity;
 
   @Column({ length: 255, nullable: true })
   cover: string;

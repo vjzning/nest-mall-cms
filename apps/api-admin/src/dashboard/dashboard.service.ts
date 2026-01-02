@@ -154,6 +154,7 @@ export class DashboardService {
                 time: o.createdAt,
             })),
             lowStockItems: lowStockItems.map((s) => ({
+                id: s.product?.id,
                 name: s.product?.name || 'Unknown',
                 sku: s.code,
                 stock: s.stock,

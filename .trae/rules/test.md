@@ -16,3 +16,5 @@
 - 后端有关金额计算的，都需要 用 BigDecimal 类型，库用decimal.JS 避免精度丢失
 
 - 生成admin 页面 用中文文案 替代英文文案
+
+packages/shared/src/index.ts 只能导入前端使用的 dto。后端的不能在这个文件

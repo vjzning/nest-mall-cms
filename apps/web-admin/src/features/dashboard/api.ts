@@ -33,6 +33,7 @@ export interface RecentOrder {
 }
 
 export interface LowStockItem {
+  id: string;
   name: string;
   sku: string;
   stock: number;

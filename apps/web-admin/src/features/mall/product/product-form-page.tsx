@@ -9,7 +9,7 @@ import {
     type CreateProductDto,
     type ProductSku,
 } from './api';
-import { categoryApi } from '@/features/category/api';
+import { mallCategoryApi } from '../category/api';
 import { getShippingTemplates } from '../shipping-template/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -117,8 +117,8 @@ export default function ProductFormPage() {
 
     // Fetch categories
     const { data: categories } = useQuery({
-        queryKey: ['categories'],
-        queryFn: categoryApi.findAll,
+        queryKey: ['mall-categories'],
+        queryFn: mallCategoryApi.findAll,
     });
 
     // Fetch shipping templates
@@ -391,11 +391,7 @@ export default function ProductFormPage() {
                             <div className='grid gap-2'>
                                 <Label htmlFor='category'>商品类目</Label>
                                 <TreeSelect
-                                    options={(categories || []).map((c) => ({
-                                        id: c.id,
-                                        name: c.name,
-                                        parentId: c.parentId,
-                                    }))}
+                                    options={categories || []}
                                     value={watch('categoryId')}
                                     onValueChange={(val) =>
                                         setValue('categoryId', Number(val))

@@ -26,6 +26,7 @@ import { Like, Not } from 'typeorm';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { ORDER_QUEUE, ORDER_AUTO_CONFIRM_JOB } from '@app/queue';
+import { NotificationService } from '@app/notification';
 
 @Injectable()
 export class OrderService {
@@ -42,7 +43,8 @@ export class OrderService {
         private readonly paymentRepo: Repository<MallPaymentEntity>,
         @InjectQueue(ORDER_QUEUE)
         private readonly orderQueue: Queue,
-        private readonly dataSource: DataSource
+        private readonly dataSource: DataSource,
+        private readonly notificationService: NotificationService
     ) {}
 
     async findAll(query: QueryOrderDto) {

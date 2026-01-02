@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as R403RouteImport } from './routes/403'
 import { Route as AuthIndexRouteImport } from './routes/_auth.index'
+import { Route as AuthDashboardRouteImport } from './routes/_auth.dashboard'
 import { Route as AuthSystemUserRouteImport } from './routes/_auth.system.user'
 import { Route as AuthSystemRoleRouteImport } from './routes/_auth.system.role'
 import { Route as AuthSystemQueuesRouteImport } from './routes/_auth.system.queues'
@@ -20,16 +21,18 @@ import { Route as AuthSystemMenuRouteImport } from './routes/_auth.system.menu'
 import { Route as AuthSystemLogRouteImport } from './routes/_auth.system.log'
 import { Route as AuthSystemDictRouteImport } from './routes/_auth.system.dict'
 import { Route as AuthSystemConfigRouteImport } from './routes/_auth.system.config'
-import { Route as AuthContentTagRouteImport } from './routes/_auth.content.tag'
-import { Route as AuthContentResourceRouteImport } from './routes/_auth.content.resource'
-import { Route as AuthContentCommentRouteImport } from './routes/_auth.content.comment'
-import { Route as AuthContentCategoryRouteImport } from './routes/_auth.content.category'
-import { Route as AuthContentArticleRouteImport } from './routes/_auth.content.article'
+import { Route as AuthMallMemberRouteImport } from './routes/_auth.mall.member'
+import { Route as AuthCmsTagRouteImport } from './routes/_auth.cms.tag'
+import { Route as AuthCmsResourceRouteImport } from './routes/_auth.cms.resource'
+import { Route as AuthCmsCommentRouteImport } from './routes/_auth.cms.comment'
+import { Route as AuthCmsCategoryRouteImport } from './routes/_auth.cms.category'
+import { Route as AuthCmsArticleRouteImport } from './routes/_auth.cms.article'
 import { Route as AuthMallShippingTemplateIndexRouteImport } from './routes/_auth.mall.shipping-template.index'
 import { Route as AuthMallProductIndexRouteImport } from './routes/_auth.mall.product.index'
 import { Route as AuthMallOrderIndexRouteImport } from './routes/_auth.mall.order.index'
 import { Route as AuthMallCouponIndexRouteImport } from './routes/_auth.mall.coupon.index'
 import { Route as AuthMallCollectionIndexRouteImport } from './routes/_auth.mall.collection.index'
+import { Route as AuthMallCategoryIndexRouteImport } from './routes/_auth.mall.category.index'
 import { Route as AuthMallAfterSaleIndexRouteImport } from './routes/_auth.mall.after-sale.index'
 import { Route as AuthMallShippingTemplateCreateRouteImport } from './routes/_auth.mall.shipping-template.create'
 import { Route as AuthMallProductCreateRouteImport } from './routes/_auth.mall.product.create'
@@ -60,7 +63,14 @@ const AuthIndexRoute = AuthIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthRoute,
-} as any)
+} as any).lazy(() => import('./routes/_auth.index.lazy').then((d) => d.Route))
+const AuthDashboardRoute = AuthDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() =>
+  import('./routes/_auth.dashboard.lazy').then((d) => d.Route),
+)
 const AuthSystemUserRoute = AuthSystemUserRouteImport.update({
   id: '/system/user',
   path: '/system/user',
@@ -108,40 +118,45 @@ const AuthSystemConfigRoute = AuthSystemConfigRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_auth.system.config.lazy').then((d) => d.Route),
 )
-const AuthContentTagRoute = AuthContentTagRouteImport.update({
-  id: '/content/tag',
-  path: '/content/tag',
+const AuthMallMemberRoute = AuthMallMemberRouteImport.update({
+  id: '/mall/member',
+  path: '/mall/member',
   getParentRoute: () => AuthRoute,
 } as any).lazy(() =>
-  import('./routes/_auth.content.tag.lazy').then((d) => d.Route),
+  import('./routes/_auth.mall.member.lazy').then((d) => d.Route),
 )
-const AuthContentResourceRoute = AuthContentResourceRouteImport.update({
-  id: '/content/resource',
-  path: '/content/resource',
+const AuthCmsTagRoute = AuthCmsTagRouteImport.update({
+  id: '/cms/tag',
+  path: '/cms/tag',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() => import('./routes/_auth.cms.tag.lazy').then((d) => d.Route))
+const AuthCmsResourceRoute = AuthCmsResourceRouteImport.update({
+  id: '/cms/resource',
+  path: '/cms/resource',
   getParentRoute: () => AuthRoute,
 } as any).lazy(() =>
-  import('./routes/_auth.content.resource.lazy').then((d) => d.Route),
+  import('./routes/_auth.cms.resource.lazy').then((d) => d.Route),
 )
-const AuthContentCommentRoute = AuthContentCommentRouteImport.update({
-  id: '/content/comment',
-  path: '/content/comment',
+const AuthCmsCommentRoute = AuthCmsCommentRouteImport.update({
+  id: '/cms/comment',
+  path: '/cms/comment',
   getParentRoute: () => AuthRoute,
 } as any).lazy(() =>
-  import('./routes/_auth.content.comment.lazy').then((d) => d.Route),
+  import('./routes/_auth.cms.comment.lazy').then((d) => d.Route),
 )
-const AuthContentCategoryRoute = AuthContentCategoryRouteImport.update({
-  id: '/content/category',
-  path: '/content/category',
+const AuthCmsCategoryRoute = AuthCmsCategoryRouteImport.update({
+  id: '/cms/category',
+  path: '/cms/category',
   getParentRoute: () => AuthRoute,
 } as any).lazy(() =>
-  import('./routes/_auth.content.category.lazy').then((d) => d.Route),
+  import('./routes/_auth.cms.category.lazy').then((d) => d.Route),
 )
-const AuthContentArticleRoute = AuthContentArticleRouteImport.update({
-  id: '/content/article',
-  path: '/content/article',
+const AuthCmsArticleRoute = AuthCmsArticleRouteImport.update({
+  id: '/cms/article',
+  path: '/cms/article',
   getParentRoute: () => AuthRoute,
 } as any).lazy(() =>
-  import('./routes/_auth.content.article.lazy').then((d) => d.Route),
+  import('./routes/_auth.cms.article.lazy').then((d) => d.Route),
 )
 const AuthMallShippingTemplateIndexRoute =
   AuthMallShippingTemplateIndexRouteImport.update({
@@ -181,6 +196,11 @@ const AuthMallCollectionIndexRoute = AuthMallCollectionIndexRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_auth.mall.collection.index.lazy').then((d) => d.Route),
 )
+const AuthMallCategoryIndexRoute = AuthMallCategoryIndexRouteImport.update({
+  id: '/mall/category/',
+  path: '/mall/category/',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthMallAfterSaleIndexRoute = AuthMallAfterSaleIndexRouteImport.update({
   id: '/mall/after-sale/',
   path: '/mall/after-sale/',
@@ -268,12 +288,14 @@ const AuthMallCollectionEditIdRoute =
 export interface FileRoutesByFullPath {
   '/403': typeof R403Route
   '/login': typeof LoginRoute
+  '/dashboard': typeof AuthDashboardRoute
   '/': typeof AuthIndexRoute
-  '/content/article': typeof AuthContentArticleRoute
-  '/content/category': typeof AuthContentCategoryRoute
-  '/content/comment': typeof AuthContentCommentRoute
-  '/content/resource': typeof AuthContentResourceRoute
-  '/content/tag': typeof AuthContentTagRoute
+  '/cms/article': typeof AuthCmsArticleRoute
+  '/cms/category': typeof AuthCmsCategoryRoute
+  '/cms/comment': typeof AuthCmsCommentRoute
+  '/cms/resource': typeof AuthCmsResourceRoute
+  '/cms/tag': typeof AuthCmsTagRoute
+  '/mall/member': typeof AuthMallMemberRoute
   '/system/config': typeof AuthSystemConfigRoute
   '/system/dict': typeof AuthSystemDictRoute
   '/system/log': typeof AuthSystemLogRoute
@@ -288,6 +310,7 @@ export interface FileRoutesByFullPath {
   '/mall/product/create': typeof AuthMallProductCreateRoute
   '/mall/shipping-template/create': typeof AuthMallShippingTemplateCreateRoute
   '/mall/after-sale': typeof AuthMallAfterSaleIndexRoute
+  '/mall/category': typeof AuthMallCategoryIndexRoute
   '/mall/collection': typeof AuthMallCollectionIndexRoute
   '/mall/coupon': typeof AuthMallCouponIndexRoute
   '/mall/order': typeof AuthMallOrderIndexRoute
@@ -301,12 +324,14 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/403': typeof R403Route
   '/login': typeof LoginRoute
+  '/dashboard': typeof AuthDashboardRoute
   '/': typeof AuthIndexRoute
-  '/content/article': typeof AuthContentArticleRoute
-  '/content/category': typeof AuthContentCategoryRoute
-  '/content/comment': typeof AuthContentCommentRoute
-  '/content/resource': typeof AuthContentResourceRoute
-  '/content/tag': typeof AuthContentTagRoute
+  '/cms/article': typeof AuthCmsArticleRoute
+  '/cms/category': typeof AuthCmsCategoryRoute
+  '/cms/comment': typeof AuthCmsCommentRoute
+  '/cms/resource': typeof AuthCmsResourceRoute
+  '/cms/tag': typeof AuthCmsTagRoute
+  '/mall/member': typeof AuthMallMemberRoute
   '/system/config': typeof AuthSystemConfigRoute
   '/system/dict': typeof AuthSystemDictRoute
   '/system/log': typeof AuthSystemLogRoute
@@ -321,6 +346,7 @@ export interface FileRoutesByTo {
   '/mall/product/create': typeof AuthMallProductCreateRoute
   '/mall/shipping-template/create': typeof AuthMallShippingTemplateCreateRoute
   '/mall/after-sale': typeof AuthMallAfterSaleIndexRoute
+  '/mall/category': typeof AuthMallCategoryIndexRoute
   '/mall/collection': typeof AuthMallCollectionIndexRoute
   '/mall/coupon': typeof AuthMallCouponIndexRoute
   '/mall/order': typeof AuthMallOrderIndexRoute
@@ -336,12 +362,14 @@ export interface FileRoutesById {
   '/403': typeof R403Route
   '/_auth': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
+  '/_auth/dashboard': typeof AuthDashboardRoute
   '/_auth/': typeof AuthIndexRoute
-  '/_auth/content/article': typeof AuthContentArticleRoute
-  '/_auth/content/category': typeof AuthContentCategoryRoute
-  '/_auth/content/comment': typeof AuthContentCommentRoute
-  '/_auth/content/resource': typeof AuthContentResourceRoute
-  '/_auth/content/tag': typeof AuthContentTagRoute
+  '/_auth/cms/article': typeof AuthCmsArticleRoute
+  '/_auth/cms/category': typeof AuthCmsCategoryRoute
+  '/_auth/cms/comment': typeof AuthCmsCommentRoute
+  '/_auth/cms/resource': typeof AuthCmsResourceRoute
+  '/_auth/cms/tag': typeof AuthCmsTagRoute
+  '/_auth/mall/member': typeof AuthMallMemberRoute
   '/_auth/system/config': typeof AuthSystemConfigRoute
   '/_auth/system/dict': typeof AuthSystemDictRoute
   '/_auth/system/log': typeof AuthSystemLogRoute
@@ -356,6 +384,7 @@ export interface FileRoutesById {
   '/_auth/mall/product/create': typeof AuthMallProductCreateRoute
   '/_auth/mall/shipping-template/create': typeof AuthMallShippingTemplateCreateRoute
   '/_auth/mall/after-sale/': typeof AuthMallAfterSaleIndexRoute
+  '/_auth/mall/category/': typeof AuthMallCategoryIndexRoute
   '/_auth/mall/collection/': typeof AuthMallCollectionIndexRoute
   '/_auth/mall/coupon/': typeof AuthMallCouponIndexRoute
   '/_auth/mall/order/': typeof AuthMallOrderIndexRoute
@@ -371,12 +400,14 @@ export interface FileRouteTypes {
   fullPaths:
     | '/403'
     | '/login'
+    | '/dashboard'
     | '/'
-    | '/content/article'
-    | '/content/category'
-    | '/content/comment'
-    | '/content/resource'
-    | '/content/tag'
+    | '/cms/article'
+    | '/cms/category'
+    | '/cms/comment'
+    | '/cms/resource'
+    | '/cms/tag'
+    | '/mall/member'
     | '/system/config'
     | '/system/dict'
     | '/system/log'
@@ -391,6 +422,7 @@ export interface FileRouteTypes {
     | '/mall/product/create'
     | '/mall/shipping-template/create'
     | '/mall/after-sale'
+    | '/mall/category'
     | '/mall/collection'
     | '/mall/coupon'
     | '/mall/order'
@@ -404,12 +436,14 @@ export interface FileRouteTypes {
   to:
     | '/403'
     | '/login'
+    | '/dashboard'
     | '/'
-    | '/content/article'
-    | '/content/category'
-    | '/content/comment'
-    | '/content/resource'
-    | '/content/tag'
+    | '/cms/article'
+    | '/cms/category'
+    | '/cms/comment'
+    | '/cms/resource'
+    | '/cms/tag'
+    | '/mall/member'
     | '/system/config'
     | '/system/dict'
     | '/system/log'
@@ -424,6 +458,7 @@ export interface FileRouteTypes {
     | '/mall/product/create'
     | '/mall/shipping-template/create'
     | '/mall/after-sale'
+    | '/mall/category'
     | '/mall/collection'
     | '/mall/coupon'
     | '/mall/order'
@@ -438,12 +473,14 @@ export interface FileRouteTypes {
     | '/403'
     | '/_auth'
     | '/login'
+    | '/_auth/dashboard'
     | '/_auth/'
-    | '/_auth/content/article'
-    | '/_auth/content/category'
-    | '/_auth/content/comment'
-    | '/_auth/content/resource'
-    | '/_auth/content/tag'
+    | '/_auth/cms/article'
+    | '/_auth/cms/category'
+    | '/_auth/cms/comment'
+    | '/_auth/cms/resource'
+    | '/_auth/cms/tag'
+    | '/_auth/mall/member'
     | '/_auth/system/config'
     | '/_auth/system/dict'
     | '/_auth/system/log'
@@ -458,6 +495,7 @@ export interface FileRouteTypes {
     | '/_auth/mall/product/create'
     | '/_auth/mall/shipping-template/create'
     | '/_auth/mall/after-sale/'
+    | '/_auth/mall/category/'
     | '/_auth/mall/collection/'
     | '/_auth/mall/coupon/'
     | '/_auth/mall/order/'
@@ -503,6 +541,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/dashboard': {
+      id: '/_auth/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthDashboardRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/system/user': {
@@ -554,39 +599,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSystemConfigRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_auth/content/tag': {
-      id: '/_auth/content/tag'
-      path: '/content/tag'
-      fullPath: '/content/tag'
-      preLoaderRoute: typeof AuthContentTagRouteImport
+    '/_auth/mall/member': {
+      id: '/_auth/mall/member'
+      path: '/mall/member'
+      fullPath: '/mall/member'
+      preLoaderRoute: typeof AuthMallMemberRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_auth/content/resource': {
-      id: '/_auth/content/resource'
-      path: '/content/resource'
-      fullPath: '/content/resource'
-      preLoaderRoute: typeof AuthContentResourceRouteImport
+    '/_auth/cms/tag': {
+      id: '/_auth/cms/tag'
+      path: '/cms/tag'
+      fullPath: '/cms/tag'
+      preLoaderRoute: typeof AuthCmsTagRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_auth/content/comment': {
-      id: '/_auth/content/comment'
-      path: '/content/comment'
-      fullPath: '/content/comment'
-      preLoaderRoute: typeof AuthContentCommentRouteImport
+    '/_auth/cms/resource': {
+      id: '/_auth/cms/resource'
+      path: '/cms/resource'
+      fullPath: '/cms/resource'
+      preLoaderRoute: typeof AuthCmsResourceRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_auth/content/category': {
-      id: '/_auth/content/category'
-      path: '/content/category'
-      fullPath: '/content/category'
-      preLoaderRoute: typeof AuthContentCategoryRouteImport
+    '/_auth/cms/comment': {
+      id: '/_auth/cms/comment'
+      path: '/cms/comment'
+      fullPath: '/cms/comment'
+      preLoaderRoute: typeof AuthCmsCommentRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_auth/content/article': {
-      id: '/_auth/content/article'
-      path: '/content/article'
-      fullPath: '/content/article'
-      preLoaderRoute: typeof AuthContentArticleRouteImport
+    '/_auth/cms/category': {
+      id: '/_auth/cms/category'
+      path: '/cms/category'
+      fullPath: '/cms/category'
+      preLoaderRoute: typeof AuthCmsCategoryRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/cms/article': {
+      id: '/_auth/cms/article'
+      path: '/cms/article'
+      fullPath: '/cms/article'
+      preLoaderRoute: typeof AuthCmsArticleRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/mall/shipping-template/': {
@@ -622,6 +674,13 @@ declare module '@tanstack/react-router' {
       path: '/mall/collection'
       fullPath: '/mall/collection'
       preLoaderRoute: typeof AuthMallCollectionIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/mall/category/': {
+      id: '/_auth/mall/category/'
+      path: '/mall/category'
+      fullPath: '/mall/category'
+      preLoaderRoute: typeof AuthMallCategoryIndexRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/mall/after-sale/': {
@@ -705,12 +764,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthRouteChildren {
+  AuthDashboardRoute: typeof AuthDashboardRoute
   AuthIndexRoute: typeof AuthIndexRoute
-  AuthContentArticleRoute: typeof AuthContentArticleRoute
-  AuthContentCategoryRoute: typeof AuthContentCategoryRoute
-  AuthContentCommentRoute: typeof AuthContentCommentRoute
-  AuthContentResourceRoute: typeof AuthContentResourceRoute
-  AuthContentTagRoute: typeof AuthContentTagRoute
+  AuthCmsArticleRoute: typeof AuthCmsArticleRoute
+  AuthCmsCategoryRoute: typeof AuthCmsCategoryRoute
+  AuthCmsCommentRoute: typeof AuthCmsCommentRoute
+  AuthCmsResourceRoute: typeof AuthCmsResourceRoute
+  AuthCmsTagRoute: typeof AuthCmsTagRoute
+  AuthMallMemberRoute: typeof AuthMallMemberRoute
   AuthSystemConfigRoute: typeof AuthSystemConfigRoute
   AuthSystemDictRoute: typeof AuthSystemDictRoute
   AuthSystemLogRoute: typeof AuthSystemLogRoute
@@ -725,6 +786,7 @@ interface AuthRouteChildren {
   AuthMallProductCreateRoute: typeof AuthMallProductCreateRoute
   AuthMallShippingTemplateCreateRoute: typeof AuthMallShippingTemplateCreateRoute
   AuthMallAfterSaleIndexRoute: typeof AuthMallAfterSaleIndexRoute
+  AuthMallCategoryIndexRoute: typeof AuthMallCategoryIndexRoute
   AuthMallCollectionIndexRoute: typeof AuthMallCollectionIndexRoute
   AuthMallCouponIndexRoute: typeof AuthMallCouponIndexRoute
   AuthMallOrderIndexRoute: typeof AuthMallOrderIndexRoute
@@ -737,12 +799,14 @@ interface AuthRouteChildren {
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
+  AuthDashboardRoute: AuthDashboardRoute,
   AuthIndexRoute: AuthIndexRoute,
-  AuthContentArticleRoute: AuthContentArticleRoute,
-  AuthContentCategoryRoute: AuthContentCategoryRoute,
-  AuthContentCommentRoute: AuthContentCommentRoute,
-  AuthContentResourceRoute: AuthContentResourceRoute,
-  AuthContentTagRoute: AuthContentTagRoute,
+  AuthCmsArticleRoute: AuthCmsArticleRoute,
+  AuthCmsCategoryRoute: AuthCmsCategoryRoute,
+  AuthCmsCommentRoute: AuthCmsCommentRoute,
+  AuthCmsResourceRoute: AuthCmsResourceRoute,
+  AuthCmsTagRoute: AuthCmsTagRoute,
+  AuthMallMemberRoute: AuthMallMemberRoute,
   AuthSystemConfigRoute: AuthSystemConfigRoute,
   AuthSystemDictRoute: AuthSystemDictRoute,
   AuthSystemLogRoute: AuthSystemLogRoute,
@@ -757,6 +821,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthMallProductCreateRoute: AuthMallProductCreateRoute,
   AuthMallShippingTemplateCreateRoute: AuthMallShippingTemplateCreateRoute,
   AuthMallAfterSaleIndexRoute: AuthMallAfterSaleIndexRoute,
+  AuthMallCategoryIndexRoute: AuthMallCategoryIndexRoute,
   AuthMallCollectionIndexRoute: AuthMallCollectionIndexRoute,
   AuthMallCouponIndexRoute: AuthMallCouponIndexRoute,
   AuthMallOrderIndexRoute: AuthMallOrderIndexRoute,

@@ -52,9 +52,9 @@ import { PopoverConfirm } from '@/components/ui/popover-confirm';
 import { Textarea } from '@/components/ui/textarea';
 
 const configSchema = z.object({
-    key: z.string().min(1, 'Key is required'),
-    value: z.string().min(1, 'Value is required'),
-    group: z.string().min(1, 'Group is required'),
+    key: z.string().min(1, '配置键必填'),
+    value: z.string().min(1, '配置值必填'),
+    group: z.string().min(1, '分组必填'),
     isEncrypted: z.boolean(),
     description: z.string().optional(),
 });
@@ -106,12 +106,10 @@ export default function SystemConfigList() {
             queryClient.invalidateQueries({ queryKey: ['system-configs'] });
             setIsOpen(false);
             form.reset();
-            toast.success('Config created');
+            toast.success('配置已创建');
         },
         onError: (error: any) => {
-            toast.error(
-                error.response?.data?.message || 'Failed to create config'
-            );
+            toast.error(error.response?.data?.message || '创建配置失败');
         },
     });
 
@@ -128,12 +126,10 @@ export default function SystemConfigList() {
             setIsOpen(false);
             setEditingConfig(null);
             form.reset();
-            toast.success('Config updated');
+            toast.success('配置已更新');
         },
         onError: (error: any) => {
-            toast.error(
-                error.response?.data?.message || 'Failed to update config'
-            );
+            toast.error(error.response?.data?.message || '更新配置失败');
         },
     });
 
@@ -141,24 +137,20 @@ export default function SystemConfigList() {
         mutationFn: systemConfigApi.remove,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['system-configs'] });
-            toast.success('Config deleted');
+            toast.success('配置已删除');
         },
         onError: (error: any) => {
-            toast.error(
-                error.response?.data?.message || 'Failed to delete config'
-            );
+            toast.error(error.response?.data?.message || '删除配置失败');
         },
     });
 
     const refreshCacheMutation = useMutation({
         mutationFn: systemConfigApi.refreshCache,
         onSuccess: () => {
-            toast.success('System cache refreshed');
+            toast.success('系统缓存已刷新');
         },
         onError: (error: any) => {
-            toast.error(
-                error.response?.data?.message || 'Failed to refresh cache'
-            );
+            toast.error(error.response?.data?.message || '刷新缓存失败');
         },
     });
 
@@ -195,10 +187,10 @@ export default function SystemConfigList() {
             <div className='flex justify-between items-center'>
                 <div>
                     <h2 className='text-2xl font-bold tracking-tight'>
-                        System Configuration
+                        系统配置
                     </h2>
                     <p className='text-muted-foreground'>
-                        Manage global system settings and sensitive keys
+                        管理全局系统设置和敏感密钥
                     </p>
                 </div>
                 <div className='flex gap-2'>
@@ -210,7 +202,7 @@ export default function SystemConfigList() {
                         <RefreshCw
                             className={`mr-2 h-4 w-4 ${refreshCacheMutation.isPending ? 'animate-spin' : ''}`}
                         />
-                        Refresh Cache
+                        刷新缓存
                     </Button>
                     <Button
                         onClick={() => {
@@ -225,7 +217,7 @@ export default function SystemConfigList() {
                             setIsOpen(true);
                         }}
                     >
-                        <Plus className='mr-2 w-4 h-4' /> Add Config
+                        <Plus className='mr-2 w-4 h-4' /> 添加配置
                     </Button>
                 </div>
             </div>
@@ -240,7 +232,7 @@ export default function SystemConfigList() {
                         value='all'
                         className='data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background'
                     >
-                        All
+                        全部
                     </TabsTrigger>
                     {groups.map((group) => (
                         <TabsTrigger
@@ -258,17 +250,13 @@ export default function SystemConfigList() {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className='w-[200px]'>Key</TableHead>
-                            <TableHead>Value</TableHead>
-                            <TableHead className='w-[100px]'>Group</TableHead>
-                            <TableHead className='w-[100px]'>
-                                Encrypted
-                            </TableHead>
-                            <TableHead className='w-[200px]'>
-                                Description
-                            </TableHead>
+                            <TableHead className='w-[200px]'>配置键</TableHead>
+                            <TableHead>配置值</TableHead>
+                            <TableHead className='w-[100px]'>分组</TableHead>
+                            <TableHead className='w-[100px]'>已加密</TableHead>
+                            <TableHead className='w-[200px]'>描述</TableHead>
                             <TableHead className='w-[100px] text-right'>
-                                Actions
+                                操作
                             </TableHead>
                         </TableRow>
                     </TableHeader>
@@ -295,13 +283,12 @@ export default function SystemConfigList() {
                                 <TableCell>
                                     {config.isEncrypted ? (
                                         <div className='flex items-center text-xs text-amber-500'>
-                                            <Lock className='mr-1 w-3 h-3' />{' '}
-                                            Yes
+                                            <Lock className='mr-1 w-3 h-3' /> 是
                                         </div>
                                     ) : (
                                         <div className='flex items-center text-xs text-muted-foreground'>
                                             <Unlock className='mr-1 w-3 h-3' />{' '}
-                                            No
+                                            否
                                         </div>
                                     )}
                                 </TableCell>
@@ -319,8 +306,8 @@ export default function SystemConfigList() {
                                             <Pencil className='w-4 h-4' />
                                         </Button>
                                         <PopoverConfirm
-                                            title='Delete Config?'
-                                            description='This action cannot be undone.'
+                                            title='删除配置？'
+                                            description='此操作无法撤销。'
                                             onConfirm={() =>
                                                 deleteMutation.mutateAsync(
                                                     config.id
@@ -345,7 +332,7 @@ export default function SystemConfigList() {
                                     colSpan={6}
                                     className='h-24 text-center text-muted-foreground'
                                 >
-                                    No configs found.
+                                    未找到配置。
                                 </TableCell>
                             </TableRow>
                         )}
@@ -357,7 +344,7 @@ export default function SystemConfigList() {
                 <DialogContent className='sm:max-w-[500px]'>
                     <DialogHeader>
                         <DialogTitle>
-                            {editingConfig ? 'Edit Config' : 'Add Config'}
+                            {editingConfig ? '编辑配置' : '添加配置'}
                         </DialogTitle>
                     </DialogHeader>
                     <form
@@ -367,13 +354,13 @@ export default function SystemConfigList() {
                         <div className='grid gap-4 py-4'>
                             <div className='grid grid-cols-4 gap-4 items-center'>
                                 <Label htmlFor='key' className='text-right'>
-                                    Key
+                                    配置键
                                 </Label>
                                 <div className='col-span-3'>
                                     <Input
                                         id='key'
                                         {...form.register('key')}
-                                        placeholder='e.g. oss.accessKey'
+                                        placeholder='例如：oss.accessKey'
                                         disabled={!!editingConfig}
                                     />
                                     {form.formState.errors.key && (
@@ -385,7 +372,7 @@ export default function SystemConfigList() {
                             </div>
                             <div className='grid grid-cols-4 gap-4 items-center'>
                                 <Label htmlFor='group' className='text-right'>
-                                    Group
+                                    分组
                                 </Label>
                                 <div className='col-span-3'>
                                     <div className='flex gap-2'>
@@ -394,7 +381,7 @@ export default function SystemConfigList() {
                                                 <Input
                                                     id='group'
                                                     {...form.register('group')}
-                                                    placeholder='e.g. oss'
+                                                    placeholder='例如：oss'
                                                 />
                                             ) : (
                                                 <Controller
@@ -408,7 +395,7 @@ export default function SystemConfigList() {
                                                             value={field.value}
                                                         >
                                                             <SelectTrigger id='group'>
-                                                                <SelectValue placeholder='Select group' />
+                                                                <SelectValue placeholder='选择分组' />
                                                             </SelectTrigger>
                                                             <SelectContent>
                                                                 {groups.map(
@@ -440,8 +427,8 @@ export default function SystemConfigList() {
                                             }
                                             title={
                                                 isCustomGroup
-                                                    ? 'Select from existing'
-                                                    : 'Enter custom group'
+                                                    ? '从现有分组中选择'
+                                                    : '输入自定义分组'
                                             }
                                         >
                                             {isCustomGroup ? (
@@ -466,7 +453,7 @@ export default function SystemConfigList() {
                                     htmlFor='isEncrypted'
                                     className='text-right'
                                 >
-                                    Encrypt
+                                    加密
                                 </Label>
                                 <div className='flex col-span-3 gap-2 items-center'>
                                     <Switch
@@ -483,7 +470,7 @@ export default function SystemConfigList() {
                                         htmlFor='isEncrypted'
                                         className='font-normal text-muted-foreground'
                                     >
-                                        Encrypt value in database
+                                        在数据库中加密存储
                                     </Label>
                                 </div>
                             </div>
@@ -492,13 +479,13 @@ export default function SystemConfigList() {
                                     htmlFor='value'
                                     className='pt-2 text-right'
                                 >
-                                    Value
+                                    配置值
                                 </Label>
                                 <div className='col-span-3'>
                                     <Textarea
                                         id='value'
                                         {...form.register('value')}
-                                        placeholder='Configuration value'
+                                        placeholder='输入配置值'
                                         rows={4}
                                     />
                                     {form.formState.errors.value && (
@@ -516,18 +503,25 @@ export default function SystemConfigList() {
                                     htmlFor='description'
                                     className='text-right'
                                 >
-                                    Description
+                                    描述
                                 </Label>
                                 <div className='col-span-3'>
                                     <Input
                                         id='description'
                                         {...form.register('description')}
-                                        placeholder='Optional description'
+                                        placeholder='选填描述'
                                     />
                                 </div>
                             </div>
                         </div>
                         <DialogFooter>
+                            <Button
+                                type='button'
+                                variant='outline'
+                                onClick={() => setIsOpen(false)}
+                            >
+                                取消
+                            </Button>
                             <Button
                                 type='submit'
                                 disabled={
@@ -535,7 +529,11 @@ export default function SystemConfigList() {
                                     updateMutation.isPending
                                 }
                             >
-                                {editingConfig ? 'Update' : 'Create'}
+                                {(createMutation.isPending ||
+                                    updateMutation.isPending) && (
+                                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                                )}
+                                保存
                             </Button>
                         </DialogFooter>
                     </form>

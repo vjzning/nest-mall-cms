@@ -5,6 +5,7 @@ import { RedisClientModule, RedisLockModule } from '@app/redis';
 import { QueueModule } from '@app/queue';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
+import { MallOrderEntity, MallAfterSaleEntity } from '@app/db';
 import { CmsAdminApiController } from './cms-admin-api.controller';
 import { CmsAdminApiService } from './cms-admin-api.service';
 import { AuthModule } from './auth/auth.module';
@@ -25,14 +26,17 @@ import { SystemLogModule } from './system/log/system-log.module';
 import { RegionModule } from './system/region/region.module';
 import { MallModule } from './mall/mall.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { NotificationAdminModule } from './notification/notification.module';
 import databaseConfig from './config/database.config';
 import { createKeyv as createKeyvRedis } from '@keyv/redis';
 import { BullBoardModule } from '@bull-board/nestjs';
 import { ExpressAdapter } from '@bull-board/express';
 import { BullBoardAuthMiddleware } from './common/middleware/bull-board-auth.middleware';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
     imports: [
+        ScheduleModule.forRoot(),
         ConfigModule.forRoot({
             isGlobal: true,
             load: [databaseConfig],
@@ -45,6 +49,7 @@ import { BullBoardAuthMiddleware } from './common/middleware/bull-board-auth.mid
             }),
             inject: [ConfigService],
         }),
+        TypeOrmModule.forFeature([MallOrderEntity, MallAfterSaleEntity]),
         CacheModule.registerAsync({
             isGlobal: true,
             useFactory: (configService: ConfigService) => {
@@ -89,6 +94,7 @@ import { BullBoardAuthMiddleware } from './common/middleware/bull-board-auth.mid
         RegionModule,
         MallModule,
         DashboardModule,
+        NotificationAdminModule,
     ],
     controllers: [CmsAdminApiController],
     providers: [

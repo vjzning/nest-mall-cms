@@ -1,8 +1,11 @@
-import { Controller, Get, Query, Post, Body } from '@nestjs/common';
+import { Controller, Get, Query, Post, Body, UseInterceptors } from '@nestjs/common';
 import { RegionService } from './region.service';
-import { Public } from '../../common/decorators/auth.decorator';
+import { Public, RequirePermissions } from '../../common/decorators/auth.decorator';
+import { Log } from '@app/shared/decorators/log.decorator';
+import { LogInterceptor } from '@app/shared/interceptors/log.interceptor';
 
 @Controller('system/region')
+@UseInterceptors(LogInterceptor)
 export class RegionController {
   constructor(private readonly regionService: RegionService) {}
 
@@ -30,7 +33,8 @@ export class RegionController {
   /**
    * 初始化省市区数据
    */
-  @Public()
+  @RequirePermissions('system:region:init')
+  @Log({ module: '区域管理', action: '初始化数据' })
   @Post('init')
   async init(@Body() data: any[]) {
     const count = await this.regionService.seed(data);

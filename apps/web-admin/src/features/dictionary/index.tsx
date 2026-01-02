@@ -19,7 +19,7 @@ export default function DictionaryPage() {
           <DictDataList key={selectedType.id} type={selectedType} />
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
-            <p>Select a dictionary type to manage values</p>
+            <p>请选择左侧的字典类型以管理其数据项</p>
           </div>
         )}
       </div>

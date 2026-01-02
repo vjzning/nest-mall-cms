@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { dashboardApi } from '../api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import {
     Card,
     CardContent,
@@ -11,7 +12,7 @@ import {
     CardDescription,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Edit } from 'lucide-react';
 import {
     Table,
     TableBody,
@@ -20,8 +21,20 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useNavigate } from '@tanstack/react-router';
+import { Button } from '@/components/ui/button';
+
+const STATUS_MAP: Record<string, string> = {
+    PENDING_PAY: '待支付',
+    PENDING_DELIVERY: '待发货',
+    SHIPPED: '已发货',
+    DELIVERED: '已送达',
+    CANCELLED: '已取消',
+    COMPLETED: '已完成',
+};
 
 export const DashboardAlerts = () => {
+    const navigate = useNavigate();
     const { data, isLoading } = useQuery({
         queryKey: ['dashboard-alerts'],
         queryFn: dashboardApi.getAlerts,
@@ -43,49 +56,56 @@ export const DashboardAlerts = () => {
         <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-7'>
             <Card className='col-span-4'>
                 <CardHeader>
-                    <CardTitle>Recent Orders</CardTitle>
-                    <CardDescription>
-                        The latest transactions from your store.
-                    </CardDescription>
+                    <CardTitle>最近订单</CardTitle>
+                    <CardDescription>商城最新的交易记录。</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Order ID</TableHead>
-                                <TableHead>Customer</TableHead>
-                                <TableHead>Amount</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className='text-right'>Time</TableHead>
+                                <TableHead>订单号</TableHead>
+                                <TableHead>客户</TableHead>
+                                <TableHead>金额</TableHead>
+                                <TableHead>状态</TableHead>
+                                <TableHead className='text-right'>
+                                    时间
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {recentOrders.map((order) => (
                                 <TableRow key={order.id}>
-                                    <TableCell className='font-medium'>
+                                    <TableCell className='font-medium text-xs'>
                                         {order.id}
                                     </TableCell>
                                     <TableCell>{order.user}</TableCell>
-                                    <TableCell>{order.amount}</TableCell>
+                                    <TableCell>¥{order.amount}</TableCell>
                                     <TableCell>
                                         <Badge
                                             variant={
                                                 order.status === 'PENDING_PAY'
                                                     ? 'outline'
-                                                    : order.status === 'PENDING_DELIVERY'
+                                                    : order.status ===
+                                                        'PENDING_DELIVERY'
                                                       ? 'secondary'
-                                                      : order.status === 'SHIPPED'
+                                                      : order.status ===
+                                                          'SHIPPED'
                                                         ? 'default'
                                                         : 'secondary'
                                             }
                                         >
-                                            {order.status}
+                                            {STATUS_MAP[order.status] ||
+                                                order.status}
                                         </Badge>
                                     </TableCell>
                                     <TableCell className='text-right text-xs text-muted-foreground'>
-                                        {formatDistanceToNow(new Date(order.time), {
-                                            addSuffix: true,
-                                        })}
+                                        {formatDistanceToNow(
+                                            new Date(order.time),
+                                            {
+                                                addSuffix: true,
+                                                locale: zhCN,
+                                            }
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -95,7 +115,7 @@ export const DashboardAlerts = () => {
                                         colSpan={5}
                                         className='text-center py-10 text-muted-foreground'
                                     >
-                                        No recent orders
+                                        暂无最近订单
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -108,18 +128,16 @@ export const DashboardAlerts = () => {
                 <CardHeader>
                     <CardTitle className='flex items-center text-rose-500'>
                         <AlertCircle className='mr-2 w-4 h-4' />
-                        Inventory Alerts
+                        库存预警
                     </CardTitle>
-                    <CardDescription>
-                        Items that are low in stock or sold out.
-                    </CardDescription>
+                    <CardDescription>库存不足或已售罄的商品。</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className='space-y-4'>
                         {lowStockItems.map((item) => (
                             <div
                                 key={item.sku}
-                                className='flex justify-between items-center pb-3 border-b last:border-0 last:pb-0'
+                                className='group flex justify-between items-center pb-3 border-b last:border-0 last:pb-0'
                             >
                                 <div className='space-y-1'>
                                     <p className='text-sm font-medium leading-none'>
@@ -129,7 +147,7 @@ export const DashboardAlerts = () => {
                                         {item.sku}
                                     </p>
                                 </div>
-                                <div className='text-right'>
+                                <div className='flex items-center gap-2'>
                                     <Badge
                                         variant={
                                             item.stock === 0
@@ -139,15 +157,28 @@ export const DashboardAlerts = () => {
                                         className='text-[10px]'
                                     >
                                         {item.stock === 0
-                                            ? 'Out of Stock'
-                                            : `${item.stock} left`}
+                                            ? '已售罄'
+                                            : `剩余 ${item.stock} 件`}
                                     </Badge>
+                                    <Button
+                                        variant='ghost'
+                                        size='icon'
+                                        className='h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity'
+                                        onClick={() =>
+                                            navigate({
+                                                to: `/mall/product/edit/${item.id}`,
+                                            })
+                                        }
+                                        title='编辑商品'
+                                    >
+                                        <Edit className='h-4 w-4' />
+                                    </Button>
                                 </div>
                             </div>
                         ))}
                         {lowStockItems.length === 0 && (
                             <div className='text-center py-10 text-muted-foreground'>
-                                All items are well stocked
+                                所有商品库存充足
                             </div>
                         )}
                     </div>
