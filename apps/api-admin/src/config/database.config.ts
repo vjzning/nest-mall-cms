@@ -9,6 +9,6 @@ export default registerAs('database', () => ({
   password: process.env.MYSQL_PASSWORD || 'root123456',
   database: process.env.CMS_DB_NAME || 'cms_admin',
   entities: ALL_ENTITIES,
-  synchronize: process.env.NODE_ENV !== 'production',
+  synchronize: process.env.DB_SYNCHRONIZE === 'true',
   logging: process.env.NODE_ENV !== 'production',
 }));

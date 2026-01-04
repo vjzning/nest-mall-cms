@@ -37,6 +37,9 @@ import { NotificationSettingEntity } from './entities/notification-setting.entit
 import { FlashSaleActivityEntity } from './entities/flash-sale-activity.entity';
 import { FlashSaleProductEntity } from './entities/flash-sale-product.entity';
 
+import { MallAfterSaleItemEntity } from './entities/mall-after-sale-item.entity';
+import { MallAfterSaleLogisticsEntity } from './entities/mall-after-sale-logistics.entity';
+
 export * from './db.module';
 export * from './db.service';
 export * from './entities/base.entity';
@@ -72,6 +75,8 @@ export * from './entities/region.entity';
 export * from './entities/mall-coupon.entity';
 export * from './entities/mall-member-coupon.entity';
 export * from './entities/mall-after-sale.entity';
+export * from './entities/mall-after-sale-item.entity';
+export * from './entities/mall-after-sale-logistics.entity';
 export * from './entities/mall-delivery.entity';
 export * from './entities/notification.entity';
 export * from './entities/notification-task.entity';
@@ -100,7 +105,6 @@ export const ALL_ENTITIES = [
     MallOrderEntity,
     MallOrderItemEntity,
     MallPaymentEntity,
-    MallOrderEntity,
     CollectionEntity,
     CollectionItemEntity,
     MemberAuthEntity,
@@ -113,6 +117,8 @@ export const ALL_ENTITIES = [
     MallCouponEntity,
     MallMemberCouponEntity,
     MallAfterSaleEntity,
+    MallAfterSaleItemEntity,
+    MallAfterSaleLogisticsEntity,
     MallDeliveryEntity,
     NotificationEntity,
     NotificationTaskEntity,

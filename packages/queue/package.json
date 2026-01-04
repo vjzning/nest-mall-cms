@@ -1,12 +1,6 @@
 {
-  "name": "@app/queue",
-  "version": "1.0.0",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "dependencies": {
-    "@nestjs/bullmq": "^11.0.0",
-    "bullmq": "^5.0.0",
-    "@nestjs/common": "^11.0.0",
-    "@nestjs/config": "^4.0.0"
-  }
+    "name": "@app/queue",
+    "version": "1.0.0",
+    "main": "./src/index.ts",
+    "types": "./src/index.ts"
 }

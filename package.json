@@ -24,7 +24,10 @@
         "test:cov": "jest --coverage",
         "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
         "test:e2e": "jest --config ./apps/api-admin/test/jest-e2e.json",
-        "seed:products": "ts-node -r tsconfig-paths/register apps/api-admin/src/scripts/seed-products.ts"
+        "typeorm": "typeorm-ts-node-commonjs -d typeorm.config.ts",
+        "migration:generate": "npm run typeorm migration:generate migrations/Init",
+        "migration:run": "npm run typeorm migration:run",
+        "migration:revert": "npm run typeorm migration:revert"
     },
     "dependencies": {
         "@astrojs/node": "^9.5.1",
