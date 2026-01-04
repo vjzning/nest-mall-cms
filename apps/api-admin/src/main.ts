@@ -8,6 +8,8 @@ import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import { join } from 'path';
+import { TransformInterceptor } from '@app/shared/interceptors/transform.interceptor';
+import { HttpExceptionFilter } from '@app/shared/filters/http-exception.filter';
 
 async function bootstrap() {
     // Restart trigger
@@ -29,6 +31,11 @@ async function bootstrap() {
             whitelist: true,
         })
     );
+
+    app.useGlobalInterceptors(new TransformInterceptor());
+    app.useGlobalFilters(new HttpExceptionFilter());
+
+    app.enableCors();
 
     await SwaggerModule.loadPluginMetadata(metadata);
     const config = new DocumentBuilder()

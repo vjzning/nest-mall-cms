@@ -17,7 +17,7 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-    (response) => response,
+    (response) => response.data,
     (error) => {
         // Ignore 401 for login requests to allow form error handling
         if (

@@ -6,6 +6,7 @@ import { CategoryEntity } from './entities/category.entity';
 import { TagEntity } from './entities/tag.entity';
 import { CommentEntity } from './entities/comment.entity';
 import { ResourceEntity } from './entities/resource.entity';
+import { ResourceFolderEntity } from './entities/resource-folder.entity';
 import { DictTypeEntity } from './entities/dict-type.entity';
 import { DictDataEntity } from './entities/dict-data.entity';
 import { SystemConfigEntity } from './entities/system-config.entity';
@@ -47,6 +48,7 @@ export * from './entities/category.entity';
 export * from './entities/tag.entity';
 export * from './entities/comment.entity';
 export * from './entities/resource.entity';
+export * from './entities/resource-folder.entity';
 export * from './entities/dict-type.entity';
 export * from './entities/dict-data.entity';
 export * from './entities/system-config.entity';
@@ -86,6 +88,7 @@ export const ALL_ENTITIES = [
     TagEntity,
     CommentEntity,
     ResourceEntity,
+    ResourceFolderEntity,
     DictTypeEntity,
     DictDataEntity,
     SystemConfigEntity,

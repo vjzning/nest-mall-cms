@@ -1,6 +1,6 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
-import { API_ENDPOINTS } from '../../lib/api';
+import { API_ENDPOINTS, request } from '../../lib/api';
 
 export const authActions = {
   // 登录 action
@@ -12,19 +12,10 @@ export const authActions = {
     }),
     handler: async (input, context) => {
       try {
-        const response = await fetch(API_ENDPOINTS.LOGIN, {
+        const data: any = await request(API_ENDPOINTS.LOGIN, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify(input),
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || '登录失败');
-        }
 
         // 使用 Astro.session 存储
         if (context.session) {
@@ -50,11 +41,8 @@ export const authActions = {
     }),
     handler: async (input, context) => {
       try {
-        const response = await fetch(API_ENDPOINTS.REGISTER, {
+        const data: any = await request(API_ENDPOINTS.REGISTER, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify({
             ...input,
             nickname: input.username,
@@ -62,12 +50,6 @@ export const authActions = {
             phone: input.phone || undefined,
           }),
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || '注册失败');
-        }
 
         // 使用 Astro.session 存储
         if (context.session) {
@@ -114,10 +96,9 @@ export const authActions = {
           throw new Error('请先登录');
         }
         
-        const response = await fetch(API_ENDPOINTS.PROFILE, {
+        const data: any = await request(API_ENDPOINTS.PROFILE, {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({
@@ -127,12 +108,6 @@ export const authActions = {
             avatar: input.avatar || undefined,
           }),
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || '更新失败');
-        }
 
         // 更新 session
         await context.session.set('user', data);

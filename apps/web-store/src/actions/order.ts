@@ -1,6 +1,6 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
-import { API_ENDPOINTS } from '../lib/api';
+import { API_ENDPOINTS, request } from '../lib/api';
 
 export const orderActions = {
     // 创建订单
@@ -40,21 +40,14 @@ export const orderActions = {
                 })),
             };
 
-            const response = await fetch(API_ENDPOINTS.MEMBER_ORDERS, {
+            const data: any = await request(API_ENDPOINTS.MEMBER_ORDERS, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(orderData),
             });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || '下单失败');
-            }
-
-            const data = await response.json();
             return {
                 success: true,
                 order: data.order,
@@ -99,20 +92,17 @@ export const orderActions = {
             if (input.addressId) {
                 try {
                     const apiUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001';
-                    const response = await fetch(`${apiUrl}/member/address/${input.addressId}`, {
+                    const addr: any = await request(`${apiUrl}/member/address/${input.addressId}`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     });
-                    if (response.ok) {
-                        const addr = await response.json();
-                        calcData.receiverInfo = {
-                            name: addr.receiverName,
-                            phone: addr.receiverPhone,
-                            provinceId: addr.provinceId,
-                            address: `${addr.stateProvince}${addr.city}${addr.districtCounty}${addr.addressLine1}`,
-                        };
-                    }
+                    calcData.receiverInfo = {
+                        name: addr.receiverName,
+                        phone: addr.receiverPhone,
+                        provinceId: addr.provinceId,
+                        address: `${addr.stateProvince}${addr.city}${addr.districtCounty}${addr.addressLine1}`,
+                    };
                 } catch (e) {
                     console.error('获取地址详情失败:', e);
                 }
@@ -128,21 +118,13 @@ export const orderActions = {
                 };
             }
 
-            const response = await fetch(API_ENDPOINTS.ORDER_CALCULATE, {
+            return request(API_ENDPOINTS.ORDER_CALCULATE, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(calcData),
             });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || '计算金额失败');
-            }
-
-            return await response.json();
         },
     }),
 
@@ -170,7 +152,7 @@ export const orderActions = {
             if (input?.limit)
                 queryParams.append('limit', input.limit.toString());
 
-            const response = await fetch(
+            return request(
                 `${API_ENDPOINTS.MEMBER_ORDERS}?${queryParams.toString()}`,
                 {
                     headers: {
@@ -178,12 +160,6 @@ export const orderActions = {
                     },
                 }
             );
-
-            if (!response.ok) {
-                throw new Error('获取订单列表失败');
-            }
-
-            return response.json();
         },
     }),
 
@@ -198,7 +174,7 @@ export const orderActions = {
                 throw new Error('请先登录');
             }
 
-            const response = await fetch(
+            return request(
                 `${API_ENDPOINTS.MEMBER_ORDERS}/${input.id}`,
                 {
                     headers: {
@@ -206,12 +182,6 @@ export const orderActions = {
                     },
                 }
             );
-
-            if (!response.ok) {
-                throw new Error('获取订单详情失败');
-            }
-
-            return response.json();
         },
     }),
 
@@ -226,7 +196,7 @@ export const orderActions = {
                 throw new Error('请先登录');
             }
 
-            const response = await fetch(
+            return request(
                 `${API_ENDPOINTS.MEMBER_ORDERS}/${input.id}/cancel`,
                 {
                     method: 'PATCH',
@@ -235,13 +205,6 @@ export const orderActions = {
                     },
                 }
             );
-
-            if (!response.ok) {
-                const result = await response.json();
-                throw new Error(result.message || '取消订单失败');
-            }
-
-            return response.json();
         },
     }),
 
@@ -256,7 +219,7 @@ export const orderActions = {
                 throw new Error('请先登录');
             }
 
-            const response = await fetch(
+            return request(
                 `${API_ENDPOINTS.MEMBER_ORDERS}/${input.id}/confirm-receipt`,
                 {
                     method: 'PATCH',
@@ -265,13 +228,6 @@ export const orderActions = {
                     },
                 }
             );
-
-            if (!response.ok) {
-                const result = await response.json();
-                throw new Error(result.message || '确认收货失败');
-            }
-
-            return response.json();
         },
     }),
 
@@ -288,12 +244,11 @@ export const orderActions = {
                 throw new Error('请先登录');
             }
 
-            const response = await fetch(
+            return request(
                 `${API_ENDPOINTS.MEMBER_ORDERS}/${input.id}/pay`,
                 {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify({
@@ -301,13 +256,6 @@ export const orderActions = {
                     }),
                 }
             );
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || '发起支付失败');
-            }
-
-            return response.json();
         },
     }),
 };

@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { actions } from 'astro:actions';
 import { getSession } from '../lib/session';
+import { getApiUrl, request } from '../lib/api';
 import type { MemberAddress } from '@app/shared';
 
 const session = await getSession(Astro);
@@ -27,18 +28,16 @@ if (!cartData || cartData.cartItems.length === 0) {
 
     // 2. 获取收货地址
     let addresses: MemberAddress[] = [];
+    const apiUrl = getApiUrl();
     try {
-        const response = await fetch(
-            `${import.meta.env.PUBLIC_API_URL || 'http://localhost:3001'}/member/address`,
+        addresses = await request<MemberAddress[]>(
+            `${apiUrl}/member/address`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             }
         );
-        if (response.ok) {
-            addresses = await response.json();
-        }
     } catch (e) {
         console.error('获取地址失败', e);
     }

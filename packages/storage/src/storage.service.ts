@@ -99,7 +99,8 @@ export class StorageService implements OnModuleInit {
 
     async upload(
         file: Express.Multer.File,
-        user: UserEntity
+        user: UserEntity,
+        folderId?: number
     ): Promise<ResourceEntity> {
         // Refresh driver to ensure latest config
         await this.refreshDriver();
@@ -115,6 +116,7 @@ export class StorageService implements OnModuleInit {
             size: file.size,
             driver: this.currentDriverName,
             uploader: user,
+            folderId,
         });
 
         return this.resourceRepository.save(resource);

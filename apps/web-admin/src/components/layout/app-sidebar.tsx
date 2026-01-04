@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
-import { Link, useNavigate, useLocation } from '@tanstack/react-router';
+import { Link, useLocation } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { useAuthStore } from '@/stores/auth.store';
 import { menuApi } from '@/features/menu/api';
 import * as LucideIcons from 'lucide-react';
 import { ModeToggle } from '@/components/mode-toggle';
@@ -20,8 +19,9 @@ import {
     SidebarProvider,
     SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { NavUser } from './nav-user';
+import { MenuSearch } from './menu-search';
+import { Logo } from '@/components/ui/logo';
 
 interface AppSidebarProps {
     children?: React.ReactNode;
@@ -45,8 +45,6 @@ const getIcon = (name: string) => {
 };
 
 export function AppSidebar({ children }: AppSidebarProps) {
-    const { user, logout } = useAuthStore();
-    const navigate = useNavigate();
     const location = useLocation();
 
     const { data: menus } = useQuery({
@@ -114,11 +112,6 @@ export function AppSidebar({ children }: AppSidebarProps) {
         return groups;
     }, [menus]);
 
-    const handleLogout = () => {
-        logout();
-        navigate({ to: '/login' });
-    };
-
     const currentItem = useMemo(() => {
         const allItems = menuGroups.flatMap((group) => group.items);
 
@@ -142,9 +135,14 @@ export function AppSidebar({ children }: AppSidebarProps) {
     return (
         <SidebarProvider>
             <div className='flex overflow-hidden w-full h-screen'>
-                <Sidebar>
+                <Sidebar variant='floating' collapsible='icon'>
                     <SidebarHeader className='p-4 border-b'>
-                        <h1 className='text-xl font-bold'>后台管理系统</h1>
+                        <div className='flex gap-3 items-center'>
+                            <Logo className='w-8 h-8 shrink-0' />
+                            <h1 className='text-xl font-bold truncate group-data-[collapsible=icon]:hidden'>
+                                后台管理系统
+                            </h1>
+                        </div>
                     </SidebarHeader>
                     <SidebarContent>
                         {menuGroups.map((group, index) => (
@@ -190,32 +188,7 @@ export function AppSidebar({ children }: AppSidebarProps) {
                         ))}
                     </SidebarContent>
                     <SidebarFooter className='p-4 border-t'>
-                        <div className='flex flex-col gap-4'>
-                            <div className='flex gap-3 items-center'>
-                                <Avatar>
-                                    <AvatarImage src={user?.avatar} />
-                                    <AvatarFallback>
-                                        <LucideIcons.User />
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div className='flex overflow-hidden flex-col'>
-                                    <span className='text-sm font-medium truncate'>
-                                        {user?.username || '用户'}
-                                    </span>
-                                    <span className='text-xs truncate text-muted-foreground'>
-                                        {user?.email || 'admin@example.com'}
-                                    </span>
-                                </div>
-                            </div>
-                            <Button
-                                variant='outline'
-                                className='gap-2 justify-start w-full'
-                                onClick={handleLogout}
-                            >
-                                <LucideIcons.LogOut size={16} />
-                                退出登录
-                            </Button>
-                        </div>
+                        <NavUser />
                     </SidebarFooter>
                 </Sidebar>
                 <main className='flex overflow-hidden flex-col flex-1 min-h-0'>
@@ -225,6 +198,7 @@ export function AppSidebar({ children }: AppSidebarProps) {
                             {currentLabel || '仪表盘'}
                         </h2>
                         <div className='flex gap-2 items-center'>
+                            <MenuSearch />
                             <NotificationCenter />
                             <ModeToggle />
                         </div>

@@ -1,0 +1,113 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { API_ENDPOINTS, request } from "../../lib/api";
+
+const { slug } = Astro.params;
+
+interface ArticleInfo {
+  id: number;
+  slug: string;
+  title: string;
+  cover?: string;
+  description?: string;
+  content?: string;
+  views: number;
+  likes: number;
+  publishedAt: string;
+  createdAt: string;
+}
+
+let article: ArticleInfo | null = null;
+try {
+  article = await request<ArticleInfo>(`${API_ENDPOINTS.ARTICLES}/${slug}`);
+} catch (e) {
+  console.error("Failed to fetch article detail:", e);
+}
+
+if (!article) {
+  return Astro.redirect("/404");
+}
+
+const formattedDate = new Date(article.publishedAt || article.createdAt).toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+---
+
+<Layout title={article.title}>
+  <main class="max-w-[800px] mx-auto px-4 py-16">
+    <article class="max-w-none prose prose-nike">
+      <header class="mb-12 text-center">
+        {article.cover && (
+          <div class="overflow-hidden mb-12 w-full rounded-lg aspect-video">
+            <img 
+              src={article.cover} 
+              alt={article.title} 
+              class="object-cover w-full h-full"
+            />
+          </div>
+        )}
+        <h1 class="mb-6 text-4xl italic font-black tracking-tighter uppercase md:text-5xl font-nike">
+          {article.title}
+        </h1>
+        <div class="flex gap-6 justify-center items-center text-sm font-bold tracking-widest uppercase text-nike-dark-grey">
+          <span>{formattedDate}</span>
+          <span class="flex gap-2 items-center">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            {article.views}
+          </span>
+        </div>
+      </header>
+
+      {article.description && (
+        <div class="pl-6 mb-12 text-xl italic font-medium leading-relaxed border-l-4 text-nike-dark-grey border-nike-black">
+          {article.description}
+        </div>
+      )}
+
+      <div class="article-content" set:html={article.content} />
+    </article>
+
+    <footer class="flex justify-between items-center pt-12 mt-16 border-t border-nike-grey">
+      <a href="/" class="px-8 py-3 text-sm btn-nike-outline">返回首页</a>
+      <div class="flex gap-4">
+        <button class="flex gap-2 items-center text-sm font-bold tracking-widest uppercase transition-opacity hover:opacity-70">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+          {article.likes} 赞
+        </button>
+      </div>
+    </footer>
+  </main>
+</Layout>
+
+<style is:global>
+  @reference "../../styles/global.css";
+
+  .article-content {
+    @apply text-lg leading-relaxed text-nike-black;
+  }
+  .article-content p {
+    @apply mb-6;
+  }
+  .article-content h2 {
+    @apply text-2xl font-black italic tracking-tight uppercase mt-12 mb-6 font-nike;
+  }
+  .article-content h3 {
+    @apply text-xl font-bold uppercase mt-8 mb-4;
+  }
+  .article-content img {
+    @apply rounded-lg my-12 w-full;
+  }
+  .article-content ul, .article-content ol {
+    @apply mb-6 pl-6;
+  }
+  .article-content li {
+    @apply mb-2;
+  }
+</style>

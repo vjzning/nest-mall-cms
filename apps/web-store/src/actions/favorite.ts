@@ -1,6 +1,6 @@
 import { ActionError, defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
-import { getApiUrl } from '../lib/api';
+import { getApiUrl, request } from '../lib/api';
 
 export const favorite = {
     toggle: defineAction({
@@ -17,29 +17,13 @@ export const favorite = {
                 });
             }
 
-            const response = await fetch(
-                `${getApiUrl()}/member/favorite/toggle`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ productId }),
-                }
-            );
-
-            if (!response.ok) {
-                const error = await response
-                    .json()
-                    .catch(() => ({ message: '操作失败' }));
-                throw new ActionError({
-                    code: 'BAD_REQUEST',
-                    message: error.message,
-                });
-            }
-
-            return response.json();
+            return request(`${getApiUrl()}/member/favorite/toggle`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ productId }),
+            });
         },
     }),
 
@@ -64,23 +48,11 @@ export const favorite = {
             if (input?.limit)
                 queryParams.append('limit', input.limit.toString());
 
-            const response = await fetch(
-                `${getApiUrl()}/member/favorite/list?${queryParams.toString()}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-
-            if (!response.ok) {
-                throw new ActionError({
-                    code: 'BAD_REQUEST',
-                    message: '获取收藏列表失败',
-                });
-            }
-
-            return response.json();
+            return request(`${getApiUrl()}/member/favorite/list?${queryParams.toString()}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
         },
     }),
 
@@ -92,18 +64,15 @@ export const favorite = {
             const token = await context.session?.get('token');
             if (!token) return { favorited: false };
 
-            const response = await fetch(
-                `${getApiUrl()}/member/favorite/check?productId=${productId}`,
-                {
+            try {
+                return await request(`${getApiUrl()}/member/favorite/check?productId=${productId}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
-                }
-            );
-
-            if (!response.ok) return { favorited: false };
-
-            return response.json();
+                });
+            } catch (error) {
+                return { favorited: false };
+            }
         },
     }),
 };

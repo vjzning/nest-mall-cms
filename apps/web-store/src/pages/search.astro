@@ -1,0 +1,71 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { API_ENDPOINTS, request } from '../lib/api';
+import ProductCard from '../components/nike/ProductCard';
+
+const keyword = Astro.url.searchParams.get('q') || '';
+let results = { products: { items: [], total: 0 }, articles: { items: [], total: 0 } };
+
+if (keyword) {
+    try {
+        const res = await request<any>(`${API_ENDPOINTS.SEARCH}?keyword=${encodeURIComponent(keyword)}`);
+        results = res;
+    } catch (e) {
+        console.error('搜索请求失败:', e);
+    }
+}
+---
+
+<Layout title={`搜索: ${keyword} - NIKE`}>
+    <main class='max-w-[1920px] mx-auto px-4 sm:px-12 py-12'>
+        <div class='mb-12'>
+            <h1 class='text-2xl font-medium'>
+                {keyword ? `“${keyword}” 的搜索结果` : '请输入搜索关键词'}
+                <span class='text-nike-dark-grey ml-2 text-lg'>
+                    ({results.products.total + results.articles.total})
+                </span>
+            </h1>
+        </div>
+
+        {keyword && results.products.total === 0 && results.articles.total === 0 ? (
+            <div class='py-24 text-center'>
+                <p class='text-xl text-nike-dark-grey'>抱歉，没有找到符合条件的商品或文章。</p>
+                <a href='/' class='inline-block mt-6 underline font-bold'>返回首页继续购物</a>
+            </div>
+        ) : (
+            <div class='space-y-16'>
+                {/* 商品结果 */}
+                {results.products.items.length > 0 && (
+                    <section>
+                        <h2 class='text-xl font-bold mb-8 uppercase tracking-tight'>商品 ({results.products.total})</h2>
+                        <div class='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-12 gap-x-4'>
+                            {results.products.items.map((product: any) => (
+                                <ProductCard product={product} />
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* 文章结果 */}
+                {results.articles.items.length > 0 && (
+                    <section>
+                        <h2 class='text-xl font-bold mb-8 uppercase tracking-tight'>文章 ({results.articles.total})</h2>
+                        <div class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
+                            {results.articles.items.map((article: any) => (
+                                <a href={`/article/${article.slug || article.id}`} class='group'>
+                                    <div class='aspect-video bg-nike-grey overflow-hidden mb-4'>
+                                        {article.cover && (
+                                            <img src={article.cover} alt={article.title} class='w-full h-full object-cover group-hover:scale-105 transition-transform duration-500' />
+                                        )}
+                                    </div>
+                                    <h3 class='font-bold text-lg group-hover:underline'>{article.title}</h3>
+                                    <p class='text-nike-dark-grey line-clamp-2 mt-2'>{article.summary || article.content.substring(0, 100)}</p>
+                                </a>
+                            ))}
+                        </div>
+                    </section>
+                )}
+            </div>
+        )}
+    </main>
+</Layout>

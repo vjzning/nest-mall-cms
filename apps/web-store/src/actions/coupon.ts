@@ -1,6 +1,6 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
-import { API_ENDPOINTS } from '../lib/api';
+import { API_ENDPOINTS, request } from '../lib/api';
 
 export const couponActions = {
     // 获取当前订单可用的优惠券
@@ -23,21 +23,13 @@ export const couponActions = {
                 throw new Error('请先登录');
             }
 
-            const response = await fetch(API_ENDPOINTS.COUPON_MATCH, {
+            return request(API_ENDPOINTS.COUPON_MATCH, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(input),
             });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || '获取优惠券失败');
-            }
-
-            return await response.json();
         },
     }),
 
@@ -72,18 +64,11 @@ export const couponActions = {
                 url.searchParams.append('status', statusMap[input.status]);
             }
 
-            const response = await fetch(url.toString(), {
+            return request(url.toString(), {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || '获取优惠券列表失败');
-            }
-
-            return await response.json();
         },
     }),
 
@@ -91,12 +76,7 @@ export const couponActions = {
     getAvailable: defineAction({
         accept: 'json',
         handler: async (_, context) => {
-            const response = await fetch(API_ENDPOINTS.COUPON_AVAILABLE);
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || '获取可领取优惠券失败');
-            }
-            return await response.json();
+            return request(API_ENDPOINTS.COUPON_AVAILABLE);
         },
     }),
 
@@ -112,7 +92,7 @@ export const couponActions = {
                 throw new Error('请先登录');
             }
 
-            const response = await fetch(
+            return request(
                 API_ENDPOINTS.COUPON_CLAIM.replace(':id', input.id.toString()),
                 {
                     method: 'POST',
@@ -121,13 +101,6 @@ export const couponActions = {
                     },
                 }
             );
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || '领取失败');
-            }
-
-            return await response.json();
         },
     }),
 };

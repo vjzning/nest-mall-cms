@@ -29,8 +29,23 @@ export class ProductService {
         try {
             const { skus, ...productData } = createProductDto;
 
+            // 计算价格缓存
+            let priceCache = '0';
+            if (skus && skus.length > 0) {
+                const prices = skus.map((s) => Number(s.price));
+                const minPrice = Math.min(...prices);
+                const maxPrice = Math.max(...prices);
+                priceCache =
+                    minPrice === maxPrice
+                        ? `${minPrice}`
+                        : `${minPrice}-${maxPrice}`;
+            }
+
             // 1. Save Product
-            const product = this.productRepo.create(productData);
+            const product = this.productRepo.create({
+                ...productData,
+                price: priceCache,
+            });
             const savedProduct = await queryRunner.manager.save(product);
 
             // 2. Save SKUs
@@ -72,7 +87,7 @@ export class ProductService {
         const [items, total] = await this.productRepo.findAndCount({
             where,
             order: { sort: 'DESC', createdAt: 'DESC' },
-            relations: ['category', 'skus'],
+            relations: ['category'], // 移除 skus 关联
             skip,
             take: limit,
         });
@@ -105,29 +120,79 @@ export class ProductService {
         try {
             const { skus, ...productData } = updateProductDto;
 
-            // 1. Update Product
+            // 1. Update Product (Initially update with basic data)
             await queryRunner.manager.update(
                 MallProductEntity,
                 id,
                 productData
             );
 
-            // 2. Update SKUs (Full replacement strategy for simplicity, or complex diff)
-            // For this version, we'll delete old SKUs and insert new ones if 'skus' is provided.
-            // A better approach would be to check IDs and update existing ones.
+            // 2. Update SKUs (Collection diff strategy)
             if (skus) {
-                await queryRunner.manager.delete(MallProductSkuEntity, {
-                    productId: id,
-                });
-                const skuEntities = skus.map((sku) =>
-                    this.skuRepo.create({
-                        ...sku,
-                        productId: id,
-                    })
+                // Get existing SKUs
+                const currentSkus = await queryRunner.manager.find(
+                    MallProductSkuEntity,
+                    {
+                        where: { productId: id },
+                    }
                 );
-                await queryRunner.manager.save(skuEntities);
+                // 确保 ID 统一转为 String 进行比较，因为 BigInt 在 JSON 传输中可能变成 String
+                const currentSkuIds = currentSkus.map((s) => String(s.id));
 
-                // 检查库存是否为 0
+                // Identify SKUs to delete, update, and create
+                const skusToUpdate = skus.filter(
+                    (sku) => sku.id && currentSkuIds.includes(String(sku.id))
+                );
+                const skusToCreate = skus.filter((sku) => !sku.id);
+                const skuIdsToKeep = skusToUpdate.map((sku) => String(sku.id));
+                const skuIdsToDelete = currentSkuIds.filter(
+                    (currentId) => !skuIdsToKeep.includes(currentId)
+                );
+
+                // 1) Delete
+                if (skuIdsToDelete.length > 0) {
+                    await queryRunner.manager.delete(
+                        MallProductSkuEntity,
+                        skuIdsToDelete
+                    );
+                }
+
+                // 2) Update
+                for (const sku of skusToUpdate) {
+                    const { id: skuId, ...skuData } = sku;
+                    await queryRunner.manager.update(
+                        MallProductSkuEntity,
+                        skuId,
+                        skuData
+                    );
+                }
+
+                // 3) Create
+                if (skusToCreate.length > 0) {
+                    const newSkuEntities = skusToCreate.map((sku) =>
+                        this.skuRepo.create({
+                            ...sku,
+                            productId: id,
+                        })
+                    );
+                    await queryRunner.manager.save(newSkuEntities);
+                }
+
+                // 计算并更新商品主表的价格缓存
+                const allPrices = skus.map((s) => Number(s.price));
+                if (allPrices.length > 0) {
+                    const minPrice = Math.min(...allPrices);
+                    const maxPrice = Math.max(...allPrices);
+                    const priceCache =
+                        minPrice === maxPrice
+                            ? `${minPrice}`
+                            : `${minPrice}-${maxPrice}`;
+                    await queryRunner.manager.update(MallProductEntity, id, {
+                        price: priceCache,
+                    });
+                }
+
+                // 检查库存是否为 0 (包含更新和新增的 SKU)
                 for (const sku of skus) {
                     if (sku.stock === 0) {
                         await this.notificationService.send({

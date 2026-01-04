@@ -1,19 +1,15 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import { CollectionType, CollectionLayout } from "@app/shared";
 import type { CollectionInfo } from "@app/shared";
 import CollectionSection from "../../components/nike/CollectionSection.astro";
-import { API_ENDPOINTS } from "../../lib/api";
+import { API_ENDPOINTS, request } from "../../lib/api";
 
 // SSR 模式 - 每次请求动态渲染
 const { slug } = Astro.params;
 
 let collection: CollectionInfo | null = null;
 try {
-  const response = await fetch(`${API_ENDPOINTS.COLLECTIONS}/${slug}`);
-  if (response.ok) {
-    collection = await response.json();
-  }
+  collection = await request<CollectionInfo>(`${API_ENDPOINTS.COLLECTIONS}/${slug}`);
 } catch (e) {
   console.error("Failed to fetch collection detail:", e);
 }

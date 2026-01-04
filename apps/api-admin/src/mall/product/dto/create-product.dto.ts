@@ -8,9 +8,14 @@ import {
     IsInt,
     Min,
 } from 'class-validator';
-import { Type, Transform } from 'class-transformer';
+import { Type } from 'class-transformer';
 
 export class CreateProductSkuDto {
+    @IsOptional()
+    @IsInt()
+    @Type(() => Number)
+    id?: number;
+
     @IsString()
     @IsNotEmpty()
     code: string;

@@ -72,6 +72,7 @@ export class FlashSaleService {
 
     async update(id: number, dto: UpdateFlashSaleActivityDto) {
         await this.activityRepo.update(id, dto);
+        await this.clearCache(id);
         return this.findOne(id);
     }
 
@@ -86,11 +87,26 @@ export class FlashSaleService {
             });
             await queryRunner.manager.delete(FlashSaleActivityEntity, id);
             await queryRunner.commitTransaction();
+            await this.clearCache(id);
         } catch (err) {
             await queryRunner.rollbackTransaction();
             throw err;
         } finally {
             await queryRunner.release();
+        }
+    }
+
+    /**
+     * 清理秒杀缓存
+     */
+    private async clearCache(id?: number) {
+        const client = await this.redis.getClient();
+        const keys = ['flash_sale:activities:list'];
+        if (id) {
+            keys.push(`flash_sale:activity:detail:${id}`);
+        }
+        for (const key of keys) {
+            await client.del(key);
         }
     }
 

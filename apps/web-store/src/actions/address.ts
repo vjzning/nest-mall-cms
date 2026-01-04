@@ -1,11 +1,10 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { API_ENDPOINTS, getApiUrl } from "../lib/api";
+import { API_ENDPOINTS, getApiUrl, request } from "../lib/api";
 
 const getHeaders = async (context: any) => {
   const token = await context.session?.get("token");
   return {
-    "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
   };
 };
@@ -34,14 +33,12 @@ export const addressActions = {
       try {
         const headers = await getHeaders(context);
         const apiUrl = getApiUrl();
-        const response = await fetch(`${apiUrl}/member/address`, {
+        const address = await request(`${apiUrl}/member/address`, {
           method: "POST",
           headers,
           body: JSON.stringify(input),
         });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.message || "保存地址失败");
-        return { success: true, address: data };
+        return { success: true, address };
       } catch (error: any) {
         console.error("Create address error:", error);
         throw error;
@@ -74,14 +71,12 @@ export const addressActions = {
         const { id, ...rest } = input;
         const headers = await getHeaders(context);
         const apiUrl = getApiUrl();
-        const response = await fetch(`${apiUrl}/member/address/${id}`, {
+        const address = await request(`${apiUrl}/member/address/${id}`, {
           method: "PUT",
           headers,
           body: JSON.stringify(rest),
         });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.message || "更新地址失败");
-        return { success: true, address: data };
+        return { success: true, address };
       } catch (error: any) {
         console.error("Update address error:", error);
         throw error;
@@ -98,14 +93,10 @@ export const addressActions = {
       try {
         const headers = await getHeaders(context);
         const apiUrl = getApiUrl();
-        const response = await fetch(`${apiUrl}/member/address/${input.id}`, {
+        await request(`${apiUrl}/member/address/${input.id}`, {
           method: "DELETE",
           headers,
         });
-        if (!response.ok) {
-          const data = await response.json().catch(() => ({}));
-          throw new Error(data.message || "删除地址失败");
-        }
         return { success: true };
       } catch (error: any) {
         console.error("Delete address error:", error);
@@ -123,22 +114,13 @@ export const addressActions = {
       try {
         const headers = await getHeaders(context);
         const apiUrl = getApiUrl();
-        const response = await fetch(
+        await request(
           `${apiUrl}/member/address/${input.id}/default`,
           {
             method: "PATCH",
             headers,
           }
         );
-        if (!response.ok) {
-          const text = await response.text();
-          let message = "设置默认地址失败";
-          try {
-            const data = JSON.parse(text);
-            message = data.message || message;
-          } catch (e) {}
-          throw new Error(message);
-        }
         return { success: true };
       } catch (error: any) {
         console.error("Set default address error:", error);

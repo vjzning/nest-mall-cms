@@ -10,6 +10,7 @@ import { CommentModule } from './comment/comment.module';
 import { MallModule } from './mall/mall.module';
 import { AuthModule } from './auth/auth.module';
 import { MemberModule } from './member/member.module';
+import { SearchModule } from './search/search.module';
 import { SystemConfigModule } from '@app/shared/system-config/system-config.module';
 import databaseConfig from './config/database.config';
 import { RedisClientModule, RedisLockModule } from '@app/redis';
@@ -18,6 +19,8 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv as createKeyvRedis } from '@keyv/redis';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { RedisThrottlerStorage, RedisClientService } from '@app/redis';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerBehindProxyGuard } from '@app/shared/guards/throttler-behind-proxy.guard';
 
 @Module({
     imports: [
@@ -79,15 +82,16 @@ import { RedisThrottlerStorage, RedisClientService } from '@app/redis';
         MallModule,
         AuthModule,
         MemberModule,
+        SearchModule,
         SystemConfigModule,
     ],
     controllers: [CmsContentApiController],
     providers: [
         CmsContentApiService,
-        // {
-        //     provide: APP_GUARD,
-        //     useClass: ThrottlerBehindProxyGuard,
-        // },
+        {
+            provide: APP_GUARD,
+            useClass: ThrottlerBehindProxyGuard,
+        },
     ],
 })
 export class CmsContentApiModule {}

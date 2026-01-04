@@ -124,6 +124,7 @@ export default function ProductList() {
                         <TableRow>
                             <TableHead className='w-[80px]'>封面</TableHead>
                             <TableHead className='w-[300px]'>名称</TableHead>
+                            <TableHead>价格</TableHead>
                             <TableHead>分类</TableHead>
                             <TableHead>销量</TableHead>
                             <TableHead>状态</TableHead>
@@ -153,6 +154,13 @@ export default function ProductList() {
                                     </div>
                                     <div className='text-xs text-muted-foreground truncate max-w-[250px]'>
                                         {product.description}
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className='font-medium text-destructive'>
+                                        {product.price
+                                            ? `￥${product.price}`
+                                            : '-'}
                                     </div>
                                 </TableCell>
                                 <TableCell>
@@ -213,7 +221,7 @@ export default function ProductList() {
                         {products.length === 0 && (
                             <TableRow>
                                 <TableCell
-                                    colSpan={7}
+                                    colSpan={8}
                                     className='h-24 text-center text-muted-foreground'
                                 >
                                     暂无商品数据

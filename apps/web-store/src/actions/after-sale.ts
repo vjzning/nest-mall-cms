@@ -1,6 +1,6 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
-import { API_ENDPOINTS } from '../lib/api';
+import { API_ENDPOINTS, request } from '../lib/api';
 
 export const afterSaleActions = {
     // 申请售后
@@ -25,24 +25,13 @@ export const afterSaleActions = {
                 throw new Error('请先登录');
             }
 
-            const response = await fetch(
-                `${API_ENDPOINTS.MEMBER_AFTER_SALES}/apply`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify(input),
-                }
-            );
-
-            const result = await response.json();
-            if (!response.ok) {
-                throw new Error(result.message || '申请售后失败');
-            }
-
-            return result;
+            return request(`${API_ENDPOINTS.MEMBER_AFTER_SALES}/apply`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(input),
+            });
         },
     }),
 
@@ -65,20 +54,11 @@ export const afterSaleActions = {
             if (input?.limit)
                 queryParams.append('limit', input.limit.toString());
 
-            const response = await fetch(
-                `${API_ENDPOINTS.MEMBER_AFTER_SALES}?${queryParams.toString()}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error('获取售后列表失败');
-            }
-
-            return response.json();
+            return request(`${API_ENDPOINTS.MEMBER_AFTER_SALES}?${queryParams.toString()}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
         },
     }),
 
@@ -93,20 +73,11 @@ export const afterSaleActions = {
                 throw new Error('请先登录');
             }
 
-            const response = await fetch(
-                `${API_ENDPOINTS.MEMBER_AFTER_SALES}/${input.id}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error('获取售后详情失败');
-            }
-
-            return response.json();
+            return request(`${API_ENDPOINTS.MEMBER_AFTER_SALES}/${input.id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
         },
     }),
 
@@ -125,24 +96,13 @@ export const afterSaleActions = {
             }
 
             const { id, ...data } = input;
-            const response = await fetch(
-                `${API_ENDPOINTS.MEMBER_AFTER_SALES}/${id}/logistics`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify(data),
-                }
-            );
-
-            const result = await response.json();
-            if (!response.ok) {
-                throw new Error(result.message || '提交物流信息失败');
-            }
-
-            return result;
+            return request(`${API_ENDPOINTS.MEMBER_AFTER_SALES}/${id}/logistics`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(data),
+            });
         },
     }),
 };

@@ -2,7 +2,7 @@
 import Layout from '../../../layouts/Layout.astro';
 import { actions } from 'astro:actions';
 import MemberSidebar from '../../../components/member/MemberSidebar.astro';
-import { getApiUrl } from '../../../lib/api';
+import { getApiUrl, request } from '../../../lib/api';
 
 const user = await Astro.session?.get('user');
 const token = await Astro.session?.get('token');
@@ -14,22 +14,19 @@ if (!user || !token) {
 const apiUrl = getApiUrl();
 
 // 获取地址列表
-const response = await fetch(`${apiUrl}/member/address`, {
-    headers: {
-        Authorization: `Bearer ${token}`,
-    },
-});
+let addresses: MemberAddress[] = [];
+let fetchError = null;
 
-if (!response.ok) {
-    console.error(
-        'Failed to fetch addresses:',
-        response.status,
-        await response.text()
-    );
+try {
+    addresses = await request<MemberAddress[]>(`${apiUrl}/member/address`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+} catch (error) {
+    console.error('Failed to fetch addresses:', error);
+    fetchError = '无法加载地址列表，请稍后重试。';
 }
-
-const addresses = response.ok ? await response.json() : [];
-const fetchError = !response.ok ? '无法加载地址列表，请稍后重试。' : null;
 
 // 处理删除或设为默认后的重定向
 const deleteResult = Astro.getActionResult(actions.address.deleteAddress);

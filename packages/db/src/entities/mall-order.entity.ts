@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany, JoinColumn, Index } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { MemberEntity } from './member.entity';
 import { MallOrderItemEntity } from './mall-order-item.entity';
@@ -20,6 +20,7 @@ export class MallOrderEntity extends BaseEntity {
     orderNo: string;
 
     @Column({ name: 'member_id', type: 'bigint' })
+    @Index()
     memberId: number;
 
     @ManyToOne(() => MemberEntity)
@@ -36,6 +37,7 @@ export class MallOrderEntity extends BaseEntity {
     shippingFee: number;
 
     @Column({ type: 'varchar', length: 20, default: OrderStatus.PENDING_PAY })
+    @Index()
     status: OrderStatus;
 
     @Column({ type: 'json', nullable: true, name: 'receiver_info' })
@@ -62,6 +64,7 @@ export class MallOrderEntity extends BaseEntity {
     remark?: string;
 
     @Column({ name: 'activity_id', type: 'bigint', nullable: true, comment: '秒杀活动ID' })
+    @Index()
     activityId?: number;
 
     @OneToMany(() => MallOrderItemEntity, (item) => item.order)

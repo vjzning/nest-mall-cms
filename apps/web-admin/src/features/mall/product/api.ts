@@ -26,6 +26,7 @@ export interface Product {
     shippingTemplateId?: number;
     weight?: number;
     volume?: number;
+    price?: string;
     createdAt: string;
     skus?: ProductSku[];
 }

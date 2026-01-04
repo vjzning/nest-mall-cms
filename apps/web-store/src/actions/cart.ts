@@ -1,6 +1,6 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
-import { API_ENDPOINTS } from '../lib/api';
+import { API_ENDPOINTS, request } from '../lib/api';
 
 const getCartState = async (context: any) => {
     const cartItems = await context.session.get('cartItems');
@@ -19,36 +19,28 @@ const getCartState = async (context: any) => {
         try {
             const url = `${API_ENDPOINTS.PRODUCTS}/${item.productId}`;
             console.log(`正在获取商品详情: ${url}`);
-            const productResponse = await fetch(url);
+            const product: any = await request(url);
 
-            if (productResponse.ok) {
-                const product = await productResponse.json();
-                // 确保 ID 匹配时使用相同的类型比较
-                const sku = product.skus?.find(
-                    (s: any) => Number(s.id) === Number(item.skuId)
-                );
+            // 确保 ID 匹配时使用相同的类型比较
+            const sku = product.skus?.find(
+                (s: any) => Number(s.id) === Number(item.skuId)
+            );
 
-                if (sku) {
-                    total += sku.price * item.quantity;
-                    enrichedItems.push({
-                        ...item,
-                        name: product.name,
-                        cover: product.cover,
-                        categoryId: product.categoryId,
-                        price: sku.price,
-                        totalPrice: Number(
-                            (sku.price * item.quantity).toFixed(2)
-                        ),
-                    });
-                } else {
-                    console.warn(
-                        `未找到 SKU: ${item.skuId}，商品 ID: ${item.productId}`
-                    );
-                    enrichedItems.push(item);
-                }
+            if (sku) {
+                total += sku.price * item.quantity;
+                enrichedItems.push({
+                    ...item,
+                    name: product.name,
+                    cover: product.cover,
+                    categoryId: product.categoryId,
+                    price: sku.price,
+                    totalPrice: Number(
+                        (sku.price * item.quantity).toFixed(2)
+                    ),
+                });
             } else {
-                console.error(
-                    `商品 API 返回错误 ${productResponse.status}: ${url}`
+                console.warn(
+                    `未找到 SKU: ${item.skuId}，商品 ID: ${item.productId}`
                 );
                 enrichedItems.push(item);
             }

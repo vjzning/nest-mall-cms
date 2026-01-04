@@ -15,14 +15,19 @@ import { toast } from 'sonner';
 interface UploadDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    folderId?: number;
 }
 
-export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
+export function UploadDialog({
+    open,
+    onOpenChange,
+    folderId,
+}: UploadDialogProps) {
     const [files, setFiles] = useState<File[]>([]);
     const queryClient = useQueryClient();
 
     const uploadMutation = useMutation({
-        mutationFn: resourceApi.upload,
+        mutationFn: (file: File) => resourceApi.upload(file, folderId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['resources'] });
             toast.success('文件上传成功');
@@ -55,7 +60,7 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
         for (const file of files) {
             try {
                 await uploadMutation.mutateAsync(file);
-            } catch (error) {
+            } catch {
                 // Error already handled in mutation
                 break;
             }

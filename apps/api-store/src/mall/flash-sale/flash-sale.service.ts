@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, OnModuleInit } from '@nestjs/common';
+import {
+    Injectable,
+    BadRequestException,
+    OnModuleInit,
+    Inject,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
 import {
@@ -11,6 +16,8 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { FLASH_SALE_ORDER_QUEUE } from '@app/queue';
 import { FlashSaleOrderDto } from './dto/flash-sale.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 
 @Injectable()
 export class FlashSaleService implements OnModuleInit {
@@ -55,7 +62,9 @@ export class FlashSaleService implements OnModuleInit {
         private readonly productRepo: Repository<FlashSaleProductEntity>,
         private readonly redis: RedisClientService,
         @InjectQueue(FLASH_SALE_ORDER_QUEUE)
-        private readonly orderQueue: Queue
+        private readonly orderQueue: Queue,
+        @Inject(CACHE_MANAGER)
+        private readonly cacheManager: Cache
     ) {}
 
     async onModuleInit() {
@@ -67,6 +76,7 @@ export class FlashSaleService implements OnModuleInit {
         if (!memberId) {
             throw new BadRequestException('用户未登录或 memberId 为空');
         }
+
         const { activityId, skuId } = dto;
 
         // 1. 基本校验 (活动是否进行中)
@@ -127,28 +137,54 @@ export class FlashSaleService implements OnModuleInit {
     }
 
     async getActivities() {
-        const now = new Date();
-        // 使用 find 代替 createQueryBuilder，以确保日期处理一致
-        return this.activityRepo.find({
-            where: {
-                status: 1,
-                endTime: MoreThan(now),
+        const cacheKey = 'flash_sale:activities:list';
+        return this.cacheManager.wrap(
+            cacheKey,
+            async () => {
+                const now = new Date();
+                return this.activityRepo.find({
+                    where: {
+                        status: 1,
+                        endTime: MoreThan(now),
+                    },
+                    order: {
+                        startTime: 'ASC',
+                    },
+                });
             },
-            order: {
-                startTime: 'ASC',
-            },
-        });
+            300000 // 5 分钟
+        );
     }
 
     async getActivityDetail(id: number) {
-        const activity = await this.activityRepo.findOne({ where: { id } });
-        if (!activity) throw new BadRequestException('活动不存在');
+        const cacheKey = `flash_sale:activity:detail:${id}`;
+        return this.cacheManager
+            .wrap(
+                cacheKey,
+                async () => {
+                    const activity = await this.activityRepo.findOne({
+                        where: { id },
+                    });
+                    if (!activity) {
+                        // 对于不存在的数据返回特殊标记，wrap 会将其缓存
+                        return '__NULL__';
+                    }
 
-        const products = await this.productRepo.find({
-            where: { activityId: id },
-            relations: ['product', 'sku'],
-            order: { sort: 'ASC' },
-        });
-        return { ...activity, products };
+                    const products = await this.productRepo.find({
+                        where: { activityId: id },
+                        relations: ['product', 'sku'],
+                        order: { sort: 'ASC' },
+                    });
+
+                    return { ...activity, products };
+                },
+                300000 // 5 分钟
+            )
+            .then((result) => {
+                if (result === '__NULL__') {
+                    throw new BadRequestException('活动不存在');
+                }
+                return result;
+            });
     }
 }

@@ -2,7 +2,8 @@
 import Layout from '../../../layouts/Layout.astro';
 import { actions } from 'astro:actions';
 import MemberSidebar from '../../../components/member/MemberSidebar.astro';
-import { getApiUrl } from '../../../lib/api';
+import { getApiUrl, request } from '../../../lib/api';
+import type { MemberAddress } from '@app/shared';
 
 const user = await Astro.session?.get('user');
 const token = await Astro.session?.get('token');
@@ -12,22 +13,21 @@ const { id } = Astro.params;
 const apiUrl = getApiUrl();
 
 // 获取当前地址详情
-const response = await fetch(
-    `${apiUrl}/member/address/${id}`,
-    {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    }
-);
-
-let address = null;
+let address: MemberAddress | null = null;
 let fetchError = null;
 
-if (!response.ok) {
+try {
+    address = await request<MemberAddress>(
+        `${apiUrl}/member/address/${id}`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+} catch (error: any) {
+    console.error('获取地址详情失败:', error);
     fetchError = '无法获取地址详情，该地址可能不存在或您没有权限访问。';
-} else {
-    address = await response.json();
 }
 
 const result = Astro.getActionResult(actions.address.updateAddress);

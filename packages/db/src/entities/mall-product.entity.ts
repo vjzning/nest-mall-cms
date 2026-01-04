@@ -48,6 +48,9 @@ export class MallProductEntity extends BaseEntity {
   @Column({ type: 'decimal', precision: 10, scale: 3, default: 0, comment: '体积 (m³)' })
   volume: number;
 
+  @Column({ length: 50, nullable: true, comment: '价格区间或起步价缓存' })
+  price: string;
+
   @OneToMany(() => MallProductSkuEntity, sku => sku.product)
   skus: MallProductSkuEntity[];
 }

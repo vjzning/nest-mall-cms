@@ -2,8 +2,10 @@
 import Layout from "../../layouts/Layout.astro";
 import { actions } from "astro:actions";
 import { getSession } from "../../lib/session";
-import { getApiUrl } from "../../lib/api";
+import { getApiUrl, request } from "../../lib/api";
 import FlashSaleDetail from "../../components/nike/FlashSaleDetail";
+
+import type { MemberAddress } from "@app/shared";
 
 const { id } = Astro.params;
 const session = await getSession(Astro);
@@ -16,17 +18,18 @@ if (!result.data) {
   return Astro.redirect('/404');
 }
 
-const { products, ...activity } = result.data;
+const { products, ...activity } = result.data as any;
 
 // 获取地址列表 (需要登录)
-let addresses = [];
+let addresses: MemberAddress[] = [];
 if (token) {
   const apiUrl = getApiUrl();
-  const addrRes = await fetch(`${apiUrl}/member/address`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (addrRes.ok) {
-    addresses = await addrRes.json();
+  try {
+    addresses = await request<MemberAddress[]>(`${apiUrl}/member/address`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  } catch (error) {
+    console.error('获取地址列表失败:', error);
   }
 }
 

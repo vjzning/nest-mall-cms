@@ -1,0 +1,115 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="页面未找到">
+  <main class="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
+    <div class="relative mb-8 group">
+      <h1 class="text-[12rem] md:text-[18rem] font-black italic leading-none tracking-tighter text-nike-grey select-none font-nike transition-all duration-700 group-hover:tracking-widest opacity-20">
+        404
+      </h1>
+      <div class="absolute inset-0 flex flex-col items-center justify-center translate-y-4">
+        <div class="flex items-center gap-2 mb-4 animate-pulse">
+          <div class="w-3 h-3 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
+          <span class="text-xs font-bold uppercase tracking-widest text-red-500">连接中断</span>
+        </div>
+        <p class="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-nike-black font-nike glitch-text" data-text="在赛场外掉线了">
+          在赛场外掉线了
+        </p>
+      </div>
+    </div>
+
+    <div class="max-w-md mx-auto space-y-8">
+      <div class="space-y-2">
+        <p class="text-nike-dark-grey text-lg font-medium leading-relaxed">
+          哎呀！看来你的连接在关键时刻“掉线”了。<br/>
+          主裁判判定该页面因技术违规已离场。
+        </p>
+      </div>
+      
+      <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+        <a href="/" class="btn-nike-black px-12 py-4 text-sm uppercase tracking-widest font-bold group flex items-center justify-center gap-2">
+          <span>重新热身 (回首页)</span>
+          <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    {/* Decorative Elements */}
+    <div class="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
+      <div class="text-left space-y-2">
+        <h3 class="text-xs font-bold uppercase tracking-widest text-nike-dark-grey">热门分类</h3>
+        <ul class="text-sm font-bold uppercase space-y-1">
+          <li><a href="/topic/men" class="hover:underline">男子</a></li>
+          <li><a href="/topic/women" class="hover:underline">女子</a></li>
+          <li><a href="/topic/kids" class="hover:underline">儿童</a></li>
+        </ul>
+      </div>
+      <div class="text-left space-y-2">
+        <h3 class="text-xs font-bold uppercase tracking-widest text-nike-dark-grey">精选系列</h3>
+        <ul class="text-sm font-bold uppercase space-y-1">
+          <li><a href="/topic/jordan" class="hover:underline">Jordan</a></li>
+          <li><a href="/topic/running" class="hover:underline">跑步</a></li>
+          <li><a href="/topic/basketball" class="hover:underline">篮球</a></li>
+        </ul>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  @reference "../styles/global.css";
+
+  h1 {
+    -webkit-text-stroke: 1px #e5e5e5;
+    text-shadow: 4px 4px 0px rgba(0,0,0,0.02);
+  }
+
+  .glitch-text {
+    position: relative;
+    text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+      -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+      0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+    animation: glitch 500ms infinite;
+  }
+
+  @keyframes glitch {
+    0% {
+      text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+        -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+        -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    14% {
+      text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+        -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+        -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    15% {
+      text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+        0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+        -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    49% {
+      text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+        0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+        -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    50% {
+      text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+        0.05em 0 0 rgba(0, 255, 0, 0.75),
+        0 -0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    99% {
+      text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+        0.05em 0 0 rgba(0, 255, 0, 0.75),
+        0 -0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    100% {
+      text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75),
+        -0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
+        -0.025em -0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+  }
+</style>

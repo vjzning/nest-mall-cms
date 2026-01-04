@@ -1,17 +1,12 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
-import { API_ENDPOINTS } from '../lib/api';
+import { API_ENDPOINTS, request } from '../lib/api';
 
 export const flashSaleActions = {
     // 获取秒杀活动列表
     getActivities: defineAction({
         handler: async () => {
-            const response = await fetch(API_ENDPOINTS.FLASH_SALE_ACTIVITIES);
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || '获取活动列表失败');
-            }
-            return await response.json();
+            return request(API_ENDPOINTS.FLASH_SALE_ACTIVITIES);
         },
     }),
 
@@ -22,12 +17,7 @@ export const flashSaleActions = {
         }),
         handler: async (input) => {
             const url = API_ENDPOINTS.FLASH_SALE_DETAIL.replace(':id', input.id.toString());
-            const response = await fetch(url);
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || '获取活动详情失败');
-            }
-            return await response.json();
+            return request(url);
         },
     }),
 
@@ -45,21 +35,13 @@ export const flashSaleActions = {
                 throw new Error('请先登录');
             }
 
-            const response = await fetch(API_ENDPOINTS.FLASH_SALE_ORDER, {
+            return request(API_ENDPOINTS.FLASH_SALE_ORDER, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(input),
             });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || '抢购失败');
-            }
-
-            return await response.json();
         },
     }),
 };
