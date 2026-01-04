@@ -5,7 +5,11 @@ import { RedisClientModule, RedisLockModule } from '@app/redis';
 import { QueueModule } from '@app/queue';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
-import { MallOrderEntity, MallAfterSaleEntity } from '@app/db';
+import {
+    MallOrderEntity,
+    MallAfterSaleEntity,
+    MallProductSkuEntity,
+} from '@app/db';
 import { CmsAdminApiController } from './cms-admin-api.controller';
 import { CmsAdminApiService } from './cms-admin-api.service';
 import { AuthModule } from './auth/auth.module';
@@ -49,7 +53,11 @@ import { ScheduleModule } from '@nestjs/schedule';
             }),
             inject: [ConfigService],
         }),
-        TypeOrmModule.forFeature([MallOrderEntity, MallAfterSaleEntity]),
+        TypeOrmModule.forFeature([
+            MallOrderEntity,
+            MallAfterSaleEntity,
+            MallProductSkuEntity,
+        ]),
         CacheModule.registerAsync({
             isGlobal: true,
             useFactory: (configService: ConfigService) => {

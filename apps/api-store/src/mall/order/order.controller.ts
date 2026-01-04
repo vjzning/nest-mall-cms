@@ -10,6 +10,7 @@ import {
     Query,
     Patch,
     UseInterceptors,
+    BadRequestException,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { PaymentService } from '@app/payment';
@@ -69,6 +70,31 @@ export class OrderController {
     async findOne(@Param('id') id: number, @Request() req) {
         const memberId = req.user.id;
         return this.orderService.findOne(id, memberId);
+    }
+
+    @Post(':id/pay')
+    @Log({ module: '交易管理', action: '支付订单' })
+    @UseInterceptors(LogInterceptor)
+    async pay(
+        @Param('id') id: number,
+        @Body('paymentMethod') paymentMethod: string,
+        @Request() req
+    ) {
+        const memberId = req.user.id;
+        const order = await this.orderService.findOne(id, memberId);
+        if (!order) {
+            throw new BadRequestException('订单不存在');
+        }
+
+        const payParams = await this.paymentService.pay(
+            order,
+            paymentMethod || 'alipay'
+        );
+
+        return {
+            success: true,
+            payParams,
+        };
     }
 
     @Patch(':id/cancel')

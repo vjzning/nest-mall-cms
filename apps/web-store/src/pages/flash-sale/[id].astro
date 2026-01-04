@@ -1,0 +1,72 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { actions } from "astro:actions";
+import { getSession } from "../../lib/session";
+import { getApiUrl } from "../../lib/api";
+import FlashSaleDetail from "../../components/nike/FlashSaleDetail";
+
+const { id } = Astro.params;
+const session = await getSession(Astro);
+const user = session?.user;
+const token = session?.token;
+
+// 获取活动详情
+const result = await Astro.callAction(actions.flashSale.getActivityDetail, { id: Number(id) });
+if (!result.data) {
+  return Astro.redirect('/404');
+}
+
+const { products, ...activity } = result.data;
+
+// 获取地址列表 (需要登录)
+let addresses = [];
+if (token) {
+  const apiUrl = getApiUrl();
+  const addrRes = await fetch(`${apiUrl}/member/address`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (addrRes.ok) {
+    addresses = await addrRes.json();
+  }
+}
+
+---
+
+<Layout title={activity.title}>
+  <main class="max-w-[1920px] mx-auto px-4 sm:px-12 py-12">
+    <nav class="mb-8">
+      <a href="/flash-sale" class="text-sm font-bold uppercase tracking-widest flex items-center hover:opacity-70 transition-opacity">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        返回列表
+      </a>
+    </nav>
+
+    {token ? (
+      <FlashSaleDetail 
+        client:load 
+        activity={activity} 
+        products={products} 
+        addresses={addresses} 
+      />
+    ) : (
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div class="space-y-8">
+          <div class="aspect-[16/9] bg-nike-grey rounded-lg overflow-hidden">
+            <img src={activity.bannerUrl || '/images/placeholder-banner.jpg'} class="w-full h-full object-cover" alt={activity.title} />
+          </div>
+          <div>
+            <h1 class="text-4xl font-black uppercase italic tracking-tighter mb-4">{activity.title}</h1>
+            <p class="text-nike-dark-grey leading-relaxed">{activity.remark}</p>
+          </div>
+        </div>
+        <div class="bg-nike-grey rounded-lg p-12 flex flex-col items-center justify-center text-center">
+          <h2 class="text-2xl font-bold uppercase italic mb-4">准备好抢购了吗？</h2>
+          <p class="text-nike-dark-grey mb-8">您需要先登录才能参与秒杀活动。</p>
+          <a href="/login" class="btn-nike-black px-12 py-4">立即登录</a>
+        </div>
+      </div>
+    )}
+  </main>
+</Layout>

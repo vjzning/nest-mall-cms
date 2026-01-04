@@ -213,7 +213,10 @@ const formatPrice = (price: number) => {
                                     {
                                         order.status === 'PENDING_PAY' && (
                                             <>
-                                                <button class='py-3 w-full font-bold text-white rounded transition-colors bg-nike-black hover:bg-gray-800'>
+                                                <button
+                                                    class='py-3 w-full font-bold text-white rounded transition-colors bg-nike-black hover:bg-gray-800'
+                                                    id='payBtn'
+                                                >
                                                     立即付款
                                                 </button>
                                                 <button
@@ -322,8 +325,37 @@ const formatPrice = (price: number) => {
 
     const orderActions = document.getElementById('orderActions');
     const orderId = orderActions?.dataset.orderId;
+    const payBtn = document.getElementById('payBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     const confirmBtn = document.getElementById('confirmBtn');
+
+    if (payBtn && orderId) {
+        payBtn.addEventListener('click', async () => {
+            payBtn.setAttribute('disabled', 'true');
+            payBtn.textContent = '正在发起支付...';
+
+            try {
+                const { data, error } = await actions.order.repay({
+                    id: orderId,
+                });
+                if (error) {
+                    alert(error.message);
+                    payBtn.removeAttribute('disabled');
+                    payBtn.textContent = '立即付款';
+                } else if (data?.payParams?.payUrl) {
+                    window.location.href = data.payParams.payUrl;
+                } else {
+                    alert('支付发起失败，请重试');
+                    payBtn.removeAttribute('disabled');
+                    payBtn.textContent = '立即付款';
+                }
+            } catch (err) {
+                alert('系统错误，请稍后再试');
+                payBtn.removeAttribute('disabled');
+                payBtn.textContent = '立即付款';
+            }
+        });
+    }
 
     if (cancelBtn && orderId) {
         cancelBtn.addEventListener('click', async () => {

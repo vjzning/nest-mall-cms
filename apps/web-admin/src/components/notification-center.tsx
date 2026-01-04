@@ -3,7 +3,6 @@ import {
     Package,
     Truck,
     MessageSquare,
-    Check,
     Settings,
     Mail,
     Info,
@@ -14,7 +13,6 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
@@ -26,6 +24,7 @@ import {
 import { useAuthStore } from '@/stores/auth.store';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import {
     Dialog,
@@ -55,7 +54,9 @@ const getIcon = (type: string) => {
 export function NotificationCenter() {
     const { user } = useAuthStore();
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const { data: notifications } = useQuery({
         queryKey: ['notifications', 'ADMIN', user?.id],
@@ -94,8 +95,21 @@ export function NotificationCenter() {
         },
     });
 
+    const handleItemClick = (notification: any) => {
+        // 1. 标记为已读
+        if (notification.isRead === 0) {
+            markAsReadMutation.mutate(notification.id);
+        }
+
+        // 2. 跳转业务页面
+        if (notification.payload?.path) {
+            navigate({ to: notification.payload.path });
+            setIsPopoverOpen(false);
+        }
+    };
+
     return (
-        <Popover>
+        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
             <PopoverTrigger asChild>
                 <Button variant='ghost' size='icon' className='relative'>
                     <Bell className='w-5 h-5' />
@@ -112,12 +126,14 @@ export function NotificationCenter() {
                     <h4 className='font-semibold text-sm'>通知中心</h4>
                     <div className='flex items-center gap-2'>
                         {unreadCount > 0 && (
-                            <Badge
-                                variant='secondary'
-                                className='font-normal py-0 px-1.5 text-[10px]'
+                            <Button
+                                variant='link'
+                                size='sm'
+                                className='h-auto p-0 text-[11px] font-normal text-muted-foreground hover:text-primary'
+                                onClick={() => markAllAsReadMutation.mutate()}
                             >
-                                {unreadCount} 条未读
-                            </Badge>
+                                全部标记已读
+                            </Button>
                         )}
                         <Button
                             variant='ghost'
@@ -127,16 +143,6 @@ export function NotificationCenter() {
                             onClick={() => setIsSettingsOpen(true)}
                         >
                             <Settings className='h-3.5 w-3.5 text-muted-foreground' />
-                        </Button>
-                        <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-6 w-6'
-                            title='全部标记为已读'
-                            onClick={() => markAllAsReadMutation.mutate()}
-                            disabled={unreadCount === 0}
-                        >
-                            <Check className='h-3 w-3' />
                         </Button>
                     </div>
                 </div>
@@ -148,10 +154,7 @@ export function NotificationCenter() {
                                 <div
                                     key={notification.id}
                                     onClick={() =>
-                                        notification.isRead === 0 &&
-                                        markAsReadMutation.mutate(
-                                            notification.id
-                                        )
+                                        handleItemClick(notification)
                                     }
                                     className={cn(
                                         'flex flex-col gap-1 p-4 transition-colors hover:bg-muted/50 cursor-pointer relative border-b last:border-0',

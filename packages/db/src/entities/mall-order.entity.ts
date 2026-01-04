@@ -61,6 +61,9 @@ export class MallOrderEntity extends BaseEntity {
     })
     remark?: string;
 
+    @Column({ name: 'activity_id', type: 'bigint', nullable: true, comment: '秒杀活动ID' })
+    activityId?: number;
+
     @OneToMany(() => MallOrderItemEntity, (item) => item.order)
     items: MallOrderItemEntity[];
 

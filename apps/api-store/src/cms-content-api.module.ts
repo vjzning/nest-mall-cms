@@ -16,8 +16,6 @@ import { RedisClientModule, RedisLockModule } from '@app/redis';
 import { QueueModule } from '@app/queue';
 import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv as createKeyvRedis } from '@keyv/redis';
-import { ThrottlerBehindProxyGuard } from '@app/shared'; // 记得确保 shared 包导出了它
-import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { RedisThrottlerStorage, RedisClientService } from '@app/redis';
 

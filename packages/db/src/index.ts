@@ -33,6 +33,8 @@ import { MallDeliveryEntity } from './entities/mall-delivery.entity';
 import { NotificationEntity } from './entities/notification.entity';
 import { NotificationTaskEntity } from './entities/notification-task.entity';
 import { NotificationSettingEntity } from './entities/notification-setting.entity';
+import { FlashSaleActivityEntity } from './entities/flash-sale-activity.entity';
+import { FlashSaleProductEntity } from './entities/flash-sale-product.entity';
 
 export * from './db.module';
 export * from './db.service';
@@ -72,6 +74,8 @@ export * from './entities/mall-delivery.entity';
 export * from './entities/notification.entity';
 export * from './entities/notification-task.entity';
 export * from './entities/notification-setting.entity';
+export * from './entities/flash-sale-activity.entity';
+export * from './entities/flash-sale-product.entity';
 
 export const ALL_ENTITIES = [
     UserEntity,
@@ -110,4 +114,6 @@ export const ALL_ENTITIES = [
     NotificationEntity,
     NotificationTaskEntity,
     NotificationSettingEntity,
+    FlashSaleActivityEntity,
+    FlashSaleProductEntity,
 ];

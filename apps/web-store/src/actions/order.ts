@@ -274,4 +274,40 @@ export const orderActions = {
             return response.json();
         },
     }),
+
+    // 重新支付
+    repay: defineAction({
+        accept: 'json',
+        input: z.object({
+            id: z.union([z.number(), z.string().transform(Number)]),
+            paymentMethod: z.string().default('alipay'),
+        }),
+        handler: async (input, context) => {
+            const token = await context?.session?.get('token');
+            if (!token) {
+                throw new Error('请先登录');
+            }
+
+            const response = await fetch(
+                `${API_ENDPOINTS.MEMBER_ORDERS}/${input.id}/pay`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        paymentMethod: input.paymentMethod,
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || '发起支付失败');
+            }
+
+            return response.json();
+        },
+    }),
 };

@@ -52,6 +52,12 @@ export class NotificationService implements OnModuleInit {
                 isEnabled: true,
                 channels: ['WEB'],
             },
+            {
+                type: 'STOCK_ZERO',
+                description: '库存预警通知',
+                isEnabled: true,
+                channels: ['WEB', 'EMAIL'],
+            },
         ];
 
         for (const item of defaults) {

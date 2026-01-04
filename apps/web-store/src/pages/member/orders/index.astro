@@ -152,6 +152,7 @@ const formatPrice = (price: number) => {
                                                         </button>
                                                         <button
                                                             class="px-4 py-2 text-sm font-medium text-white rounded transition-colors bg-nike-black hover:bg-gray-800"
+                                                            data-pay-id={order.id}
                                                         >
                                                             立即付款
                                                         </button>
@@ -230,6 +231,36 @@ const formatPrice = (price: number) => {
                 } else {
                     window.location.reload();
                 }
+            }
+        });
+    });
+
+    // 立即付款逻辑
+    document.querySelectorAll('[data-pay-id]').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const id = (e.target as HTMLButtonElement).dataset.payId!;
+            const btn = e.target as HTMLButtonElement;
+            
+            btn.disabled = true;
+            btn.textContent = '正在发起支付...';
+            
+            try {
+                const { data, error } = await actions.order.repay({ id });
+                if (error) {
+                    alert(error.message);
+                    btn.disabled = false;
+                    btn.textContent = '立即付款';
+                } else if (data?.payParams?.payUrl) {
+                    window.location.href = data.payParams.payUrl;
+                } else {
+                    alert('支付发起失败，请重试');
+                    btn.disabled = false;
+                    btn.textContent = '立即付款';
+                }
+            } catch (err) {
+                alert('系统错误，请稍后再试');
+                btn.disabled = false;
+                btn.textContent = '立即付款';
             }
         });
     });

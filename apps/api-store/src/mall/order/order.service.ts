@@ -12,6 +12,8 @@ import {
     PaymentStatus as MallPaymentStatus,
     PaymentMethod,
 } from '@app/db/entities/mall-payment.entity';
+import { MemberAddressEntity } from '@app/db/entities/member-address.entity';
+import { FlashSaleProductEntity } from '@app/db/entities/flash-sale-product.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { customAlphabet } from 'nanoid';
 import { alphanumeric } from 'nanoid-dictionary';
@@ -23,6 +25,8 @@ import { ORDER_QUEUE, ORDER_TIMEOUT_JOB } from '@app/queue';
 import { ShippingService } from '../shipping/shipping.service';
 import { CouponService } from '../coupon/coupon.service';
 import { MallProductEntity } from '@app/db/entities/mall-product.entity';
+import { NotificationService } from '@app/notification';
+import { RedisClientService } from '@app/redis';
 
 @Injectable()
 export class OrderService {
@@ -33,11 +37,15 @@ export class OrderService {
         private readonly orderItemRepo: Repository<MallOrderItemEntity>,
         @InjectRepository(MallPaymentEntity)
         private readonly paymentRepo: Repository<MallPaymentEntity>,
+        @InjectRepository(MemberAddressEntity)
+        private readonly addressRepo: Repository<MemberAddressEntity>,
         @InjectQueue(ORDER_QUEUE)
         private readonly orderQueue: Queue,
         private readonly dataSource: DataSource,
         private readonly shippingService: ShippingService,
-        private readonly couponService: CouponService
+        private readonly couponService: CouponService,
+        private readonly notificationService: NotificationService,
+        private readonly redis: RedisClientService
     ) {}
 
     async create(createOrderDto: CreateOrderDto, memberId: number) {
@@ -272,6 +280,22 @@ export class OrderService {
                     'stock',
                     item.quantity
                 );
+
+                // 如果是秒杀订单，额外恢复秒杀库存和销量
+                if (order.activityId) {
+                    await queryRunner.manager.increment(
+                        FlashSaleProductEntity,
+                        { activityId: order.activityId, skuId: item.skuId },
+                        'stock',
+                        item.quantity
+                    );
+                    await queryRunner.manager.decrement(
+                        FlashSaleProductEntity,
+                        { activityId: order.activityId, skuId: item.skuId },
+                        'sales',
+                        item.quantity
+                    );
+                }
             }
 
             // 2. Update Status
@@ -279,6 +303,32 @@ export class OrderService {
             await queryRunner.manager.save(order);
 
             await queryRunner.commitTransaction();
+
+            // 3. 异步恢复 Redis 中的秒杀库存和限购
+            if (order.activityId) {
+                try {
+                    const client = await this.redis.getClient();
+                    for (const item of order.items) {
+                        const stockKey = `flash_sale:stock:${item.skuId}`;
+                        const userLimitKey = `flash_sale:user_limit:${order.activityId}:${item.skuId}`;
+
+                        // 增加 Redis 库存
+                        await client.incrBy(stockKey, item.quantity);
+                        // 减少用户已购数量
+                        await client.hIncrBy(
+                            userLimitKey,
+                            String(memberId),
+                            -item.quantity
+                        );
+                    }
+                } catch (redisError) {
+                    console.error(
+                        'Failed to restore flash sale limits in Redis:',
+                        redisError
+                    );
+                }
+            }
+
             return order;
         } catch (err) {
             await queryRunner.rollbackTransaction();
@@ -348,7 +398,91 @@ export class OrderService {
             // Ignore error
         }
 
+        // 4. Send notification to ADMIN
+        try {
+            await this.notificationService.send({
+                targetType: 'ADMIN',
+                type: 'NEW_ORDER',
+                title: '新订单通知',
+                content: `您有一个新的待发货订单 [${order.orderNo}]，请及时处理。`,
+                payload: {
+                    orderId: order.id,
+                    orderNo: order.orderNo,
+                    path: `/mall/order/${order.id}`,
+                },
+            });
+        } catch (err) {
+            // Ignore notification error to avoid blocking payment success
+        }
+
         return order;
+    }
+
+    /**
+     * 创建秒杀订单
+     */
+    async createFlashSaleOrder(
+        manager: any,
+        data: {
+            memberId: number;
+            flashProduct: FlashSaleProductEntity;
+            sku: MallProductSkuEntity;
+            addressId: number;
+        }
+    ) {
+        const { memberId, flashProduct, sku, addressId } = data;
+
+        // 1. 获取收货信息
+        const address = await this.addressRepo.findOne({
+            where: { id: addressId, memberId },
+        });
+        if (!address) {
+            throw new Error('收货地址不存在');
+        }
+
+        const receiverInfo = {
+            name: address.receiverName,
+            phone: address.receiverPhone,
+            address: `${address.stateProvince} ${address.city} ${address.districtCounty} ${address.addressLine1} ${address.addressLine2 || ''}`,
+            provinceId: null, // 秒杀订单暂不计算复杂运费，可根据需要扩展
+        };
+
+        // 2. 创建订单
+        const order = new MallOrderEntity();
+        order.orderNo = `FS${Date.now()}${customAlphabet(alphanumeric, 6)().toUpperCase()}`;
+        order.memberId = memberId;
+        order.activityId = flashProduct.activityId;
+        order.status = OrderStatus.PENDING_PAY;
+        order.totalAmount = flashProduct.flashPrice;
+        order.payAmount = flashProduct.flashPrice;
+        order.shippingFee = 0; // 秒杀通常包邮，或使用固定运费
+        order.receiverInfo = receiverInfo;
+
+        const savedOrder = await manager.save(MallOrderEntity, order);
+
+        // 3. 创建订单详情
+        const orderItem = new MallOrderItemEntity();
+        orderItem.orderId = savedOrder.id;
+        orderItem.productId = sku.productId;
+        orderItem.skuId = sku.id;
+        orderItem.productName = sku.product.name;
+        orderItem.productImg = sku.product.cover;
+        orderItem.skuSpecs = sku.specs;
+        orderItem.price = flashProduct.flashPrice;
+        orderItem.quantity = 1;
+        await manager.save(MallOrderItemEntity, orderItem);
+
+        // 4. 添加超时取消任务 (秒杀通常 15 分钟不支付自动取消)
+        await this.orderQueue.add(
+            ORDER_TIMEOUT_JOB,
+            { orderId: savedOrder.id },
+            {
+                delay: 15 * 60 * 1000,
+                jobId: `timeout-${savedOrder.id}`,
+            }
+        );
+
+        return savedOrder;
     }
 
     async confirmReceipt(id: number, memberId?: number) {

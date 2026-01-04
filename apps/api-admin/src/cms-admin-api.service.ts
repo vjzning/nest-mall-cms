@@ -7,6 +7,7 @@ import {
     OrderStatus,
     MallAfterSaleEntity,
     AfterSaleStatus,
+    MallProductSkuEntity,
 } from '@app/db';
 import { NotificationService } from '@app/notification';
 
@@ -19,6 +20,8 @@ export class CmsAdminApiService {
         private readonly orderRepo: Repository<MallOrderEntity>,
         @InjectRepository(MallAfterSaleEntity)
         private readonly afterSaleRepo: Repository<MallAfterSaleEntity>,
+        @InjectRepository(MallProductSkuEntity)
+        private readonly skuRepo: Repository<MallProductSkuEntity>,
         private readonly notificationService: NotificationService
     ) {}
 
@@ -50,8 +53,11 @@ export class CmsAdminApiService {
                 type: 'ORDER_TIMEOUT',
                 title: '订单处理超时',
                 content: `订单 [${order.orderNo}] 已超过 24 小时未处理，请及时关注。`,
-                payload: { orderId: order.id, orderNo: order.orderNo },
-                channels: ['WEB', 'EMAIL'],
+                payload: {
+                    orderId: order.id,
+                    orderNo: order.orderNo,
+                    path: `/mall/order/${order.id}`,
+                },
             });
         }
 
@@ -72,8 +78,32 @@ export class CmsAdminApiService {
                 payload: {
                     afterSaleId: afterSale.id,
                     afterSaleNo: afterSale.afterSaleNo,
+                    path: `/mall/after-sale/${afterSale.id}`,
                 },
-                channels: ['WEB', 'EMAIL'],
+            });
+        }
+
+        // 3. 检查低库存商品
+        const lowStockSkus = await this.skuRepo.find({
+            where: {
+                stock: LessThan(10),
+            },
+            relations: ['product'],
+        });
+
+        for (const sku of lowStockSkus) {
+            await this.notificationService.send({
+                targetType: 'ADMIN',
+                type: 'STOCK_ZERO',
+                title: '库存预警通知',
+                content: `商品 [${sku.product?.name}] SKU [${sku.code}] 库存仅剩 ${sku.stock}，请及时补货。`,
+                payload: {
+                    productId: sku.productId,
+                    skuId: sku.id,
+                    skuCode: sku.code,
+                    stock: sku.stock,
+                    path: `/mall/product/edit/${sku.productId}`,
+                },
             });
         }
     }

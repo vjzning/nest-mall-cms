@@ -1,0 +1,82 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { actions } from "astro:actions";
+
+const result = await Astro.callAction(actions.flashSale.getActivities, {});
+const activities = result.data || [];
+
+const formatDate = (dateStr: string) => {
+  return new Date(dateStr).toLocaleString('zh-CN', {
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+const getStatus = (start: string, end: string) => {
+  const now = new Date();
+  const startTime = new Date(start);
+  const endTime = new Date(end);
+  
+  if (now < startTime) return 'COMING_SOON';
+  if (now > endTime) return 'FINISHED';
+  return 'ONGOING';
+};
+---
+
+<Layout title="限时秒杀">
+  <main class="max-w-[1920px] mx-auto px-4 sm:px-12 py-12">
+    <div class="mb-12">
+      <h1 class="text-4xl md:text-6xl font-black uppercase italic tracking-tighter mb-4">限时秒杀</h1>
+      <p class="text-nike-dark-grey text-lg">每日大牌好物，限量超低价抢购。</p>
+    </div>
+
+    {activities.length === 0 ? (
+      <div class="text-center py-20 bg-nike-grey rounded-lg">
+        <p class="text-xl text-nike-dark-grey">暂无秒杀活动，敬请期待</p>
+      </div>
+    ) : (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {activities.map((activity: any) => {
+          const status = getStatus(activity.startTime, activity.endTime);
+          return (
+            <a href={`/flash-sale/${activity.id}`} class="group block bg-white border border-nike-grey overflow-hidden hover:shadow-xl transition-shadow">
+              <div class="aspect-[16/9] overflow-hidden relative">
+                <img 
+                  src={activity.bannerUrl || '/images/placeholder-banner.jpg'} 
+                  alt={activity.title}
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div class="absolute top-4 left-4">
+                  {status === 'ONGOING' && <span class="bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase italic">正在进行</span>}
+                  {status === 'COMING_SOON' && <span class="bg-nike-black text-white px-3 py-1 text-xs font-bold uppercase italic">即将开始</span>}
+                  {status === 'FINISHED' && <span class="bg-gray-400 text-white px-3 py-1 text-xs font-bold uppercase italic">已结束</span>}
+                </div>
+              </div>
+              <div class="p-6">
+                <h3 class="text-xl font-bold uppercase italic mb-2 group-hover:text-red-600 transition-colors">{activity.title}</h3>
+                <div class="flex items-center text-sm text-nike-dark-grey space-x-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>{formatDate(activity.startTime)} - {formatDate(activity.endTime)}</span>
+                </div>
+                {activity.remark && <p class="mt-4 text-sm text-nike-dark-grey line-clamp-2">{activity.remark}</p>}
+                
+                <div class="mt-6 flex justify-between items-center">
+                  <span class="text-sm font-bold uppercase tracking-widest text-nike-black group-hover:translate-x-2 transition-transform inline-flex items-center">
+                    立即抢购
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    )}
+  </main>
+</Layout>

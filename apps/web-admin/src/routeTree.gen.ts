@@ -30,6 +30,7 @@ import { Route as AuthCmsArticleRouteImport } from './routes/_auth.cms.article'
 import { Route as AuthMallShippingTemplateIndexRouteImport } from './routes/_auth.mall.shipping-template.index'
 import { Route as AuthMallProductIndexRouteImport } from './routes/_auth.mall.product.index'
 import { Route as AuthMallOrderIndexRouteImport } from './routes/_auth.mall.order.index'
+import { Route as AuthMallFlashSaleIndexRouteImport } from './routes/_auth.mall.flash-sale.index'
 import { Route as AuthMallCouponIndexRouteImport } from './routes/_auth.mall.coupon.index'
 import { Route as AuthMallCollectionIndexRouteImport } from './routes/_auth.mall.collection.index'
 import { Route as AuthMallCategoryIndexRouteImport } from './routes/_auth.mall.category.index'
@@ -182,6 +183,13 @@ const AuthMallOrderIndexRoute = AuthMallOrderIndexRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_auth.mall.order.index.lazy').then((d) => d.Route),
 )
+const AuthMallFlashSaleIndexRoute = AuthMallFlashSaleIndexRouteImport.update({
+  id: '/mall/flash-sale/',
+  path: '/mall/flash-sale/',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() =>
+  import('./routes/_auth.mall.flash-sale.index.lazy').then((d) => d.Route),
+)
 const AuthMallCouponIndexRoute = AuthMallCouponIndexRouteImport.update({
   id: '/mall/coupon/',
   path: '/mall/coupon/',
@@ -313,6 +321,7 @@ export interface FileRoutesByFullPath {
   '/mall/category': typeof AuthMallCategoryIndexRoute
   '/mall/collection': typeof AuthMallCollectionIndexRoute
   '/mall/coupon': typeof AuthMallCouponIndexRoute
+  '/mall/flash-sale': typeof AuthMallFlashSaleIndexRoute
   '/mall/order': typeof AuthMallOrderIndexRoute
   '/mall/product': typeof AuthMallProductIndexRoute
   '/mall/shipping-template': typeof AuthMallShippingTemplateIndexRoute
@@ -349,6 +358,7 @@ export interface FileRoutesByTo {
   '/mall/category': typeof AuthMallCategoryIndexRoute
   '/mall/collection': typeof AuthMallCollectionIndexRoute
   '/mall/coupon': typeof AuthMallCouponIndexRoute
+  '/mall/flash-sale': typeof AuthMallFlashSaleIndexRoute
   '/mall/order': typeof AuthMallOrderIndexRoute
   '/mall/product': typeof AuthMallProductIndexRoute
   '/mall/shipping-template': typeof AuthMallShippingTemplateIndexRoute
@@ -387,6 +397,7 @@ export interface FileRoutesById {
   '/_auth/mall/category/': typeof AuthMallCategoryIndexRoute
   '/_auth/mall/collection/': typeof AuthMallCollectionIndexRoute
   '/_auth/mall/coupon/': typeof AuthMallCouponIndexRoute
+  '/_auth/mall/flash-sale/': typeof AuthMallFlashSaleIndexRoute
   '/_auth/mall/order/': typeof AuthMallOrderIndexRoute
   '/_auth/mall/product/': typeof AuthMallProductIndexRoute
   '/_auth/mall/shipping-template/': typeof AuthMallShippingTemplateIndexRoute
@@ -425,6 +436,7 @@ export interface FileRouteTypes {
     | '/mall/category'
     | '/mall/collection'
     | '/mall/coupon'
+    | '/mall/flash-sale'
     | '/mall/order'
     | '/mall/product'
     | '/mall/shipping-template'
@@ -461,6 +473,7 @@ export interface FileRouteTypes {
     | '/mall/category'
     | '/mall/collection'
     | '/mall/coupon'
+    | '/mall/flash-sale'
     | '/mall/order'
     | '/mall/product'
     | '/mall/shipping-template'
@@ -498,6 +511,7 @@ export interface FileRouteTypes {
     | '/_auth/mall/category/'
     | '/_auth/mall/collection/'
     | '/_auth/mall/coupon/'
+    | '/_auth/mall/flash-sale/'
     | '/_auth/mall/order/'
     | '/_auth/mall/product/'
     | '/_auth/mall/shipping-template/'
@@ -662,6 +676,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthMallOrderIndexRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/mall/flash-sale/': {
+      id: '/_auth/mall/flash-sale/'
+      path: '/mall/flash-sale'
+      fullPath: '/mall/flash-sale'
+      preLoaderRoute: typeof AuthMallFlashSaleIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/mall/coupon/': {
       id: '/_auth/mall/coupon/'
       path: '/mall/coupon'
@@ -789,6 +810,7 @@ interface AuthRouteChildren {
   AuthMallCategoryIndexRoute: typeof AuthMallCategoryIndexRoute
   AuthMallCollectionIndexRoute: typeof AuthMallCollectionIndexRoute
   AuthMallCouponIndexRoute: typeof AuthMallCouponIndexRoute
+  AuthMallFlashSaleIndexRoute: typeof AuthMallFlashSaleIndexRoute
   AuthMallOrderIndexRoute: typeof AuthMallOrderIndexRoute
   AuthMallProductIndexRoute: typeof AuthMallProductIndexRoute
   AuthMallShippingTemplateIndexRoute: typeof AuthMallShippingTemplateIndexRoute
@@ -824,6 +846,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthMallCategoryIndexRoute: AuthMallCategoryIndexRoute,
   AuthMallCollectionIndexRoute: AuthMallCollectionIndexRoute,
   AuthMallCouponIndexRoute: AuthMallCouponIndexRoute,
+  AuthMallFlashSaleIndexRoute: AuthMallFlashSaleIndexRoute,
   AuthMallOrderIndexRoute: AuthMallOrderIndexRoute,
   AuthMallProductIndexRoute: AuthMallProductIndexRoute,
   AuthMallShippingTemplateIndexRoute: AuthMallShippingTemplateIndexRoute,

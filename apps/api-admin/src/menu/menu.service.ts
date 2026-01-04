@@ -33,4 +33,23 @@ export class MenuService {
   async remove(id: number): Promise<void> {
     await this.menuRepository.delete(id);
   }
+
+  async initDefaultMenus() {
+    const mallMenu = await this.menuRepository.findOne({ where: { name: '商城管理' } });
+    if (mallMenu) {
+      const flashSaleMenu = await this.menuRepository.findOne({ where: { name: '秒杀管理' } });
+      if (!flashSaleMenu) {
+        await this.menuRepository.save({
+          parentId: mallMenu.id,
+          name: '秒杀管理',
+          path: '/mall/flash-sale',
+          component: 'mall/flash-sale/index',
+          icon: 'Zap',
+          type: 2,
+          sort: 10,
+          status: 1,
+        });
+      }
+    }
+  }
 }

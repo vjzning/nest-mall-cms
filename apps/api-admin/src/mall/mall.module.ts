@@ -7,6 +7,7 @@ import { CouponModule } from './coupon/coupon.module';
 import { ShippingTemplateModule } from './shipping-template/shipping-template.module';
 import { MallCategoryModule } from './category/category.module';
 import { MemberModule } from './member/member.module';
+import { FlashSaleModule } from './flash-sale/flash-sale.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { MemberModule } from './member/member.module';
     ShippingTemplateModule,
     MallCategoryModule,
     MemberModule,
+    FlashSaleModule,
   ],
 })
 export class MallModule { }

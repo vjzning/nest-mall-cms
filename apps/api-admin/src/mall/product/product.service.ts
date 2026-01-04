@@ -72,7 +72,7 @@ export class ProductService {
         const [items, total] = await this.productRepo.findAndCount({
             where,
             order: { sort: 'DESC', createdAt: 'DESC' },
-            relations: ['category'],
+            relations: ['category', 'skus'],
             skip,
             take: limit,
         });
@@ -135,7 +135,11 @@ export class ProductService {
                             type: 'STOCK_ZERO',
                             title: '库存预警',
                             content: `商品 [${productData.name || '未知'}] 的规格 [${sku.code}] 库存已清零，请及时补货。`,
-                            payload: { productId: id, skuCode: sku.code },
+                            payload: {
+                                productId: id,
+                                skuCode: sku.code,
+                                path: `/mall/product/edit/${id}`,
+                            },
                             channels: ['WEB'],
                         });
                     }

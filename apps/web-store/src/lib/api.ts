@@ -39,4 +39,9 @@ export const API_ENDPOINTS = {
 
   // 售后
   MEMBER_AFTER_SALES: `${API_BASE_URL}/mall/after-sales`,
+
+  // 秒杀
+  FLASH_SALE_ACTIVITIES: `${API_BASE_URL}/mall/flash-sale/activities`,
+  FLASH_SALE_DETAIL: `${API_BASE_URL}/mall/flash-sale/activity/:id`,
+  FLASH_SALE_ORDER: `${API_BASE_URL}/mall/flash-sale/order`,
 };

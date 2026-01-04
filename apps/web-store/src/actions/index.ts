@@ -5,6 +5,7 @@ import { orderActions } from './order';
 import { afterSaleActions } from './after-sale';
 import { favorite as favoriteActions } from './favorite';
 import { couponActions } from './coupon';
+import { flashSaleActions } from './flash-sale';
 
 export const server = {
     auth: authActions,
@@ -14,4 +15,5 @@ export const server = {
     afterSale: afterSaleActions,
     favorite: favoriteActions,
     coupon: couponActions,
+    flashSale: flashSaleActions,
 };

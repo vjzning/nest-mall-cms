@@ -21,6 +21,7 @@ import {
 } from '@app/db/entities/mall-order.entity';
 import { MallOrderItemEntity } from '@app/db/entities/mall-order-item.entity';
 import { ApplyAfterSaleDto, SubmitLogisticsDto } from './dto/after-sale.dto';
+import { NotificationService } from '@app/notification';
 
 @Injectable()
 export class AfterSaleService {
@@ -34,7 +35,8 @@ export class AfterSaleService {
         @InjectRepository(MallOrderEntity)
         private readonly orderRepo: Repository<MallOrderEntity>,
         @InjectRepository(MallOrderItemEntity)
-        private readonly orderItemRepo: Repository<MallOrderItemEntity>
+        private readonly orderItemRepo: Repository<MallOrderItemEntity>,
+        private readonly notificationService: NotificationService
     ) {}
 
     async getRefundableInfo(orderId: number, memberId: number) {
@@ -218,6 +220,23 @@ export class AfterSaleService {
         });
 
         await this.afterSaleItemRepo.save(afterSaleItems);
+
+        // 发送通知给管理员
+        try {
+            await this.notificationService.send({
+                targetType: 'ADMIN',
+                type: 'NEW_AFTERSALE',
+                title: '新售后申请通知',
+                content: `订单 [${order.orderNo}] 有新的售后申请 [${savedAfterSale.afterSaleNo}]，请及时处理。`,
+                payload: {
+                    afterSaleId: savedAfterSale.id,
+                    afterSaleNo: savedAfterSale.afterSaleNo,
+                    path: `/mall/after-sale/${savedAfterSale.id}`,
+                },
+            });
+        } catch (err) {
+            // 忽略通知错误
+        }
 
         return savedAfterSale;
     }
