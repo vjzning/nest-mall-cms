@@ -61,7 +61,7 @@ FROM node:20-slim AS runtime
 
 # 优化 E: 合并 RUN 指令减少层数，清理缓存
 RUN apt-get update && apt-get install -y nginx --no-install-recommends && \
-    npm install -g pm2 serve && \
+    npm install -g pm2 && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean
 
